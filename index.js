@@ -233,7 +233,7 @@ const mainScript = () => {
 				this.lenis.destroy();
 			}
          this.lenis = new Lenis({
-               content: data.next.container
+               content: data.next.container,
                wrapper: data.next.container
                smoothTouch: false,
                infinite: false,
