@@ -234,7 +234,7 @@ const mainScript = () => {
 			}
          this.lenis = new Lenis({
                content: data.next.container,
-               wrapper: data.next.container
+               wrapper: data.next.container,
                smoothTouch: false,
                infinite: false,
          })
