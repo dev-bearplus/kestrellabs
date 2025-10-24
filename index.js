@@ -229,12 +229,9 @@ const mainScript = () => {
 		}
 
       reInit(data) {
-         let namespace = data ? data.next.namespace : $('[data-barba="container"]').attr('data-barba-namespace');
-
 			if (this.lenis) {
 				this.lenis.destroy();
 			}
-         console.log()
          this.lenis = new Lenis({
                content: data.next.container
                wrapper: data.next.container
