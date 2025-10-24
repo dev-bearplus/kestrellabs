@@ -234,12 +234,10 @@ const mainScript = () => {
 			if (this.lenis) {
 				this.lenis.destroy();
 			}
-
+         console.log()
          this.lenis = new Lenis({
-               content:
-               document.querySelector('.main-inner'),
-               wrapper:
-               document.querySelector('.main-inner'),
+               content: data.next.container
+               wrapper: data.next.container
                smoothTouch: false,
                infinite: false,
          })
