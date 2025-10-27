@@ -196,6 +196,33 @@ const mainScript = () => {
          init
       }
    })();
+
+   class Marquee {
+      constructor(list, item, duration = 40) {
+         this.list = list;
+         this.item = item;
+         this.duration = duration;
+      }
+      setup(isReverse) {
+         const cloneAmount = Math.ceil($(window).width() / this.list.width()) + 1;
+
+         let itemClone = this.item.clone();
+         let itemWidth = this.item.width();
+         this.list.html('');
+         new Array(cloneAmount).fill().forEach(() => {
+            let html = itemClone.clone()
+            html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
+            if (isReverse) {
+                  html.css('animation-direction', 'reverse');
+            }
+            html.addClass('marquee-left');
+            this.list.append(html);
+         });
+      }
+      play() {
+         $(this.list).find('.marquee-left').addClass('anim');
+      }
+   }
 	class SmoothScroll {
 		constructor() {
 			this.lenis = null;
@@ -751,7 +778,13 @@ const mainScript = () => {
                $(this.el).addClass("on-hide");
                $(this.el).removeClass("on-hide");
                setTimeout(() => {
-                  if (inst.scroll === smoothScroll.scroller.scrollY && inst.velocity === 0 && !$(this.el).hasClass('on-hide') ) {
+                  if (
+                     inst.scroll > ($(this.el).height() * 3) &&
+                     inst.scroll === smoothScroll.scroller.scrollY
+                     && inst.velocity === 0
+                     && !$(this.el).hasClass('on-hide')
+                     && !$(this.el).is(':hover')
+                  ) {
                      $(this.el).addClass('on-hide');
                   }
                }, 2500);
@@ -877,6 +910,12 @@ const mainScript = () => {
                allowMobile: true,
                tweenArr: []
             });
+
+            let taglineMarquee = new Marquee(
+               $(this.el).find('.home-hero-work'),
+               $(this.el).find('.home-hero-work-inner'), 40);
+            taglineMarquee.setup();
+            taglineMarquee.play();
          }
          destroy() {
                if (this.tlOnce) {
@@ -905,10 +944,35 @@ const mainScript = () => {
             this.interact();
          }
          animationReveal() {
+            let partnerMarquee = new Marquee(
+               $(this.el).find('.home-intro-partner-cms'),
+               $(this.el).find('.home-intro-partner-list'), 40);
+            partnerMarquee.setup();
+            partnerMarquee.play();
          }
          animationScrub() {
          }
          interact() {
+         }
+         destroy() {
+         }
+      },
+      UseCase: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.home-usecase-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.animationScrub();
+            this.interact();
+         }
+         animationScrub() {
+         }
+         interact() {
+            $(this.el).find('.home-usecase-faq-item').on('click', function() {
+               $(this).toggleClass('active').siblings().removeClass('active');
+            });
          }
          destroy() {
          }
