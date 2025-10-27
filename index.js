@@ -239,7 +239,7 @@ const mainScript = () => {
                infinite: false,
          })
 			this.lenis.on("scroll", (e) => {
-				// this.updateOnScroll(e);
+				this.updateOnScroll(e);
 				ScrollTrigger.update();
 			});
 		}
@@ -743,8 +743,13 @@ const mainScript = () => {
       }
       toggleHide(inst) {
          if (inst.direction == 1) {
-            if (inst.scroll > ($(this.el).height() * 3)) {
+            if (inst.scroll > ($(this.el).height() * 3) && !$(this.el).hasClass('on-hide')) {
                $(this.el).addClass('on-hide');
+               setTimeout(() => {
+                  if (inst.scroll === smoothScroll.scroller.scrollY && $(this.el).hasClass('on-hide')) {
+                     $(this.el).removeClass('on-hide');
+                  }
+               }, 2000);
             }
          } else if (inst.direction == -1) {
             if (inst.scroll > ($(this.el).height() * 3)) {
