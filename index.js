@@ -743,18 +743,18 @@ const mainScript = () => {
       }
       toggleHide(inst) {
          if (inst.direction == 1) {
-            if (inst.scroll > ($(this.el).height() * 3) && !$(this.el).hasClass('on-hide')) {
+            if (inst.scroll > ($(this.el).height() * 3)) {
                $(this.el).addClass('on-hide');
-               setTimeout(() => {
-                  if (inst.scroll === smoothScroll.scroller.scrollY && $(this.el).hasClass('on-hide')) {
-                     $(this.el).removeClass('on-hide');
-                  }
-               }, 2000);
             }
          } else if (inst.direction == -1) {
             if (inst.scroll > ($(this.el).height() * 3)) {
                $(this.el).addClass("on-hide");
                $(this.el).removeClass("on-hide");
+               setTimeout(() => {
+                  if (inst.scroll === smoothScroll.scroller.scrollY && inst.velocity === 0 && !$(this.el).hasClass('on-hide') ) {
+                     $(this.el).addClass('on-hide');
+                  }
+               }, 2500);
             }
          }
          else {
