@@ -970,9 +970,17 @@ const mainScript = () => {
          animationScrub() {
          }
          interact() {
+            const activeAccordion = (idx) => {
+               $(this.el).find('.home-usecase-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
+               $(this.el).find('.home-usecase-faq-item').eq(idx).siblings().find('.home-usecase-faq-item-sub').slideUp();
+               $(this.el).find('.home-usecase-faq-item').eq(idx).find('.home-usecase-faq-item-sub').slideToggle();
+            }
+            $(this.el).find('.home-usecase-faq-item-sub').hide();
+
             $(this.el).find('.home-usecase-faq-item').on('click', function() {
-               $(this).toggleClass('active').siblings().removeClass('active');
+               activeAccordion($(this).index());
             });
+            activeAccordion(0);
          }
          destroy() {
          }
