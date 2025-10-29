@@ -864,7 +864,7 @@ const mainScript = () => {
          this.hoverLogo();
       }
       hoverLogo() {
-         this.footerWrap = $(this.el).find('.footer-img-wrap')[0];
+         this.footerLogoWrap = $(this.el).find('.footer-img-wrap').get(0);
          this.raf = requestAnimationFrame(() => this.render());
          this.lastScrollY = smoothScroll.scroller.scrollY;
          this.lastMousePos = { ...mouse.cacheMousePos };
@@ -876,7 +876,7 @@ const mainScript = () => {
       }
 
       render() {
-         if (isMouseInArea(this.footerWrap, mouse.mousePos)) {
+         if (isMouseInArea(this.footerLogoWrap, mouse.mousePos)) {
             if (!this.isEntered) {
                this.onEnter();
                this.isEntered = true;
@@ -925,14 +925,14 @@ const mainScript = () => {
       }
 
       updateTargetPosition() {
-         if (!this.footerWrap) return;
-         const parentRect = this.footerWrap.getBoundingClientRect();
+         if (!this.footerLogoWrap) return;
+         const parentRect = this.footerLogoWrap.getBoundingClientRect();
          this.targetX = mouse.mousePos.x - parentRect.left;
          this.targetY = mouse.mousePos.y - parentRect.top;
       }
 
       moveElement() {
-         if (!this.footerWrap) return;
+         if (!this.footerLogoWrap) return;
 
          this.currentX = lerp(this.currentX, this.targetX, 0.15);
          this.currentY = lerp(this.currentY, this.targetY, 0.15);
