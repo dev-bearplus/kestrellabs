@@ -47,6 +47,13 @@ const mainScript = () => {
                rect.bottom >= 0
             );
       }
+   }
+
+   const isMouseInArea = (el, mousePos) => {
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return mousePos.x >= rect.left && mousePos.x <= rect.right &&
+            mousePos.y >= rect.top && mousePos.y <= rect.bottom;
    };
    const debounce = (func, timeout = 300) => {
          let timer
@@ -196,7 +203,6 @@ const mainScript = () => {
          init
       }
    })();
-
    class Marquee {
       constructor(list, item, duration = 40) {
          this.list = list;
@@ -221,53 +227,6 @@ const mainScript = () => {
       }
       play() {
          $(this.list).find('.marquee-left').addClass('anim');
-      }
-   }
-   class StickerHomeWhyUs {
-      constructor(el) {
-         this.el = el;
-         this.raf = requestAnimationFrame(() => this.render());
-         this.lastScrollY = smoothScroll.scroller.scrollY;
-         this.lastMousePos = { ...mouse.cacheMousePos }
-      }
-      render() {
-         if (isInViewport(this.el) && $(this.el).is(':hover')) {
-            this.onEnter();
-            if (
-               mouse.cacheMousePos.y !== this.lastMousePos.y ||
-               mouse.cacheMousePos.x !== this.lastMousePos.x ||
-               smoothScroll.scroller.scrollY !== this.lastScrollY) {
-               this.moveLine();
-            }
-         }
-         else {
-            this.onLeave();
-         }
-         this.lastScrollY = smoothScroll.scroller.scrollY;
-         this.lastMousePos = { ...mouse.cacheMousePos };
-         this.raf = requestAnimationFrame(this.render.bind(this));
-      }
-      onEnter() {
-         gsap.to($(this.el).find('.home-why-main-line'), { opacity: 1 })
-         gsap.to($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
-      }
-      onLeave() {
-         gsap.to($(this.el).find('.home-why-main-line'), { opacity: 0 })
-         gsap.to($(this.el).find('.home-why-item-sticky'), { opacity: 0 })
-      }
-      moveLine() {
-         console.log("move")
-         const lineElement = $(this.el).find('.home-why-main-line').get(0);
-         if (lineElement) {
-            let lineYCurr = yGetter(lineElement);
-            let lineYMove = mouse.mousePos.y - this.el.getBoundingClientRect().top - gsap.getProperty(this.el, 'padding-top');
-            gsap.set(lineElement, { y: lerp(lineYCurr, lineYMove, .2) });
-            gsap.set($(this.el).find('.home-why-item-sticky'), { y: lerp(lineYCurr, lineYMove, .2) - $(this.el).find('.home-why-item-sticky').height() / 2 });
-         }
-      }
-      destroy() {
-         cancelAnimationFrame(this.raf);
-         this.raf = null;
       }
    }
 	class SmoothScroll {
@@ -885,6 +844,7 @@ const mainScript = () => {
          super();
          this.el = null;
          this.tlOverlap = null;
+         this.raf = null;
       }
       trigger(data) {
          this.el = data.next.container.querySelector('.footer');
@@ -900,8 +860,93 @@ const mainScript = () => {
       animationScrub() {
       }
       interact() {
+         console.log('interact');
+         this.hoverLogo();
+      }
+      hoverLogo() {
+         this.footerWrap = $(this.el).find('.footer-img-wrap')[0];
+         this.raf = requestAnimationFrame(() => this.render());
+         this.lastScrollY = smoothScroll.scroller.scrollY;
+         this.lastMousePos = { ...mouse.cacheMousePos };
+         this.currentX = 0;
+         this.currentY = 0;
+         this.targetX = 0;
+         this.targetY = 0;
+         this.isEntered = false;
+      }
+
+      render() {
+         if (isMouseInArea(this.footerWrap, mouse.mousePos)) {
+            if (!this.isEntered) {
+               this.onEnter();
+               this.isEntered = true;
+            }
+            if (
+               mouse.cacheMousePos.y !== this.lastMousePos.y ||
+               mouse.cacheMousePos.x !== this.lastMousePos.x ||
+               smoothScroll.scroller.scrollY !== this.lastScrollY) {
+               this.updateTargetPosition();
+            }
+            this.moveElement();
+         } else {
+            if (this.isEntered) {
+               this.onLeave();
+               this.isEntered = false;
+            }
+         }
+         this.lastScrollY = smoothScroll.scroller.scrollY;
+         this.lastMousePos = { ...mouse.cacheMousePos };
+         this.raf = requestAnimationFrame(this.render.bind(this));
+      }
+
+      onEnter() {
+         if (this.footerWrap) {
+            const parentRect = this.footerWrap.getBoundingClientRect();
+            this.currentX = mouse.mousePos.x - parentRect.left;
+            this.currentY = mouse.mousePos.y - parentRect.top;
+
+            $('.footer-img-item.item2').css({
+               '--mouse-x': `${this.currentX}px`,
+               '--mouse-y': `${this.currentY}px`,
+            });
+         }
+
+         gsap.to($(this.el).find('.footer-img-item.item2'), {
+            opacity: 1,
+            duration: 0.5,
+         });
+      }
+
+      onLeave() {
+         gsap.to($(this.el).find('.footer-img-item.item2'), {
+            opacity: 0,
+            duration: 0.5,
+         });
+      }
+
+      updateTargetPosition() {
+         if (!this.footerWrap) return;
+         const parentRect = this.footerWrap.getBoundingClientRect();
+         this.targetX = mouse.mousePos.x - parentRect.left;
+         this.targetY = mouse.mousePos.y - parentRect.top;
+      }
+
+      moveElement() {
+         if (!this.footerWrap) return;
+
+         this.currentX = lerp(this.currentX, this.targetX, 0.15);
+         this.currentY = lerp(this.currentY, this.targetY, 0.15);
+
+         $('.footer-img-item.item2').css({
+            '--mouse-x': `${this.currentX}px`,
+            '--mouse-y': `${this.currentY}px`,
+         });
       }
       destroy() {
+         if (this.raf) {
+            cancelAnimationFrame(this.raf);
+            this.raf = null;
+         }
       }
    }
 
@@ -1033,9 +1078,61 @@ const mainScript = () => {
          animationReveal() {
          }
          interact() {
-            new StickerHomeWhyUs($(this.el).find('.home-why-main-wrap').get(0));
+            this.stickerCard();
+         }
+         stickerCard() {
+            this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
+            this.raf = requestAnimationFrame(() => this.render());
+            this.lastScrollY = smoothScroll.scroller.scrollY;
+            this.lastMousePos = { ...mouse.cacheMousePos };
+            this.isEntered = false;
+         }
+         render() {
+            if (isMouseInArea(this.stickerCardWrap, mouse.mousePos) || isInViewport(this.stickerCardWrap)) {
+               if (!this.isEntered) {
+                  this.onEnter();
+                  this.isEntered = true;
+               }
+               if (
+                  mouse.cacheMousePos.y !== this.lastMousePos.y ||
+                  mouse.cacheMousePos.x !== this.lastMousePos.x ||
+                  smoothScroll.scroller.scrollY !== this.lastScrollY) {
+                  this.moveLine();
+               }
+            }
+            else {
+               if (this.isEntered) {
+                  this.onLeave();
+                  this.isEntered = false;
+               }
+            }
+            this.lastScrollY = smoothScroll.scroller.scrollY;
+            this.lastMousePos = { ...mouse.cacheMousePos };
+            this.raf = requestAnimationFrame(this.render.bind(this));
+         }
+         onEnter() {
+            gsap.set($(this.el).find('.home-why-main-line'), { opacity: 1 })
+            gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
+         }
+         onLeave() {
+            gsap.set($(this.el).find('.home-why-main-line'), { opacity: 0 })
+            gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 0 })
+         }
+         moveLine() {
+            if (!this.stickerCardWrap) return;
+            const lineElement = $(this.el).find('.home-why-main-line').get(0);
+            if (lineElement) {
+               let lineYCurr = yGetter(lineElement);
+               let lineYMove = mouse.mousePos.y - this.stickerCardWrap.getBoundingClientRect().top - gsap.getProperty(this.stickerCardWrap, 'padding-top');
+               gsap.set(lineElement, { y: lerp(lineYCurr, lineYMove, .2) });
+               gsap.set($(this.el).find('.home-why-item-sticky'), { y: lerp(lineYCurr, lineYMove, .2) - $(this.el).find('.home-why-item-sticky').height() / 2 });
+            }
          }
          destroy() {
+            if (this.raf) {
+               cancelAnimationFrame(this.raf);
+               this.raf = null;
+            }
          }
       },
       UseCase: class extends TriggerSetup {
