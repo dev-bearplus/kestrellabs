@@ -906,20 +906,29 @@ const mainScript = () => {
             this.currentY = mouse.mousePos.y - parentRect.top;
 
             $('.footer-img-item.item2').css({
-               '--mouse-x': `${this.currentX}px`,
-               '--mouse-y': `${this.currentY}px`,
+               '--mouse-x': `${cvUnit(this.currentX, 'rem')}px`,
+               '--mouse-y': `${cvUnit(this.currentY, 'rem')}px`,
             });
          }
 
          gsap.to($(this.el).find('.footer-img-item.item2'), {
             opacity: 1,
             duration: 0.5,
+            filter: 'blur(.5px) contrast(1.2)',
+         });
+         gsap.to($(this.el).find('.footer-img-item').eq(0), {
+            opacity: .6,
+            duration: 0.5
          });
       }
 
       onLeave() {
          gsap.to($(this.el).find('.footer-img-item.item2'), {
             opacity: 0,
+            duration: 0.5,
+         });
+         gsap.to($(this.el).find('.footer-img-item').eq(0), {
+            opacity: 1,
             duration: 0.5,
          });
       }
@@ -934,13 +943,26 @@ const mainScript = () => {
       moveElement() {
          if (!this.footerLogoWrap) return;
 
-         this.currentX = lerp(this.currentX, this.targetX, 0.15);
-         this.currentY = lerp(this.currentY, this.targetY, 0.15);
+         this.currentX = lerp(this.currentX, this.targetX, 0.08);
+         this.currentY = lerp(this.currentY, this.targetY, 0.08);
 
-         $('.footer-img-item.item2').css({
-            '--mouse-x': `${this.currentX}px`,
-            '--mouse-y': `${this.currentY}px`,
-         });
+         const parentRect = this.footerLogoWrap.getBoundingClientRect();
+         const centerX = parentRect.width / 2;
+         const centerY = parentRect.height / 2;
+
+         const distanceFromCenter = distance(this.targetX, this.targetY, centerX, centerY);
+         const maxDistance = Math.hypot(centerX, centerY);
+         const scaleBasedOnDistance = 1 - (0.006 * (distanceFromCenter / maxDistance));
+
+         const currentScale = gsap.getProperty($('.footer-img-item.item2').get(0), 'scale');
+         const newScale = lerp(currentScale, scaleBasedOnDistance, 0.08);
+
+
+         gsap.set($('.footer-img-item.item2'), {
+            '--mouse-x': `${cvUnit(this.currentX, 'rem')}px`,
+            '--mouse-y': `${cvUnit(this.currentY, 'rem')}px`,
+            scale: newScale,
+         })
       }
       destroy() {
          if (this.raf) {
