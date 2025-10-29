@@ -860,7 +860,6 @@ const mainScript = () => {
       animationScrub() {
       }
       interact() {
-         console.log('interact');
          this.hoverLogo();
       }
       hoverLogo() {
@@ -989,6 +988,7 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
+            this.interact();
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -1041,6 +1041,84 @@ const mainScript = () => {
                $(this.el).find('.home-hero-work-inner'), 40);
             taglineMarquee.setup();
             taglineMarquee.play();
+
+            gsap.to($(this.el).find('.home-hero-curor-line, .home-hero-img-plus'), {
+               autoAlpha: 1,
+               duration: 0.5
+            });
+         }
+         interact() {
+            this.rulerMove();
+         }
+         rulerMove() {
+            this.rulerWrap = $(this.el).find('.home-hero-img-wrap').get(0);
+            this.raf = requestAnimationFrame(() => this.render());
+            this.lastScrollY = smoothScroll.scroller.scrollY;
+            this.lastMousePos = { ...mouse.cacheMousePos };
+            this.currentX = 0;
+            this.currentY = 0;
+            this.targetX = 0;
+            this.targetY = 0;
+            this.minX = cvUnit(16, 'rem');
+            this.maxX = this.rulerWrap.offsetWidth - cvUnit(16, 'rem');
+            this.minY = cvUnit(16, 'rem');
+            this.maxY = this.rulerWrap.offsetHeight - cvUnit(17, 'rem');
+         }
+         render() {
+            if (isMouseInArea(this.rulerWrap, mouse.mousePos) || isInViewport(this.el)) {
+               if (
+                  mouse.cacheMousePos.y !== this.lastMousePos.y ||
+                  mouse.cacheMousePos.x !== this.lastMousePos.x ||
+                  smoothScroll.scroller.scrollY !== this.lastScrollY) {
+                     this.updateTargetPosition();
+                     this.moveElement();
+                  }
+            } else { }
+
+            this.lastScrollY = smoothScroll.scroller.scrollY;
+            this.lastMousePos = { ...mouse.cacheMousePos };
+            this.raf = requestAnimationFrame(this.render.bind(this));
+         }
+         updateTargetPosition() {
+            if (!this.rulerWrap) return;
+
+            const parentRect = this.rulerWrap.getBoundingClientRect();
+            this.targetX = mouse.mousePos.x - parentRect.left;
+            this.targetY = mouse.mousePos.y - parentRect.top;
+         }
+         moveElement() {
+            if (!this.rulerWrap) return;
+               this.currentX = lerp(this.currentX, this.targetX, 0.2);
+               this.currentY = lerp(this.currentY, this.targetY, 0.2);
+
+               // Clamp the values
+               this.currentX = Math.max(this.minX, Math.min(this.currentX, this.maxX));
+               this.currentY = Math.max(this.minY, Math.min(this.currentY, this.maxY));
+
+               let normalizedX = normalize(this.currentX, this.rulerWrap.offsetWidth) * this.rulerWrap.offsetWidth / 2;
+               let normalizedY = normalize(this.currentY, this.rulerWrap.offsetHeight) * this.rulerWrap.offsetHeight / 2;
+
+
+               const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
+               const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
+               const isAtEdge = isAtEdgeX || isAtEdgeY;
+
+               const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
+               const scale = lerp(currentScale, isAtEdge ? 0.6 : 1, 0.1);
+
+               const currentOpacityVertical = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || 1;
+               const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
+               const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : 1, 0.1);
+               const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : 1, 0.1);
+
+               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+               gsap.set($(this.el).find('.home-hero-img-plus'), {
+                  x: normalizedX - cvUnit(.25, 'rem'),
+                  y: normalizedY + cvUnit(.5, 'rem'),
+                  scale: scale,
+                  backgroundColor: isAtEdgeX && isAtEdgeY ? 'rgba(241, 85, 52, 1)' : 'rgba(241, 85, 52, 0)'
+               });
          }
          destroy() {
                if (this.tlOnce) {
