@@ -917,7 +917,7 @@ const mainScript = () => {
             filter: 'blur(.5px) contrast(1.2)',
          });
          gsap.to($(this.el).find('.footer-img-item').eq(0), {
-            opacity: .6,
+            opacity: .7,
             duration: 0.5
          });
       }
@@ -926,6 +926,7 @@ const mainScript = () => {
          gsap.to($(this.el).find('.footer-img-item.item2'), {
             opacity: 0,
             duration: 0.5,
+            filter: 'blur(0px) contrast(1)',
          });
          gsap.to($(this.el).find('.footer-img-item').eq(0), {
             opacity: 1,
@@ -955,13 +956,13 @@ const mainScript = () => {
          const scaleBasedOnDistance = 1 - (0.006 * (distanceFromCenter / maxDistance));
 
          const currentScale = gsap.getProperty($('.footer-img-item.item2').get(0), 'scale');
-         const newScale = lerp(currentScale, scaleBasedOnDistance, 0.08);
+         const scale = lerp(currentScale, scaleBasedOnDistance, 0.08);
 
 
          gsap.set($('.footer-img-item.item2'), {
             '--mouse-x': `${cvUnit(this.currentX, 'rem')}px`,
             '--mouse-y': `${cvUnit(this.currentY, 'rem')}px`,
-            scale: newScale,
+            scale,
          })
       }
       destroy() {
