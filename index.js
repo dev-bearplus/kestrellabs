@@ -1032,7 +1032,10 @@ const mainScript = () => {
             });
          }
          interact() {
-            this.rulerMove();
+            if (viewport.w > 991) {
+               this.rulerMove();
+               this.drawBox();
+            }
          }
          rulerMove() {
             this.rulerWrap = $(this.el).find('.home-hero-img-wrap').get(0);
@@ -1073,8 +1076,8 @@ const mainScript = () => {
          }
          moveElement() {
             if (!this.rulerWrap) return;
-               this.currentX = lerp(this.currentX, this.targetX, 0.2);
-               this.currentY = lerp(this.currentY, this.targetY, 0.2);
+               this.currentX = lerp(this.currentX, this.targetX, 0.3);
+               this.currentY = lerp(this.currentY, this.targetY, 0.3);
 
                // Clamp the values
                this.currentX = Math.max(this.minX, Math.min(this.currentX, this.maxX));
@@ -1088,7 +1091,7 @@ const mainScript = () => {
                const isAtEdge = isAtEdgeX || isAtEdgeY;
 
                const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
-               const scale = lerp(currentScale, isAtEdge ? 0.7 : 1, 0.08);
+               const scale = lerp(currentScale, isAtEdge ? 0.8 : 1, 0.08);
 
                const currentOpacityVertical = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || 1;
                const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
@@ -1100,25 +1103,134 @@ const mainScript = () => {
                const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
                const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
 
-               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), {
-                  x: normalizedX, autoAlpha: autoAlphaVertical
-               });
-               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), {
-                  y: normalizedY, autoAlpha: autoAlphaHorizontal
-               });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+               gsap.set($(this.el).find('.home-hero-img-plus-line.line-vertical'), { autoAlpha: autoAlphaVertical });
+               gsap.set($(this.el).find('.home-hero-img-plus-line.line-horizital'), { autoAlpha: autoAlphaHorizontal });
                gsap.set($(this.el).find('.home-hero-img-plus'), {
-                  x: normalizedX - cvUnit(.25, 'rem'),
-                  y: normalizedY + cvUnit(.5, 'rem'),
+                  x: normalizedX,
+                  y: normalizedY,
                   scale: scale,
                   backgroundColor: `rgba(241, 85, 52, ${lerpedColorAlpha})`,
                   color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
                });
          }
          drawBox() {
+            this.box = null;
             let isOnDown = false;
             let isOnMove = false;
+            const MOVEMENT_THRESHOLD = 2;
 
+            const track = $(this.el).find('.home-hero-img-plus').get(0);
 
+            const createBox = () => {
+               this.box = document.createElement('div');
+               this.box.className = 'home-hero-img-plus-box';
+               this.box.style.display = 'block';
+               this.box.style.position = 'absolute';
+               this.box.style.top = `${mouse.mousePos.y}px`;
+               this.box.style.left = `${mouse.mousePos.x}px`;
+               this.box.style.border = '1px solid #F15534';
+               this.box.style.zIndex = '100';
+               this.rulerWrap.prepend(this.box);
+               return this.box;
+            }
+
+            const handleOnDown = (e) => {
+               if (this.box) {
+                  this.box.remove();
+                  this.box = null;
+               };
+               this.box = createBox();
+               const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+               const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+               track.dataset.mouseXDownAt = clientX - this.rulerWrap.getBoundingClientRect().left;
+               track.dataset.mouseYDownAt = clientY - this.rulerWrap.getBoundingClientRect().top;
+               track.dataset.initialX = track.dataset.mouseXDownAt;
+               track.dataset.initialY = track.dataset.mouseYDownAt;
+               this.box.style.left = `${track.dataset.mouseXDownAt}px`;
+               this.box.style.top = `${track.dataset.mouseYDownAt}px`;
+               isOnDown = true;
+            }
+            const handleOnMove = (e) => {
+               if (!isOnDown) return;
+               const rect = this.rulerWrap.getBoundingClientRect();
+               const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+               const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+               const currX = clientX - rect.left;
+               const currY = clientY - rect.top;
+               const initX = parseFloat(track.dataset.initialX);
+               const initY = parseFloat(track.dataset.initialY);
+
+              // persist as strings if other logic depends on dataset
+               track.dataset.currentX = String(currX);
+               track.dataset.currentY = String(currY);
+
+               const movement = distance(currX, currY, initX, initY);
+               if (movement > MOVEMENT_THRESHOLD) {
+                  isOnMove = true;
+                  track.dataset.mouseXDownAt = String(initX);
+                  track.dataset.mouseYDownAt = String(initY);
+
+                  let boxWidth = 0;
+                  let boxHeight = 0;
+                  let boxLeft = 0;
+                  let boxTop = 0;
+                  let finalDirection = '';
+
+                  const moveRight = currX > initX;
+                  const moveDown = currY > initY;
+
+                  if (moveRight) {
+                     boxWidth = currX - initX;
+                     boxLeft = initX;
+                     if (moveDown) {
+                        finalDirection = '315deg';
+                        boxHeight = currY - initY;
+                        boxTop = initY;
+                     } else {
+                        finalDirection = '225deg';
+                        boxHeight = initY - currY;
+                        boxTop = currY;
+                     }
+                  } else {
+                     boxWidth = initX - currX;
+                     boxLeft = currX;
+                     if (moveDown) {
+                        finalDirection = '45deg';
+                        boxHeight = currY - initY;
+                        boxTop = initY;
+                     } else {
+                        finalDirection = '135deg';
+                        boxHeight = initY - currY;
+                        boxTop = currY;
+                     }
+                  }
+
+                  this.box.style.background = `linear-gradient(${finalDirection}, rgba(241, 85, 52, 0.64) 0%, rgba(245, 245, 239, 0.00) 67.05%)`;
+                  this.box.style.width = `${boxWidth}px`;
+                  this.box.style.height = `${boxHeight}px`;
+                  this.box.style.left = `${boxLeft}px`;
+                  this.box.style.top = `${boxTop}px`;
+               }
+            }
+            const handleOnUp = (e) => {
+               track.dataset.mouseDownAt = "0";
+               isOnDown = false;
+               isOnMove = false;
+               if (this.box) {
+                  this.box.remove();
+                  this.box = null;
+               }
+            }
+            this.rulerWrap.onmousedown = (e) => handleOnDown(e);
+            this.rulerWrap.ontouchstart = (e) => handleOnDown(e);
+
+            this.rulerWrap.onmouseup = (e) => handleOnUp(e);
+            this.rulerWrap.ontouchend = (e) => handleOnUp(e);
+
+            this.rulerWrap.onmousemove = (e) => handleOnMove(e);
+            this.rulerWrap.ontouchmove = (e) => handleOnMove(e);
          }
          destroy() {
                if (this.tlOnce) {
