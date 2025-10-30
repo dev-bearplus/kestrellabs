@@ -899,8 +899,8 @@ const mainScript = () => {
       }
 
       onEnter() {
-         if (this.footerWrap) {
-            const parentRect = this.footerWrap.getBoundingClientRect();
+         if (this.footerLogoWrap) {
+            const parentRect = this.footerLogoWrap.getBoundingClientRect();
             this.currentX = mouse.mousePos.x - parentRect.left;
             this.currentY = mouse.mousePos.y - parentRect.top;
 
@@ -936,8 +936,9 @@ const mainScript = () => {
       updateTargetPosition() {
          if (!this.footerLogoWrap) return;
          const parentRect = this.footerLogoWrap.getBoundingClientRect();
-         this.targetX = mouse.mousePos.x - parentRect.left;
-         this.targetY = mouse.mousePos.y - parentRect.top;
+
+         this.targetX = ((mouse.mousePos.x - parentRect.left) / parentRect.width) * 100;
+         this.targetY = ((mouse.mousePos.y - parentRect.top) / parentRect.height) * 100;
       }
 
       moveElement() {
@@ -945,24 +946,7 @@ const mainScript = () => {
 
          this.currentX = lerp(this.currentX, this.targetX, 0.08);
          this.currentY = lerp(this.currentY, this.targetY, 0.08);
-
-         const parentRect = this.footerLogoWrap.getBoundingClientRect();
-         const centerX = parentRect.width / 2;
-         const centerY = parentRect.height / 2;
-
-         const distanceFromCenter = distance(this.targetX, this.targetY, centerX, centerY);
-         const maxDistance = Math.hypot(centerX, centerY);
-         const scaleBasedOnDistance = 1 - (0.006 * (distanceFromCenter / maxDistance));
-
-         const currentScale = gsap.getProperty($('.footer-img-item.item2').get(0), 'scale');
-         const scale = lerp(currentScale, scaleBasedOnDistance, 0.08);
-
-
-         gsap.set($('.footer-img-item.item2'), {
-            '--mouse-x': `${cvUnit(this.currentX, 'rem')}px`,
-            '--mouse-y': `${cvUnit(this.currentY, 'rem')}px`,
-            scale,
-         })
+         gsap.set($('.footer-img-item.item2'), { '--mouse-x': `${this.currentX}%`, '--mouse-y': `${this.currentY}%` })
       }
       destroy() {
          if (this.raf) {
@@ -1059,10 +1043,11 @@ const mainScript = () => {
             this.currentY = 0;
             this.targetX = 0;
             this.targetY = 0;
-            this.minX = cvUnit(16, 'rem');
-            this.maxX = this.rulerWrap.offsetWidth - cvUnit(16, 'rem');
-            this.minY = cvUnit(16, 'rem');
-            this.maxY = this.rulerWrap.offsetHeight - cvUnit(17, 'rem');
+            this.offset = cvUnit(16, 'rem');
+            this.minX = this.offset;
+            this.maxX = this.rulerWrap.offsetWidth - this.offset;
+            this.minY = this.offset;
+            this.maxY = this.rulerWrap.offsetHeight - this.offset;
          }
          render() {
             if (isMouseInArea(this.rulerWrap, mouse.mousePos) || isInViewport(this.el)) {
@@ -1098,27 +1083,42 @@ const mainScript = () => {
                let normalizedX = normalize(this.currentX, this.rulerWrap.offsetWidth) * this.rulerWrap.offsetWidth / 2;
                let normalizedY = normalize(this.currentY, this.rulerWrap.offsetHeight) * this.rulerWrap.offsetHeight / 2;
 
-
                const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
                const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
                const isAtEdge = isAtEdgeX || isAtEdgeY;
 
                const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
-               const scale = lerp(currentScale, isAtEdge ? 0.6 : 1, 0.1);
+               const scale = lerp(currentScale, isAtEdge ? 0.7 : 1, 0.08);
 
                const currentOpacityVertical = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || 1;
                const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
                const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : 1, 0.1);
                const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : 1, 0.1);
 
-               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
-               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+               const currentBackgroundColor = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'backgroundColor');
+               const currentColorAlpha = parseFloat(currentBackgroundColor.split(',')[3]) || 0;
+               const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
+               const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
+
+               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), {
+                  x: normalizedX, autoAlpha: autoAlphaVertical
+               });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), {
+                  y: normalizedY, autoAlpha: autoAlphaHorizontal
+               });
                gsap.set($(this.el).find('.home-hero-img-plus'), {
                   x: normalizedX - cvUnit(.25, 'rem'),
                   y: normalizedY + cvUnit(.5, 'rem'),
                   scale: scale,
-                  backgroundColor: isAtEdgeX && isAtEdgeY ? 'rgba(241, 85, 52, 1)' : 'rgba(241, 85, 52, 0)'
+                  backgroundColor: `rgba(241, 85, 52, ${lerpedColorAlpha})`,
+                  color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
                });
+         }
+         drawBox() {
+            let isOnDown = false;
+            let isOnMove = false;
+
+
          }
          destroy() {
                if (this.tlOnce) {
