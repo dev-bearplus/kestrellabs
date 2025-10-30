@@ -1035,6 +1035,7 @@ const mainScript = () => {
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
                this.initRuler();
                this.drawBox();
+               this.drawImageContainer();
             }
          }
          initRuler() {
@@ -1236,6 +1237,27 @@ const mainScript = () => {
 
             this.rulerWrap.onmousemove = (e) => handleOnMove(e);
             this.rulerWrap.ontouchmove = (e) => handleOnMove(e);
+         }
+         drawImageContainer() {
+            const $img = $('.home-hero-img-inner img');
+            const $container = $img.parent();
+            const containerWidth = $container.width();
+            const containerHeight = $container.height();
+            const imgNaturalWidth = $img[0].naturalWidth;
+            const imgNaturalHeight = $img[0].naturalHeight;
+
+            const containerRatio = containerWidth / containerHeight;
+            const imgRatio = imgNaturalWidth / imgNaturalHeight;
+
+            let displayedWidth, displayedHeight;
+
+            if (imgRatio > containerRatio) {
+               displayedWidth = containerWidth;
+               displayedHeight = containerWidth / imgRatio;
+            } else {
+               displayedHeight = containerHeight;
+               displayedWidth = containerHeight * imgRatio;
+            }
          }
          destroy() {
                if (this.tlOnce) {
