@@ -1032,7 +1032,7 @@ const mainScript = () => {
             });
          }
          interact() {
-            if (viewport.w > 991) {
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
                this.initRuler();
                this.drawBox();
             }
@@ -1136,7 +1136,9 @@ const mainScript = () => {
                return this.box;
             }
 
-            const handleOnDown = (e) => {
+             const handleOnDown = (e) => {
+                // Prevent right-click from initiating box drawing
+                if ((e && e.button === 2) || (e && e.which === 3)) return;
                if (this.box) {
                   this.box.remove();
                   this.box = null;
@@ -1223,6 +1225,9 @@ const mainScript = () => {
                   this.box = null;
                }
             }
+            // Prevent native context menu on this area
+            this.rulerWrap.oncontextmenu = (e) => { e.preventDefault(); return false; };
+
             this.rulerWrap.onmousedown = (e) => handleOnDown(e);
             this.rulerWrap.ontouchstart = (e) => handleOnDown(e);
 
