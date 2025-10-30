@@ -1033,11 +1033,11 @@ const mainScript = () => {
          }
          interact() {
             if (viewport.w > 991) {
-               this.rulerMove();
+               this.initRuler();
                this.drawBox();
             }
          }
-         rulerMove() {
+         initRuler() {
             this.rulerWrap = $(this.el).find('.home-hero-img-wrap').get(0);
             this.raf = requestAnimationFrame(() => this.render());
             this.lastScrollY = smoothScroll.scroller.scrollY;
@@ -1059,7 +1059,7 @@ const mainScript = () => {
                   mouse.cacheMousePos.x !== this.lastMousePos.x ||
                   smoothScroll.scroller.scrollY !== this.lastScrollY) {
                      this.updateTargetPosition();
-                     this.moveElement();
+                     this.animateRuler();
                   }
             } else { }
 
@@ -1074,7 +1074,7 @@ const mainScript = () => {
             this.targetX = mouse.mousePos.x - parentRect.left;
             this.targetY = mouse.mousePos.y - parentRect.top;
          }
-         moveElement() {
+         animateRuler() {
             if (!this.rulerWrap) return;
                this.currentX = lerp(this.currentX, this.targetX, 0.3);
                this.currentY = lerp(this.currentY, this.targetY, 0.3);
