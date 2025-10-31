@@ -1092,7 +1092,7 @@ const mainScript = () => {
                const isAtEdge = isAtEdgeX || isAtEdgeY;
 
                const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
-               const scale = lerp(currentScale, isAtEdge ? 0.8 : 1, 0.08);
+               const scale = lerp(currentScale, isAtEdge ? 1.2 : 1, 0.08);
 
                const currentOpacityVertical = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || 1;
                const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
@@ -1137,9 +1137,9 @@ const mainScript = () => {
                return this.box;
             }
 
-             const handleOnDown = (e) => {
+            const handleOnDown = (e) => {
                 // Prevent right-click from initiating box drawing
-                if ((e && e.button === 2) || (e && e.which === 3)) return;
+               if ((e && e.button === 2) || (e && e.which === 3)) return;
                if (this.box) {
                   this.box.remove();
                   this.box = null;
