@@ -269,6 +269,28 @@ class FadeSplitText {
         })
     }
 }
+
+class TextTypewriter {
+    constructor({ el, delay, ...props }) {
+        this.DOM = { el: el };
+        this.delay = delay;
+        document.fonts.ready.then(() => {
+            gsap.set(this.DOM.el, { height: this.DOM.el.offsetHeight });
+            this.animation = gsap.from(this.DOM.el, {
+                text: {
+                    value: "",
+                    speed: 3,
+                    ...props
+                },
+                clearProps: 'all',
+            });;
+        })
+    }
+    init() {
+    }
+    stop() {
+    }
+}
 class FadeIn {
     constructor({ el, type, delay, isDisableRevert, from, to, ...props }) {
         this.DOM = { el: el };

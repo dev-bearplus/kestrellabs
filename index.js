@@ -1,5 +1,5 @@
 const mainScript = () => {
-   gsap.registerPlugin(ScrollTrigger);
+   gsap.registerPlugin(ScrollTrigger, SplitText, TextPlugin);
    ScrollTrigger.defaults({
       invalidateOnRefresh: true,
       scroller: ".main-inner",
@@ -1014,12 +1014,18 @@ const mainScript = () => {
             // }
          }
          animationReveal(timeline) {
-            new MasterTimeline({
-               timeline,
-               allowMobile: true,
-               tweenArr: []
-            });
-
+            // new MasterTimeline({
+            //    timeline,
+            //    allowMobile: true,
+            //    tweenArr: [
+            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-title .heading').get(0), speed: .5 }),
+            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-btn .txt').get(0), rtl: true, speed: .5 }),
+            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-sub .txt').get(0) }),
+            //       // ...Array.from($(this.el).find('.home-hero-work-item')).flatMap((el, idx) => [
+            //       //    new TextTypewriter({ el: $(this.el).find('.home-hero-work-item-title .txt').get(0), speed: .5 }),
+            //       // ])
+            //    ]
+            // });
             let taglineMarquee = new Marquee(
                $(this.el).find('.home-hero-work'),
                $(this.el).find('.home-hero-work-inner'), 40);
