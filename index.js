@@ -1404,7 +1404,6 @@ const mainScript = () => {
                   start: 'top 50%',
                   end: `bottom-=${cvUnit(100, 'vh')} bottom`,
                   scrub: true,
-                  markers: true,
                   onToggle: (self) => {
                      if (self.isActive) {
                         $(this.el).find('.home-map').removeClass('expanded');
