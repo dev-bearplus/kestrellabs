@@ -1109,7 +1109,8 @@ const mainScript = () => {
                const currentColorAlpha = parseFloat(currentBackgroundColor.split(',')[3]) || 0;
                const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
                const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
-
+               const coordiX = normalizedX - $(this.el).find('.home-hero-img-coordi').width() / 2 - cvUnit(4, 'rem');
+               const coordiY = normalizedY + $(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem');
                gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
                gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
                gsap.set($(this.el).find('.home-hero-img-plus-line.line-vertical'), { autoAlpha: autoAlphaVertical });
@@ -1121,6 +1122,14 @@ const mainScript = () => {
                   backgroundColor: `rgba(241, 85, 52, ${lerpedColorAlpha})`,
                   color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
                });
+               gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: autoAlphaHorizontal });
+
+               gsap.set($(this.el).find('.home-hero-img-coordi'), {
+                  x: coordiX,
+                  y: coordiY,
+               });
+               $('[data-control="x"]').text(normalizedX.toFixed(0));
+               $('[data-control="y"]').text(normalizedY.toFixed(0));
          }
          drawBox() {
             this.box = null;
@@ -1301,6 +1310,100 @@ const mainScript = () => {
          animationScrub() {
          }
          interact() {
+         }
+         destroy() {
+         }
+      },
+      Map: class extends TriggerSetup {
+         constructor() {
+            super();
+            this.el = null;
+            this.tl = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.home-map-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.setup();
+            this.interact();
+         }
+         setup() {
+            let gap= cvUnit(12, 'rem');
+            // get position left, right của .home-map-number[data-number='item1'] so với .home-map-main-img-inner
+            const item1 = $(this.el).find('.home-map-number[data-number="item1"]').get(0);
+            const parent = $(this.el).find('.home-map-main-img-inner').get(0);
+            const item2 = $(this.el).find('.home-map-number[data-number="item2"]').get(0);
+            const item3 = $(this.el).find('.home-map-number[data-number="item3"]').get(0);
+            const parentRect = parent.getBoundingClientRect();
+            const item1Rect = item1.getBoundingClientRect();
+            const item2Rect = item2.getBoundingClientRect();
+            const item3Rect = item3.getBoundingClientRect();
+            const relativeLeft = item1Rect.left - parentRect.left + gap + item1Rect.width  ;
+            const relativeTop = item1Rect.top - parentRect.top;
+            const relativeLeft2 = item2Rect.left - parentRect.left + gap + item2Rect.width;
+            const relativeTop2 = item2Rect.top - parentRect.top;
+            const relativeLeft3 = item3Rect.left - parentRect.left + gap + item3Rect.width;
+            const relativeTop3 = item3Rect.top - parentRect.top;
+
+            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item1"]').css({
+               left: `${relativeLeft}px`,
+               top: `${relativeTop}px`,
+            });
+            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item2"]').css({
+               left: `${relativeLeft2}px`,
+               top: `${relativeTop2}px`,
+            });
+            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item3"]').css({
+               left: `${relativeLeft3}px`,
+               top: `${relativeTop3}px`,
+            });
+
+            this.tl = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top top',
+                  end: 'bottom top+=100%',
+                  scrub: true,
+                  markers: true,
+               }
+            });
+
+            const totalDuration = 10;
+            const segmentDuration = totalDuration / 10;
+
+            this.tl
+                 .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, 0)
+                 .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration)
+                 .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, segmentDuration * 2)
+                 .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration * 3)
+                 .to($(this.el).find('.home-map-main-img:nth-child(3)'), { opacity: 1, ease: 'none' }, segmentDuration * 4)
+                 .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-img-svg path'), { x: 0, y: 0, ease: 'none' }, segmentDuration * 5)
+                 .to($(this.el).find('.home-map-main-img:nth-child(4)'), { opacity: 1, ease: 'none' }, segmentDuration * 6)
+                 .to($(this.el).find('.home-map-main-img:nth-child(5)'), { opacity: 1, ease: 'none' }, segmentDuration * 7)
+                 .to($(this.el).find('.home-map-main-img:nth-child(6)'), { opacity: 1, ease: 'none' }, segmentDuration * 8)
+                 .to($(this.el).find('.home-map-main-img:nth-child(7)'), { opacity: 1, ease: 'none', onStart: () => {
+                     $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active')
+                 } }, segmentDuration * 9) 
+
+         }
+         interact() {
+            $(this.el).find('.home-map-number').on('mouseenter', function() {
+               console.log('mouseenter');
+               $(this).parent().addClass('hover');
+               let dataNumber = $(this).attr('data-number');
+               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('hover')
+            });
+            $(this.el).find('.home-map-number').on('mouseleave', function() {
+               $(this).parent().removeClass('hover');
+               let dataNumber = $(this).attr('data-number');
+               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('hover')  
+            });
+            $(this.el).find('.home-map-number').on('click', function() {
+               $(this).parent().toggleClass('active');
+               let dataNumber = $(this).attr('data-number');
+               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').toggleClass('active')
+            });
          }
          destroy() {
          }
