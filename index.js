@@ -1109,8 +1109,16 @@ const mainScript = () => {
                const currentColorAlpha = parseFloat(currentBackgroundColor.split(',')[3]) || 0;
                const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
                const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
-               const coordiX = normalizedX - $(this.el).find('.home-hero-img-coordi').width() / 2 - cvUnit(4, 'rem');
-               const coordiY = normalizedY + $(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem');
+
+               const defaultCoordiX = normalizedX - ($(this.el).find('.home-hero-img-coordi').width() / 2 + cvUnit(4, 'rem'));
+               const coordiX = normalizedX >= 0
+                  ? defaultCoordiX
+                  : normalizedX + ($(this.el).find('.home-hero-img-coordi').width() / 2 + cvUnit(4, 'rem'));
+               const defaultCoordiY = normalizedY + $(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem');
+               const coordiY = normalizedY >= 0
+                  ? normalizedY - ($(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem'))
+                  : defaultCoordiY;
+
                gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
                gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
                gsap.set($(this.el).find('.home-hero-img-plus-line.line-vertical'), { autoAlpha: autoAlphaVertical });
@@ -1122,14 +1130,14 @@ const mainScript = () => {
                   backgroundColor: `rgba(241, 85, 52, ${lerpedColorAlpha})`,
                   color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
                });
-               gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: autoAlphaHorizontal });
+               gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: 1 - lerpedColorAlpha });
 
                gsap.set($(this.el).find('.home-hero-img-coordi'), {
-                  x: coordiX,
-                  y: coordiY,
+                  x: isAtEdgeX ? coordiX : defaultCoordiX,
+                  y: isAtEdgeY ? coordiY : defaultCoordiY,
                });
-               $('[data-control="x"]').text(normalizedX.toFixed(0));
-               $('[data-control="y"]').text(normalizedY.toFixed(0));
+               $('[data-control="x"]').text(this.targetX.toFixed(0));
+               $('[data-control="y"]').text(this.targetY.toFixed(0));
          }
          drawBox() {
             this.box = null;
@@ -1327,6 +1335,7 @@ const mainScript = () => {
          onTrigger() {
             this.setup();
             this.interact();
+            this.animationScrub()
          }
          setup() {
             let gap= cvUnit(12, 'rem');
@@ -1339,7 +1348,7 @@ const mainScript = () => {
             const item1Rect = item1.getBoundingClientRect();
             const item2Rect = item2.getBoundingClientRect();
             const item3Rect = item3.getBoundingClientRect();
-            const relativeLeft = item1Rect.left - parentRect.left + gap + item1Rect.width  ;
+            const relativeLeft = item1Rect.left - parentRect.left + gap + item1Rect.width;
             const relativeTop = item1Rect.top - parentRect.top;
             const relativeLeft2 = item2Rect.left - parentRect.left + gap + item2Rect.width;
             const relativeTop2 = item2Rect.top - parentRect.top;
@@ -1358,34 +1367,6 @@ const mainScript = () => {
                left: `${relativeLeft3}px`,
                top: `${relativeTop3}px`,
             });
-
-            this.tl = gsap.timeline({
-               scrollTrigger: {
-                  trigger: this.el,
-                  start: 'top top',
-                  end: 'bottom top+=100%',
-                  scrub: true,
-                  markers: true,
-               }
-            });
-
-            const totalDuration = 10;
-            const segmentDuration = totalDuration / 10;
-
-            this.tl
-                 .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, 0)
-                 .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration)
-                 .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, segmentDuration * 2)
-                 .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration * 3)
-                 .to($(this.el).find('.home-map-main-img:nth-child(3)'), { opacity: 1, ease: 'none' }, segmentDuration * 4)
-                 .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-img-svg path'), { x: 0, y: 0, ease: 'none' }, segmentDuration * 5)
-                 .to($(this.el).find('.home-map-main-img:nth-child(4)'), { opacity: 1, ease: 'none' }, segmentDuration * 6)
-                 .to($(this.el).find('.home-map-main-img:nth-child(5)'), { opacity: 1, ease: 'none' }, segmentDuration * 7)
-                 .to($(this.el).find('.home-map-main-img:nth-child(6)'), { opacity: 1, ease: 'none' }, segmentDuration * 8)
-                 .to($(this.el).find('.home-map-main-img:nth-child(7)'), { opacity: 1, ease: 'none', onStart: () => {
-                     $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active')
-                 } }, segmentDuration * 9) 
-
          }
          interact() {
             $(this.el).find('.home-map-number').on('mouseenter', function() {
@@ -1397,13 +1378,77 @@ const mainScript = () => {
             $(this.el).find('.home-map-number').on('mouseleave', function() {
                $(this).parent().removeClass('hover');
                let dataNumber = $(this).attr('data-number');
-               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('hover')  
+               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('hover')
             });
             $(this.el).find('.home-map-number').on('click', function() {
                $(this).parent().toggleClass('active');
                let dataNumber = $(this).attr('data-number');
                $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').toggleClass('active')
             });
+         }
+         animationScrub() {
+            this.tlStickFade = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom',
+                  end: `top top`,
+                  scrub: true
+               }
+            });
+            this.tlStickFade
+               .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
+
+            this.tl = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top 50%',
+                  end: `bottom-=${cvUnit(100, 'vh')} bottom`,
+                  scrub: true,
+                  markers: true,
+                  onToggle: (self) => {
+                     if (self.isActive) {
+                        $(this.el).find('.home-map').removeClass('expanded');
+                     }
+                     else {
+                        if (self.progress === 1) {
+                           $(this.el).find('.home-map').addClass('expanded');
+                        }
+                     }
+                  }
+               }
+            });
+
+            $(this.el).find('.home-intel-inner').each((idx, item) => {
+               this.tl
+                     .fromTo(item, { autoAlpha: 0, y: cvUnit(3, 'rem'), scale: 1.04 }, { autoAlpha: 1, y: 0, scale: 1 }, '>=0')
+                     .fromTo(item, { autoAlpha: 1, y: 0, scale: 1 }, { autoAlpha: 0, y: -cvUnit(3, 'rem'), scale: .96 }, '>=.5');
+               gsap.set(item, { autoAlpha: 0 });
+            })
+            gsap.set($(this.el).find('.home-map-main-img .home-map-img-svg path'), { opacity: 0, scale: 1.1 })
+            this.tl
+               .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-main-img-inner'), {
+                  opacity: 1
+               }, "-=.5")
+               .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), { scale: 1, opacity: 1, x: 0, y: 0, stagger: { amount: 0.02, from: 'random' } }, "<=0")
+               .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), { opacity: 1 })
+               .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), { opacity: 1 })
+               .to($(this.el).find('.home-map-main-img:nth-child(6) .home-map-main-img-inner'), { opacity: 1 })
+               .to($(this.el).find('.home-map-main-img:nth-child(7) .home-map-main-img-inner'), { opacity: 1, onStart: () => {
+                  $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active');
+               } })
+            // this.tl
+            //       .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, 0)
+            //       .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration)
+                  // .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, segmentDuration * 2)
+                  // .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration * 3)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(3)'), { opacity: 1, ease: 'none' }, segmentDuration * 4)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-img-svg path'), { x: 0, y: 0, ease: 'none' }, segmentDuration * 5)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(4)'), { opacity: 1, ease: 'none' }, segmentDuration * 6)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(5)'), { opacity: 1, ease: 'none' }, segmentDuration * 7)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(6)'), { opacity: 1, ease: 'none' }, segmentDuration * 8)
+                  // .to($(this.el).find('.home-map-main-img:nth-child(7)'), { opacity: 1, ease: 'none', onStart: () => {
+                  //    $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active')
+                  // } }, segmentDuration * 9)
          }
          destroy() {
          }
