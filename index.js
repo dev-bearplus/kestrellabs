@@ -1228,12 +1228,33 @@ const mainScript = () => {
                         boxTop = currY;
                      }
                   }
-
                   this.box.style.background = `linear-gradient(${finalDirection}, rgba(241, 85, 52, 0.64) 0%, rgba(245, 245, 239, 0.00) 67.05%)`;
                   this.box.style.width = `${boxWidth}px`;
                   this.box.style.height = `${boxHeight}px`;
                   this.box.style.left = `${boxLeft}px`;
                   this.box.style.top = `${boxTop}px`;
+                  // check each home-hero-img-deco active if box overlaps/touches deco
+                  const boxRect = this.box.getBoundingClientRect();
+                  $('.home-hero-img-deco').each((index, item) => {
+                     const decoRect = $(item).get(0).getBoundingClientRect();
+
+                     // Check if box and deco are overlapping (touching)
+                     const isOverlapping = !(
+                        boxRect.right < decoRect.left ||
+                        boxRect.left > decoRect.right ||
+                        boxRect.bottom < decoRect.top ||
+                        boxRect.top > decoRect.bottom
+                     );
+
+                     if (isOverlapping) {
+                        if (!$('.home-hero-intro').hasClass('hide')) {
+                           $('.home-hero-intro').addClass('hide');
+                        }
+                        $(item).addClass('active');
+                     } else {
+                        $(item).removeClass('active');
+                     }
+                  });
                }
             }
             const handleOnUp = (e) => {
@@ -1244,6 +1265,7 @@ const mainScript = () => {
                   this.box.remove();
                   this.box = null;
                }
+               $('.home-hero-img-deco').removeClass('active');
             }
             // Prevent native context menu on this area
             this.rulerWrap.oncontextmenu = (e) => { e.preventDefault(); return false; };
@@ -1277,7 +1299,10 @@ const mainScript = () => {
                displayedHeight = containerHeight;
                displayedWidth = containerHeight * imgRatio;
             }
-            console.log(displayedWidth, displayedHeight);
+            $('.home-hero-img-deco-main').css({
+               width: `${displayedWidth}px`,
+               height: `${displayedHeight}px`,
+            });
             const IMG_HEIGHT = 829;
             const IMG_WIDTH = 1648;
             const calcVerticalPos = (imgY) => {
@@ -1408,7 +1433,20 @@ const mainScript = () => {
          onTrigger() {
             this.animationScrub();
             this.animationReveal();
+            this.setup();
             this.interact();
+         }
+         setup() {
+            this.tlStickFade = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el.querySelector('.home-intro-content'),
+                  start: 'center bottom+=10%',
+                  end: `center top+=20%`,
+                  scrub: true,
+               }
+            });
+            let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars'});
+            this.tlStickFade.to(title.chars, { color: '#282828', stagger: 0.01 })
          }
          animationReveal() {
             let partnerMarquee = new Marquee(
@@ -1472,7 +1510,6 @@ const mainScript = () => {
          }
          interact() {
             $(this.el).find('.home-map-number').on('mouseenter', function() {
-               console.log('mouseenter');
                $(this).parent().addClass('hover');
                let dataNumber = $(this).attr('data-number');
                $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('hover')
@@ -1489,17 +1526,6 @@ const mainScript = () => {
             });
          }
          animationScrub() {
-            this.tlStickFade = gsap.timeline({
-               scrollTrigger: {
-                  trigger: this.el,
-                  start: 'top bottom',
-                  end: `top top`,
-                  scrub: true
-               }
-            });
-            this.tlStickFade
-               .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
-
             this.tl = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -1526,30 +1552,120 @@ const mainScript = () => {
                gsap.set(item, { autoAlpha: 0 });
             })
             gsap.set($(this.el).find('.home-map-main-img .home-map-img-svg path'), { opacity: 0, scale: 1.1 })
+
+            // Track which items are currently active
+            let activeItems = new Set();
+
             this.tl
                .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-main-img-inner'), {
-                  opacity: 1
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item3')) {
+                           intro.addClass('active');
+                           activeItems.add('item3');
+                        }
+                     } else {
+                        if (activeItems.has('item3')) {
+                           intro.removeClass('active');
+                           activeItems.delete('item3');
+                        }
+                     }
+                  }
                }, "-=.5")
-               .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), { scale: 1, opacity: 1, x: 0, y: 0, stagger: { amount: 0.02, from: 'random' } }, "<=0")
-               .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), { opacity: 1 })
-               .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), { opacity: 1 })
-               .to($(this.el).find('.home-map-main-img:nth-child(6) .home-map-main-img-inner'), { opacity: 1 })
-               .to($(this.el).find('.home-map-main-img:nth-child(7) .home-map-main-img-inner'), { opacity: 1, onStart: () => {
-                  $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active');
-               } })
-            // this.tl
-            //       .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, 0)
-            //       .fromTo($(this.el).find('.home-intel-inner:nth-child(1)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration)
-                  // .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 0 }, { opacity: 1, ease: 'none' }, segmentDuration * 2)
-                  // .fromTo($(this.el).find('.home-intel-inner:nth-child(2)'), { opacity: 1 }, { opacity: 0, ease: 'none' }, segmentDuration * 3)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(3)'), { opacity: 1, ease: 'none' }, segmentDuration * 4)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-img-svg path'), { x: 0, y: 0, ease: 'none' }, segmentDuration * 5)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(4)'), { opacity: 1, ease: 'none' }, segmentDuration * 6)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(5)'), { opacity: 1, ease: 'none' }, segmentDuration * 7)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(6)'), { opacity: 1, ease: 'none' }, segmentDuration * 8)
-                  // .to($(this.el).find('.home-map-main-img:nth-child(7)'), { opacity: 1, ease: 'none', onStart: () => {
-                  //    $(this.el).find('.home-map-main-img:nth-child(7)').addClass('active')
-                  // } }, segmentDuration * 9)
+               .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), {
+                  scale: 1,
+                  opacity: 1,
+                  x: 0,
+                  y: 0,
+                  stagger: { amount: 0.02, from: 'random' }
+               }, "<=0")
+               .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), {
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item4')) {
+                           intro.addClass('active');
+                           activeItems.add('item4');
+                        }
+                     } else {
+                        if (activeItems.has('item4')) {
+                           intro.removeClass('active');
+                           activeItems.delete('item4');
+                        }
+                     }
+                  }
+               })
+               .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), {
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item5')) {
+                           intro.addClass('active');
+                           activeItems.add('item5');
+                        }
+                     } else {
+                        if (activeItems.has('item5')) {
+                           intro.removeClass('active');
+                           activeItems.delete('item5');
+                        }
+                     }
+                  }
+               })
+               .to($(this.el).find('.home-map-main-img:nth-child(6) .home-map-main-img-inner'), {
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item6')) {
+                           intro.addClass('active');
+                           activeItems.add('item6');
+                        }
+                     } else {
+                        if (activeItems.has('item6')) {
+                           intro.removeClass('active');
+                           activeItems.delete('item6');
+                        }
+                     }
+                  }
+               })
+               .to($(this.el).find('.home-map-main-img:nth-child(7) .home-map-main-img-inner'), {
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item7')) {
+                           item.addClass('active');
+                           intro.addClass('active');
+                           activeItems.add('item7');
+                        }
+                     } else {
+                        if (activeItems.has('item7')) {
+                           item.removeClass('active');
+                           intro.removeClass('active');
+                           activeItems.delete('item7');
+                        }
+                     }
+                  }
+               })
          }
          destroy() {
          }
@@ -1643,6 +1759,11 @@ const mainScript = () => {
          animationScrub() {
          }
          interact() {
+            $(this.el).find('.home-usecase-faq-item').on('mouseenter', function() {
+               let index = $(this).index();
+               $('.home-usecase-img-item').removeClass('active');
+               $('.home-usecase-img-item').eq(index).addClass('active');
+            });
             const activeAccordion = (idx) => {
                $(this.el).find('.home-usecase-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
                $(this.el).find('.home-usecase-faq-item').eq(idx).siblings().find('.home-usecase-faq-item-sub').slideUp();
