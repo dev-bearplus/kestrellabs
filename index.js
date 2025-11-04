@@ -758,6 +758,68 @@ const mainScript = () => {
             }
       }
    }
+   class FlipText {
+      constructor(wrapEl, { onCycleComplete = () => {}, duration = 3 }) {
+          this.wrapEl = wrapEl;
+          this.tlMaster;
+          this.onCycleComplete = onCycleComplete;
+          this.duration = duration;
+      }
+      setup() {
+          let allSlideItems = $(this.wrapEl).find('.home-hero-title');
+          this.tlMaster = gsap.timeline({
+              paused: true,
+              onComplete: () => {
+                  this.tlMaster.progress(0);
+              }
+          });
+
+          const DEFAULT = {
+              duration: this.duration,
+              ease: 'expo.inOut',
+              transform: {
+                  out: `translate3d(0px, ${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(-91deg)`,
+                  in: `translate3d(0px, -${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(91deg)`,
+              }
+          }
+          gsap.set(this.wrapEl, { perspective: cvUnit(82.5, 'rem') })
+          gsap.set(allSlideItems, {
+              transformOrigin: true
+                  ? 'center center -.1em !important'
+                  : 'center center -.26em !important',
+          });
+
+          allSlideItems.each((idx, text) => {
+              if (idx == allSlideItems.length - 1) {
+                  gsap.set(text, { transform: 'none', autoAlpha: 1 });
+              } else {
+                  gsap.set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 });
+              }
+              let tlChild = gsap.timeline({});
+
+              if (idx === allSlideItems.length - 1) {
+                  tlChild
+                      .set(text, { transform: 'none', autoAlpha: 1 })
+                      .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } }, '<=0')
+                      .to(text, { duration: DEFAULT.duration * idx - 1 * DEFAULT.duration })
+                      .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
+                      .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease });
+              } else {
+                  tlChild
+                      .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
+                      .to(text, { duration: DEFAULT.duration * idx }, '<=0')
+                      .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease })
+                      .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } })
+                      .to(text, { duration: (allSlideItems.length - 2 - idx) * DEFAULT.duration });
+              }
+              this.tlMaster.add(tlChild, 0);
+          });
+          this.tlMaster.progress((1 / allSlideItems.length).toFixed(2));
+      }
+      play() {
+          this.tlMaster.play();
+      }
+  }
    class Header {
       constructor() {
          this.el = null;
@@ -968,6 +1030,7 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
+            this.rotateText();
             this.interact();
          }
          setupOnce(data) {
@@ -1008,6 +1071,11 @@ const mainScript = () => {
             // if (isInViewport(this.el)) {
             //     this.tlEnter.play();
             // }
+         }
+         rotateText() {
+            let headingFlipping = new FlipText('.home-hero-title-wrap', {});
+            headingFlipping.setup();
+            headingFlipping.play();
          }
          animationReveal(timeline) {
             // new MasterTimeline({
@@ -1478,34 +1546,23 @@ const mainScript = () => {
             this.animationScrub()
          }
          setup() {
-            let gap= cvUnit(12, 'rem');
-            // get position left, right của .home-map-number[data-number='item1'] so với .home-map-main-img-inner
-            const item1 = $(this.el).find('.home-map-number[data-number="item1"]').get(0);
+            this.initPositionItem();
+         }
+         initPositionItem() {
+            const gap = cvUnit(12, 'rem');
             const parent = $(this.el).find('.home-map-main-img-inner').get(0);
-            const item2 = $(this.el).find('.home-map-number[data-number="item2"]').get(0);
-            const item3 = $(this.el).find('.home-map-number[data-number="item3"]').get(0);
             const parentRect = parent.getBoundingClientRect();
-            const item1Rect = item1.getBoundingClientRect();
-            const item2Rect = item2.getBoundingClientRect();
-            const item3Rect = item3.getBoundingClientRect();
-            const relativeLeft = item1Rect.left - parentRect.left + gap + item1Rect.width;
-            const relativeTop = item1Rect.top - parentRect.top;
-            const relativeLeft2 = item2Rect.left - parentRect.left + gap + item2Rect.width;
-            const relativeTop2 = item2Rect.top - parentRect.top;
-            const relativeLeft3 = item3Rect.left - parentRect.left + gap + item3Rect.width;
-            const relativeTop3 = item3Rect.top - parentRect.top;
 
-            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item1"]').css({
-               left: `${relativeLeft}px`,
-               top: `${relativeTop}px`,
-            });
-            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item2"]').css({
-               left: `${relativeLeft2}px`,
-               top: `${relativeTop2}px`,
-            });
-            $(this.el).find('.home-map-main-img-sub-hover[data-hover="item3"]').css({
-               left: `${relativeLeft3}px`,
-               top: `${relativeTop3}px`,
+            ['item1', 'item2', 'item3'].forEach((itemName) => {
+               const item = $(this.el).find(`.home-map-number[data-number="${itemName}"]`).get(0);
+               const itemRect = item.getBoundingClientRect();
+               const relativeLeft = itemRect.left - parentRect.left + gap + itemRect.width;
+               const relativeTop = itemRect.top - parentRect.top;
+
+               $(this.el).find(`.home-map-main-img-sub-hover[data-hover="${itemName}"]`).css({
+                  left: `${relativeLeft}px`,
+                  top: `${relativeTop}px`,
+               });
             });
          }
          interact() {
@@ -1520,9 +1577,23 @@ const mainScript = () => {
                $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('hover')
             });
             $(this.el).find('.home-map-number').on('click', function() {
-               $(this).parent().toggleClass('active');
-               let dataNumber = $(this).attr('data-number');
-               $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').toggleClass('active')
+               if ($(this).parent().hasClass('active')) {
+                  $(this).parent().removeClass('active');
+                  let dataNumber = $(this).attr('data-number');
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('active')
+               } else {
+                  $('.home-map-number-wrap').removeClass('active');
+                  $('.home-map-main-img-sub-hover').removeClass('active');
+                  $(this).parent().addClass('active');
+                  let dataNumber = $(this).attr('data-number');
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active')
+               }
+            });
+            $(document).on('click', function(e) {
+               if (!$(e.target).closest('.home-map-number').length) {
+                  $(this.el).find('.home-map-number-wrap').removeClass('active');
+                  $('.home-map-main-img-sub-hover').removeClass('active');
+               }
             });
          }
          animationScrub() {
@@ -1541,6 +1612,9 @@ const mainScript = () => {
                            $(this.el).find('.home-map').addClass('expanded');
                         }
                      }
+                     setTimeout(() => {
+                        this.initPositionItem();
+                     }, 410);
                   }
                }
             });
@@ -1659,7 +1733,7 @@ const mainScript = () => {
                         }
                      } else {
                         if (activeItems.has('item7')) {
-                           item.removeClass('active');
+                           // item.removeClass('active');
                            intro.removeClass('active');
                            activeItems.delete('item7');
                         }
@@ -1759,12 +1833,9 @@ const mainScript = () => {
          animationScrub() {
          }
          interact() {
-            $(this.el).find('.home-usecase-faq-item').on('mouseenter', function() {
-               let index = $(this).index();
-               $('.home-usecase-img-item').removeClass('active');
-               $('.home-usecase-img-item').eq(index).addClass('active');
-            });
             const activeAccordion = (idx) => {
+               $('.home-usecase-img-item').removeClass('active');
+               $('.home-usecase-img-item').eq(idx).addClass('active');
                $(this.el).find('.home-usecase-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
                $(this.el).find('.home-usecase-faq-item').eq(idx).siblings().find('.home-usecase-faq-item-sub').slideUp();
                $(this.el).find('.home-usecase-faq-item').eq(idx).find('.home-usecase-faq-item-sub').slideToggle();
