@@ -1763,7 +1763,9 @@ const mainScript = () => {
          animationReveal() {
          }
          interact() {
-            this.stickerCard();
+            if(viewport.w > 991) {
+               this.stickerCard();
+            }
          }
          stickerCard() {
             this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
