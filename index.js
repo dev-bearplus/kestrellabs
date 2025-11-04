@@ -901,13 +901,9 @@ const mainScript = () => {
       onEnter() {
          if (this.footerLogoWrap) {
             const parentRect = this.footerLogoWrap.getBoundingClientRect();
-            this.currentX = mouse.mousePos.x - parentRect.left;
-            this.currentY = mouse.mousePos.y - parentRect.top;
-
-            $('.footer-img-item.item2').css({
-               '--mouse-x': `${cvUnit(this.currentX, 'rem')}px`,
-               '--mouse-y': `${cvUnit(this.currentY, 'rem')}px`,
-            });
+            this.currentX = ((mouse.mousePos.x - parentRect.left) / parentRect.width) * 100;
+            this.currentY = ((mouse.mousePos.y - parentRect.top) / parentRect.height) * 100;
+            $('.footer-img-item.item2').css({ '--mouse-x': `${this.currentX}%`, '--mouse-y': `${this.currentY}%` });
          }
 
          gsap.to($(this.el).find('.footer-img-item.item2'), {
@@ -1281,6 +1277,112 @@ const mainScript = () => {
                displayedHeight = containerHeight;
                displayedWidth = containerHeight * imgRatio;
             }
+            console.log(displayedWidth, displayedHeight);
+            const IMG_HEIGHT = 829;
+            const IMG_WIDTH = 1648;
+            const calcVerticalPos = (imgY) => {
+               return displayedHeight * imgY / IMG_HEIGHT + (containerHeight - displayedHeight) / 2;
+            };
+            const calcHorizontalClip = (imgX) => {
+               return ((containerWidth - displayedWidth) / 2 + displayedWidth * imgX / IMG_WIDTH) / containerWidth * 100;
+            };
+            const calcHorizitalPos = (imgX) => {
+               return displayedWidth * imgX / IMG_WIDTH + (containerWidth - displayedWidth) / 2;
+            };
+            const calcVerticalClip = (imgY) => {
+               return ((containerHeight - displayedHeight) / 2 + displayedHeight * (1 - imgY / IMG_HEIGHT)) / containerHeight * 100;
+            };
+            const verticalLineStartY = 117;
+            const verticalLineStartX = 348;
+            const verticalLineHeight = 611;
+            const verticalLineWidth = 926;
+
+            // Left vertical line
+            $('.home-hero-ruler-item.left .home-hero-ruler-item-line-vertical')
+               .css('height', `${displayedHeight * verticalLineHeight / IMG_HEIGHT}px`)
+               .css('top', `${calcVerticalPos(verticalLineStartY)}px`);
+
+            // Right vertical line
+            $('.home-hero-ruler-item.right .home-hero-ruler-item-line-vertical')
+               .css('height', `${displayedHeight * verticalLineHeight / IMG_HEIGHT}px`)
+               .css('top', `${calcVerticalPos(verticalLineStartY)}px`);
+
+            // Top horizontal line
+            $('.home-hero-ruler-item.top .home-hero-ruler-item-line-horizital')
+               .css('width', `${displayedWidth * verticalLineWidth / IMG_WIDTH}px`)
+               .css('left', `${calcHorizitalPos(verticalLineStartX)}px`);
+
+            // Bottom horizontal line
+            $('.home-hero-ruler-item.bot .home-hero-ruler-item-line-horizital')
+            .css('width', `${displayedWidth * verticalLineWidth / IMG_WIDTH}px`)
+            .css('left', `${calcHorizitalPos(verticalLineStartX)}px`);
+
+            const horizontalLinesLeft = [
+               { y: 116, x: 464 },
+               { y: 319, x: 792 },
+               { y: 502, x: 343 },
+               { y: 671, x: 487 },
+               { y: 728, x: 577 }
+            ];
+            const horizontalLinesRight = [
+               { y: 116, x: 1146 },
+               { y: 319, x: 767 },
+               { y: 361, x: 635 },
+               { y: 512, x: 481 },
+               { y: 672, x: 606 },
+               { y: 727, x: 606 }
+            ];
+            const verticalLinesTop = [
+               { y: 303, x: 348 },
+               { y: 713, x: 462 },
+               { y: 715, x: 505 },
+               { y: 510, x: 792 },
+               { y: 510, x: 882 },
+               { y: 468, x: 1014 },
+               { y: 317, x: 1168 },
+               { y: 207, x: 1274 }
+            ];
+            const verticalLinesBot = [
+               { y: 505, x: 348 },
+               { y: 604, x: 462 },
+               { y: 729, x: 567 },
+               { y: 604, x: 817 },
+               { y: 671, x: 1043 },
+               { y: 560, x: 1168 },
+               { y: 618, x: 1274 },
+            ];
+            horizontalLinesLeft.forEach((line, index) => {
+               // lọc qua từng .home-hero-ruler-item.left
+               $('.home-hero-ruler-item.left').each((itemIndex, item) => {
+                  const lineItem = $(item).find('.home-hero-ruler-item-line-horizital').eq(index);
+                  lineItem.css('top', `${calcVerticalPos(line.y)}px`)
+                     .css('--clip-half', `${calcHorizontalClip(line.x)}%`);
+               });
+               
+            });
+            horizontalLinesRight.forEach((line, index) => {
+               const invertedClip = 100 - calcHorizontalClip(line.x);
+               $('.home-hero-ruler-item.right').each((itemIndex, item) => {
+                  const lineItem = $(item).find('.home-hero-ruler-item-line-horizital').eq(index);
+                  lineItem.css('top', `${calcVerticalPos(line.y)}px`)
+                     .css('--clip-half', `${invertedClip}%`);
+               });
+            });
+            verticalLinesTop.forEach((line, index) => {
+               $('.home-hero-ruler-item.top').each((itemIndex, item) => {
+                  const lineItem = $(item).find('.home-hero-ruler-item-line-vertical').eq(index);
+                  lineItem.css('left', `${calcHorizitalPos(line.x)}px`)
+                     .css('--clip-half', `${calcVerticalClip(line.y)}%`);
+               });
+            });
+            verticalLinesBot.forEach((line, index) => {
+               const invertedClip = 100 - calcVerticalClip(line.y);
+               $('.home-hero-ruler-item.bot').each((itemIndex, item) => {
+                  const lineItem = $(item).find('.home-hero-ruler-item-line-vertical').eq(index);
+                  lineItem.css('left', `${calcHorizitalPos(line.x)}px`)
+                     .css('--clip-half', `${invertedClip}%`);
+               });
+            });
          }
          destroy() {
                if (this.tlOnce) {
