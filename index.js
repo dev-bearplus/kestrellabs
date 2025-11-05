@@ -266,8 +266,9 @@ const mainScript = () => {
 				this.lenis.destroy();
 			}
          this.lenis = new Lenis({
-               content: data.next.container,
-               wrapper: data.next.container,
+               content: document.querySelector('.main-content'),
+               wrapper: document.querySelector('.main-inner'),
+               syncTouch: true,
                smoothTouch: false,
                infinite: false,
          })
@@ -1863,10 +1864,10 @@ const mainScript = () => {
             this.isEntered = false;
          }
          swiperCard() {
-            $('.home-why-main-inner').addClass('swiper');
+            $('.home-why-main-cms').addClass('swiper');
             $('.home-why-main').addClass('swiper-wrapper');
             $('.home-why-item').addClass('swiper-slide');
-            new Swiper('.home-why-main-inner', {
+            new Swiper('.home-why-main-cms', {
                slidesPerView: 1,
                spaceBetween: cvUnit(12, 'rem'),
                pagination: {
