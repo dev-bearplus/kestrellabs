@@ -386,7 +386,7 @@ const mainScript = () => {
          window.addEventListener('mousemove', (e) => {
             this.mousePos = this.getPointerPos(e);
          });
-         window.addEventListener('touchmove', () => {
+         window.addEventListener('touchmove', (e) => {
             this.mousePos = this.getPointerPos(e);
          });
       }
@@ -766,7 +766,7 @@ const mainScript = () => {
           this.duration = duration;
       }
       setup() {
-          let allSlideItems = $(this.wrapEl).find('.home-hero-title');
+          let allSlideItems = $(this.wrapEl).find('.heading');
           this.tlMaster = gsap.timeline({
               paused: true,
               onComplete: () => {
@@ -1530,6 +1530,39 @@ const mainScript = () => {
          destroy() {
          }
       },
+      Problem: class extends TriggerSetup {
+         constructor() {
+            super();
+            this.el = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.home-problem-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.setup();
+         }
+         setup() {
+            if(viewport.w < 768) {
+               this.swiperCard();
+            }
+         }
+         swiperCard() {
+            $('.home-problem-cms').addClass('swiper');
+            $('.home-problem-list').addClass('swiper-wrapper');
+            $('.home-problem-item').addClass('swiper-slide');
+            new Swiper('.home-problem-cms', {
+               slidesPerView: 'auto',
+               spaceBetween: 0,
+               pagination: {
+                  el: '.home-problem-pagi',
+                  bulletClass: 'home-problem-pagi-item',
+                  bulletActiveClass: 'active',
+                  clickable: true,  
+               },
+            });
+         }
+      },
       Map: class extends TriggerSetup {
          constructor() {
             super();
@@ -1647,9 +1680,13 @@ const mainScript = () => {
                         if (activeItems.has('item3')) {
                            intro.removeClass('active');
                            activeItems.delete('item3');
+                           $('.home-map-main-img:nth-child(3) .home-map-img-svg').removeClass('filter');
                         }
                      }
-                  }
+                  }, 
+                  onComplete: () => {
+                     $('.home-map-main-img:nth-child(3) .home-map-img-svg').addClass('filter');
+                  },
                }, "-=.5")
                .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), {
                   scale: 1,
@@ -1744,6 +1781,54 @@ const mainScript = () => {
          destroy() {
          }
       },
+      Platform: class extends TriggerSetup {
+         constructor() {
+            super();
+            this.el = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.home-platform-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.setup();
+            this.interact();
+            this.animationScrub()
+         }
+         setup() {
+         }
+         interact() {}
+         animationScrub() {
+            const contentItems = $(this.el).find('.home-platform-content-inner');
+            const totalItems = contentItems.length;
+
+            this.tl = gsap.timeline({
+               scrollTrigger: {
+                  trigger: '.home-platform-content',
+                  start: 'top bottom',
+                  end: 'bottom top',
+                  scrub: true,
+                  onUpdate: (self) => {
+                     const progress = self.progress;
+                     const itemThreshold = 1 / totalItems;
+
+                     contentItems.each((index, item) => {
+                        const startProgress = index * itemThreshold;
+                        const endProgress = (index + 1) * itemThreshold;
+                        console.log(progress, startProgress, endProgress);
+                        if (progress >= startProgress && progress < endProgress) {
+                           $(item).addClass('active');
+                        } else {
+                           $(item).removeClass('active');
+                        }
+                     });
+                  }
+               }
+            });
+         }
+         destroy() {
+         }
+      },
       WhyUs: class extends TriggerSetup {
          constructor() {
             super();
@@ -1766,6 +1851,9 @@ const mainScript = () => {
             if(viewport.w > 991) {
                this.stickerCard();
             }
+            else if (viewport.w <= 767) {
+               this.swiperCard();
+            }
          }
          stickerCard() {
             this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
@@ -1773,6 +1861,21 @@ const mainScript = () => {
             this.lastScrollY = smoothScroll.scroller.scrollY;
             this.lastMousePos = { ...mouse.cacheMousePos };
             this.isEntered = false;
+         }
+         swiperCard() {
+            $('.home-why-main-inner').addClass('swiper');
+            $('.home-why-main').addClass('swiper-wrapper');
+            $('.home-why-item').addClass('swiper-slide');
+            new Swiper('.home-why-main-inner', {
+               slidesPerView: 1,
+               spaceBetween: cvUnit(12, 'rem'),
+               pagination: {
+                  el: '.home-why-pagi',
+                  bulletClass: 'home-why-pagi-item',
+                  bulletActiveClass: 'active',
+                  clickable: true,  
+               },
+            });
          }
          render() {
             if (isMouseInArea(this.stickerCardWrap, mouse.mousePos) || isInViewport(this.stickerCardWrap)) {
