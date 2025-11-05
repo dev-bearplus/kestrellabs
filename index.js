@@ -1688,9 +1688,13 @@ const mainScript = () => {
                         if (activeItems.has('item3')) {
                            intro.removeClass('active');
                            activeItems.delete('item3');
+                           $('.home-map-main-img:nth-child(3) .home-map-img-svg').removeClass('filter');
                         }
                      }
                   }, 
+                  onComplete: () => {
+                     $('.home-map-main-img:nth-child(3) .home-map-img-svg').addClass('filter');
+                  },
                }, "-=.5")
                .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), {
                   scale: 1,
