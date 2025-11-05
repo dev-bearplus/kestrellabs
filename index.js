@@ -1096,9 +1096,12 @@ const mainScript = () => {
                $(this.el).find('.home-hero-work-inner'), 40);
             taglineMarquee.setup();
             taglineMarquee.play();
-
-            gsap.to($(this.el).find('.home-hero-curor-line, .home-hero-img-plus'), {
+            gsap.to($(this.el).find(' .home-hero-img-plus'), {
                autoAlpha: 1,
+               duration: 0.5
+            });
+            gsap.to($(this.el).find('.home-hero-curor-line'), {
+               autoAlpha: .16,
                duration: 0.5
             });
          }
@@ -1169,6 +1172,10 @@ const mainScript = () => {
                const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
                const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : 1, 0.1);
                const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : 1, 0.1);
+               const currentOpacityVerticalLine = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || .16;
+               const currentOpacityHorizontalLine = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || .16;
+               const autoAlphaVerticalLine = lerp(currentOpacityVerticalLine, isAtEdgeX ? 0 : .16, 0.1);
+               const autoAlphaHorizontalLine = lerp(currentOpacityHorizontalLine, isAtEdgeY ? 0 : .16, 0.1);
 
                const currentBackgroundColor = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'backgroundColor');
                const currentColorAlpha = parseFloat(currentBackgroundColor.split(',')[3]) || 0;
@@ -1184,8 +1191,8 @@ const mainScript = () => {
                   ? normalizedY - ($(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem'))
                   : defaultCoordiY;
 
-               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVertical });
-               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVerticalLine });
+               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontalLine });
                gsap.set($(this.el).find('.home-hero-img-plus-line.line-vertical'), { autoAlpha: autoAlphaVertical });
                gsap.set($(this.el).find('.home-hero-img-plus-line.line-horizital'), { autoAlpha: autoAlphaHorizontal });
                gsap.set($(this.el).find('.home-hero-img-plus'), {
