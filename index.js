@@ -1688,13 +1688,9 @@ const mainScript = () => {
                         if (activeItems.has('item3')) {
                            intro.removeClass('active');
                            activeItems.delete('item3');
-                           $('.home-map-main-img:nth-child(3) .home-map-img-svg').removeClass('filter');
                         }
                      }
                   }, 
-                  onComplete: () => {
-                     $('.home-map-main-img:nth-child(3) .home-map-img-svg').addClass('filter');
-                  },
                }, "-=.5")
                .to($(this.el).find('.home-map-main-img .home-map-img-svg path'), {
                   scale: 1,
@@ -1772,15 +1768,35 @@ const mainScript = () => {
 
                      if (progress > 0 && progress < 1) {
                         if (!activeItems.has('item7')) {
-                           item.addClass('active');
                            intro.addClass('active');
                            activeItems.add('item7');
                         }
                      } else {
                         if (activeItems.has('item7')) {
-                           // item.removeClass('active');
                            intro.removeClass('active');
                            activeItems.delete('item7');
+                        }
+                     }
+                  }
+               })
+               .to($(this.el).find('.home-map-main-img:nth-child(8) .home-map-main-img-inner'), {
+                  opacity: 1,
+                  onUpdate: function() {
+                     const progress = this.progress();
+                     const item = $(this.targets()[0]).closest('.home-map-main-img');
+                     const intro = item.find('.home-map-intro');
+
+                     if (progress > 0 && progress < 1) {
+                        if (!activeItems.has('item8')) {
+                           item.addClass('active');
+                           intro.addClass('active');
+                           activeItems.add('item8');
+                        }
+                     } else {
+                        if (activeItems.has('item8')) {
+                           // item.removeClass('active');
+                           intro.removeClass('active');
+                           activeItems.delete('item8');
                         }
                      }
                   }
