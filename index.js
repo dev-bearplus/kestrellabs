@@ -1987,7 +1987,49 @@ const mainScript = () => {
          constructor() { super(); }
       }
    }
+   const ProductPage = {
+      Key: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.product-key-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.animationScrub();
+            this.interact();
+         }
+         animationScrub() {
+            const parent = $(this.el).find('.product-key-main-title-wrap');
+            const items = $(this.el).find('.product-key-main-title-inner');
 
+            items.each((index, item) => {
+               if(index > 0) {
+                  let itemPrev = $('.product-key-main-img-main').eq(index - 1);
+                  let itemCurrent = $('.product-key-main-img-main').eq(index);
+                  const tlItem = gsap.timeline({
+                     scrollTrigger: {
+                        trigger: item,
+                        start: 'top bottom',
+                        end: 'bottom bottom',
+                        scrub: true,
+                        markers: true,
+                        onUpdate: (self) => {
+                           const progress = self.progress;
+                           let prevItemClip = 1 - progress;
+
+                           gsap.set(itemPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
+                           gsap.set(itemCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
+                        }
+                     }
+                  });
+                  tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
+               }
+            });
+         }
+         interact() {
+         }
+      }
+   }
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -2063,8 +2105,12 @@ const mainScript = () => {
    class HomePageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class ProductPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
+      product: new ProductPageManager(ProductPage),
    };
 
 	const SCRIPT = {
@@ -2077,6 +2123,15 @@ const mainScript = () => {
             PageManagerRegistry.home.destroy(data);
          }
       },
+      product: {
+         namespace: 'product',
+         afterEnter(data) {
+            PageManagerRegistry.product.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.product.destroy(data);
+         }
+      }
 	};
 
    let namespace = $('.main-inner').attr('data-barba-namespace');
