@@ -1328,7 +1328,7 @@ const mainScript = () => {
                         }
                         $(item).addClass('active');
                      } else {
-                        $(item).removeClass('active');
+                        // $(item).removeClass('active');
                      }
                   });
                }
@@ -1341,7 +1341,7 @@ const mainScript = () => {
                   this.box.remove();
                   this.box = null;
                }
-               $('.home-hero-img-deco').removeClass('active');
+               // $('.home-hero-img-deco').removeClass('active');
             }
             // Prevent native context menu on this area
             this.rulerWrap.oncontextmenu = (e) => { e.preventDefault(); return false; };
