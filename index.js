@@ -1193,17 +1193,13 @@ const mainScript = () => {
 
                gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVerticalLine });
                gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontalLine });
-               gsap.set($(this.el).find('.home-hero-img-plus-line.line-vertical'), { autoAlpha: autoAlphaVertical });
-               gsap.set($(this.el).find('.home-hero-img-plus-line.line-horizital'), { autoAlpha: autoAlphaHorizontal });
                gsap.set($(this.el).find('.home-hero-img-plus'), {
                   x: normalizedX,
                   y: normalizedY,
                   scale: scale,
-                  backgroundColor: `rgba(241, 85, 52, ${lerpedColorAlpha})`,
                   color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
                });
                gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: 1 - lerpedColorAlpha });
-
                gsap.set($(this.el).find('.home-hero-img-coordi'), {
                   x: isAtEdgeX ? coordiX : defaultCoordiX,
                   y: isAtEdgeY ? coordiY : defaultCoordiY,
@@ -1522,13 +1518,7 @@ const mainScript = () => {
                }
             });
             let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars'});
-            this.tlStickFade.to(title.chars, { 
-               color: '#282828', 
-               stagger: {
-                   each: 0.04,    
-                   from: "start"   
-               }
-           });
+            this.tlStickFade.to(title.chars, { color: '#282828', stagger: 0.03 })
          }
          animationReveal() {
             let partnerMarquee = new Marquee(
