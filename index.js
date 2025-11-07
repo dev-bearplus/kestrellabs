@@ -1668,30 +1668,47 @@ const mainScript = () => {
             })
             gsap.set($(this.el).find('.home-map-main-img .home-map-img-svg path'), { opacity: 0, scale: 1.1 })
 
-            // Track which items are currently active
-            let activeItems = new Set();
+            const activeItems = new Set();
+            const introWrap = $('.home-map-intro');
+            const introItem = $('.home-map-intro-content-item');
+            const introItemContent = $('.home-map-intro-content');
+            const activeIntro = index => {
+               introItemContent.css('height', introItem.eq(index).outerHeight() + 'px');
+               introItem.removeClass('active').eq(index).addClass('active');
+            };
+            const introStep = (itemKey, introIdx) => ({
+               opacity: 1,
+               onUpdate: function() {
+                  const progress = this.progress();
+                  if (progress > 0 && progress < 1) {
+                     if (!activeItems.has(itemKey)) {
+                        activeIntro(introIdx);
+                        activeItems.add(itemKey);
+                     }
+                  } else if (activeItems.has(itemKey)) {
+                     introItem.removeClass('active');
+                     activeItems.delete(itemKey);
+                  }
+               }
+            });
 
             this.tl
                .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-main-img-inner'), {
                   opacity: 1,
                   onUpdate: function() {
                      const progress = this.progress();
-                     const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
-
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item3')) {
-                           intro.addClass('active');
-                           activeItems.add('item3');
-                        }
-                     } else {
-                        if (activeItems.has('item3')) {
-                           intro.removeClass('active');
-                           activeItems.delete('item3');
-                           $('.home-map-main-img:nth-child(3) .home-map-img-svg').removeClass('filter');
-                        }
+                     if (progress === 0) {
+                        introWrap.removeClass('active');
                      }
-                  }, 
+                     if (progress > 0 && progress < 1 && !activeItems.has('item3')) {
+                        introWrap.addClass('active');
+                        activeIntro(0);
+                        activeItems.add('item3');
+                     } else if ((progress === 0 || progress === 1) && activeItems.has('item3')) {
+                        activeItems.delete('item3');
+                        $('.home-map-main-img:nth-child(3) .home-map-img-svg').removeClass('filter');
+                     }
+                  },
                   onComplete: () => {
                      $('.home-map-main-img:nth-child(3) .home-map-img-svg').addClass('filter');
                   },
@@ -1703,108 +1720,30 @@ const mainScript = () => {
                   y: 0,
                   stagger: { amount: 0.02, from: 'random' }
                }, "<=0")
-               .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), {
-                  opacity: 1,
-                  onUpdate: function() {
-                     const progress = this.progress();
-                     const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
 
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item4')) {
-                           intro.addClass('active');
-                           activeItems.add('item4');
-                        }
-                     } else {
-                        if (activeItems.has('item4')) {
-                           intro.removeClass('active');
-                           activeItems.delete('item4');
-                        }
-                     }
-                  }
-               })
-               .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), {
-                  opacity: 1,
-                  onUpdate: function() {
-                     const progress = this.progress();
-                     const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
+               // Use shared logic for similar steps
+               .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), introStep('item4', 0))
+               .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), introStep('item5', 1))
+               .to($(this.el).find('.home-map-main-img:nth-child(6) .home-map-main-img-inner'), introStep('item6', 2))
+               .to($(this.el).find('.home-map-main-img:nth-child(7) .home-map-main-img-inner'), introStep('item7', 3))
 
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item5')) {
-                           intro.addClass('active');
-                           activeItems.add('item5');
-                        }
-                     } else {
-                        if (activeItems.has('item5')) {
-                           intro.removeClass('active');
-                           activeItems.delete('item5');
-                        }
-                     }
-                  }
-               })
-               .to($(this.el).find('.home-map-main-img:nth-child(6) .home-map-main-img-inner'), {
-                  opacity: 1,
-                  onUpdate: function() {
-                     const progress = this.progress();
-                     const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
-
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item6')) {
-                           intro.addClass('active');
-                           activeItems.add('item6');
-                        }
-                     } else {
-                        if (activeItems.has('item6')) {
-                           intro.removeClass('active');
-                           activeItems.delete('item6');
-                        }
-                     }
-                  }
-               })
-               .to($(this.el).find('.home-map-main-img:nth-child(7) .home-map-main-img-inner'), {
-                  opacity: 1,
-                  onUpdate: function() {
-                     const progress = this.progress();
-                     const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
-
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item7')) {
-                           intro.addClass('active');
-                           activeItems.add('item7');
-                        }
-                     } else {
-                        if (activeItems.has('item7')) {
-                           intro.removeClass('active');
-                           activeItems.delete('item7');
-                        }
-                     }
-                  }
-               })
                .to($(this.el).find('.home-map-main-img:nth-child(8) .home-map-main-img-inner'), {
                   opacity: 1,
                   onUpdate: function() {
                      const progress = this.progress();
                      const item = $(this.targets()[0]).closest('.home-map-main-img');
-                     const intro = item.find('.home-map-intro');
-
-                     if (progress > 0 && progress < 1) {
-                        if (!activeItems.has('item8')) {
-                           item.addClass('active');
-                           intro.addClass('active');
-                           activeItems.add('item8');
-                        }
-                     } else {
-                        if (activeItems.has('item8')) {
-                           // item.removeClass('active');
-                           intro.removeClass('active');
-                           activeItems.delete('item8');
-                        }
+                     if (progress === 0) {
+                        introItem.removeClass('active');
+                     }
+                     if (progress > 0 && progress < 1 && !activeItems.has('item8')) {
+                        item.addClass('active');
+                        activeIntro(4);
+                        activeItems.add('item8');
+                     } else if ((progress === 0 || progress === 1) && activeItems.has('item8')) {
+                        activeItems.delete('item8');
                      }
                   }
-               })
+               });
          }
          destroy() {
          }
@@ -2003,30 +1942,75 @@ const mainScript = () => {
             const items = $(this.el).find('.product-key-main-title-inner');
 
             items.each((index, item) => {
-               if(index > 0) {
-                  let itemPrev = $('.product-key-main-img-main').eq(index - 1);
-                  let itemCurrent = $('.product-key-main-img-main').eq(index);
-                  const tlItem = gsap.timeline({
-                     scrollTrigger: {
-                        trigger: item,
-                        start: 'top bottom',
-                        end: 'bottom bottom',
-                        scrub: true,
-                        markers: true,
-                        onUpdate: (self) => {
+               let itemImgPrev = $('.product-key-main-img-main').eq(index - 1);
+               let itemImgCurrent = $('.product-key-main-img-main').eq(index);
+               let itemLabelPrev = $('.product-key-main-left-main').eq(index - 1);
+               let itemLabelCurrent = $('.product-key-main-left-main').eq(index);
+               const tlItem = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: item,
+                     start: 'top bottom',
+                     end: 'bottom bottom',
+                     scrub: true,
+                     markers: true,
+                     onUpdate: (self) => {
+                        if(index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
-
-                           gsap.set(itemPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
-                           gsap.set(itemCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
+   
+                           gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
+                           gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
+                           gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
+                           gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
+                           if(progress > 0.65) {
+                              $(items).removeClass('active');
+                              $(item).addClass('active');
+                           }  
                         }
+                     },
+                     onEnter: () => {
+                        console.log('start');
+                        $('.product-key-tab-item').removeClass('active');
+                        $('.product-key-tab-item').eq(index).addClass('active');
+                     },
+                     onEnterBack: () => {
+                        $('.product-key-tab-item').removeClass('active');
+                        $('.product-key-tab-item').eq(index).addClass('active');
+                     },
+                     onLeaveEnter: () => {
+                        $('.product-key-tab-item').removeClass('active');
+                        $('.product-key-tab-item').eq(index).addClass('active');
                      }
-                  });
-                  tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
-               }
+                  }
+               });
+               tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
             });
          }
          interact() {
+            let heightTab = $('.product-key-tab-wrap').height();
+            $('.product-key-tab-item').on('click', function() {
+               const index = $(this).index();
+               $('.product-key-tab-item').removeClass('active');
+               $(this).addClass('active');
+               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: heightTab*-1 });
+            });
+         }
+      },
+      How : class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.product-how-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.animationScrub();
+            this.interact();
+         }
+         animationScrub() {
+         }
+         interact() {
+         }
+         destroy() {
          }
       }
    }
