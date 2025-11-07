@@ -1972,6 +1972,66 @@ const mainScript = () => {
       }
    }
    const ProductPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector('.product-hero-wrap');
+            if (mode === 'once') {
+               this.setupOnce(data);
+            } else if (mode === 'enter') {
+               this.setupEnter(data);
+            }
+            else return;
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: .3,
+               onStart: () => {
+                  $('[data-init-hidden]').removeAttr('data-init-hidden');
+               }
+            })
+
+            this.animationReveal(this.tlOnce);
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+            })
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom+=50%',
+                  end: 'bottom top-=50%',
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               }
+            })
+
+            this.animationReveal(this.tlEnter);
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         animationReveal(timeline) {
+            let partnerMarquee = new Marquee(
+               $(this.el).find('.product-hero-logo-cms'),
+               $(this.el).find('.product-hero-logo-list'), 40);
+            partnerMarquee.setup();
+            partnerMarquee.play();
+         }
+         destroy() {
+         }
+      },
       Key: class extends TriggerSetup {
          constructor() { super(); }
          trigger(data) {
@@ -1983,7 +2043,7 @@ const mainScript = () => {
             this.interact();
          }
          animationScrub() {
-            const parent = $(this.el).find('.product-key-main-title-wrap');
+            const tabItems = $(this.el).find('.product-key-tab-item');
             const items = $(this.el).find('.product-key-main-title-inner');
 
             items.each((index, item) => {
@@ -1991,14 +2051,19 @@ const mainScript = () => {
                let itemImgCurrent = $('.product-key-main-img-main').eq(index);
                let itemLabelPrev = $('.product-key-main-left-main').eq(index - 1);
                let itemLabelCurrent = $('.product-key-main-left-main').eq(index);
+               let heightHeader = $('.header').height();
                const tlItem = gsap.timeline({
                   scrollTrigger: {
                      trigger: item,
                      start: 'top bottom',
                      end: 'bottom bottom',
                      scrub: true,
-                     markers: true,
                      onUpdate: (self) => {
+                        if(!$('.header').hasClass('on-hide')) {
+                           $('.product-key-tab-wrap').css('top', heightHeader);
+                        } else {
+                           $('.product-key-tab-wrap').css('top', 0);
+                        }
                         if(index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
@@ -2015,16 +2080,16 @@ const mainScript = () => {
                      },
                      onEnter: () => {
                         console.log('start');
-                        $('.product-key-tab-item').removeClass('active');
-                        $('.product-key-tab-item').eq(index).addClass('active');
+                        tabItems.removeClass('active');
+                        tabItems.eq(index).addClass('active');
                      },
                      onEnterBack: () => {
-                        $('.product-key-tab-item').removeClass('active');
-                        $('.product-key-tab-item').eq(index).addClass('active');
+                        tabItems.removeClass('active');
+                        tabItems.eq(index).addClass('active');
                      },
                      onLeaveEnter: () => {
-                        $('.product-key-tab-item').removeClass('active');
-                        $('.product-key-tab-item').eq(index).addClass('active');
+                        tabItems.removeClass('active');
+                        tabItems.eq(index).addClass('active');
                      }
                   }
                });
@@ -2037,12 +2102,15 @@ const mainScript = () => {
                const index = $(this).index();
                $('.product-key-tab-item').removeClass('active');
                $(this).addClass('active');
-               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: heightTab*-1 });
+               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: index > 0 ? heightTab*-1 : heightTab*-1 - 1 });
             });
          }
       },
       How : class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() { 
+            super();
+            this.tl = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-how-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
@@ -2052,11 +2120,57 @@ const mainScript = () => {
             this.interact();
          }
          animationScrub() {
+            this.tl = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $('.product-how-inner').get(0),
+                  start: 'bottom bottom',
+                  endTrigger: $('.product-how-inner').get(0),
+                  end: 'bottom top',
+                  scrub: true,
+               }
+            });
+            const items = $(this.el).find('.product-how-item');
+            gsap.set(items, { yPercent: 100 });
+            items.each((index, item) => {
+               this.tl.to(item, { yPercent: 0, stagger: 1, onComplete: () => {
+                  $(item).addClass('active');
+               }, onReverseComplete: () => {
+                  $(item).removeClass('active');
+               }});
+            });
          }
          interact() {
          }
          destroy() {
          }
+      },
+      Faq: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.product-faq-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.interact();
+         }
+         interact() {
+            const activeAccordion = (idx) => {
+               $(this.el).find('.product-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
+               $(this.el).find('.product-faq-item').eq(idx).siblings().find('.product-faq-item-sub').slideUp();
+               $(this.el).find('.product-faq-item').eq(idx).find('.product-faq-item-sub').slideToggle();
+            }
+            $(this.el).find('.product-faq-item-sub').hide();
+
+            $(this.el).find('.product-faq-item').on('click', function() {
+               activeAccordion($(this).index());
+            });
+            activeAccordion(0);
+         }
+         destroy() {
+         }
+      },
+      Footer: class extends Footer {
+         constructor() { super(); }
       }
    }
    class PageManager {
