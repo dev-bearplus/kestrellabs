@@ -1802,9 +1802,6 @@ const mainScript = () => {
             this.animationScrub()
          }
          setup() {
-            $('.home-platform-img-item-inner img').each((index, item) => {
-               new ParallaxImage({ el: item, scaleOffset: 0.1 });
-            });
          }
          interact() {}
          animationScrub() {
