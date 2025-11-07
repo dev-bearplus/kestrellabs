@@ -1517,12 +1517,18 @@ const mainScript = () => {
                scrollTrigger: {
                   trigger: this.el.querySelector('.home-intro-content'),
                   start: 'center bottom+=10%',
-                  end: `center top+=20%`,
+                  end: `center top+=40%`,
                   scrub: true,
                }
             });
             let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars'});
-            this.tlStickFade.to(title.chars, { color: '#282828', stagger: 0.01 })
+            this.tlStickFade.to(title.chars, { 
+               color: '#282828', 
+               stagger: {
+                   each: 0.04,    
+                   from: "start"   
+               }
+           });
          }
          animationReveal() {
             let partnerMarquee = new Marquee(
@@ -1638,6 +1644,16 @@ const mainScript = () => {
             });
          }
          animationScrub() {
+            this.tlStickFade = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom',
+                  end: `top top`,
+                  scrub: true
+               }
+            });
+            this.tlStickFade
+               .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
             this.tl = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -1662,7 +1678,7 @@ const mainScript = () => {
 
             $(this.el).find('.home-intel-inner').each((idx, item) => {
                this.tl
-                     .fromTo(item, { autoAlpha: 0, y: cvUnit(3, 'rem'), scale: 1.04 }, { autoAlpha: 1, y: 0, scale: 1 }, '>=0')
+                     .fromTo(item, { autoAlpha: idx === 0 ? 1 : 0, y: cvUnit(3, 'rem'), scale: 1.04 }, { autoAlpha: 1, y: 0, scale: 1 }, '>=0')
                      .fromTo(item, { autoAlpha: 1, y: 0, scale: 1 }, { autoAlpha: 0, y: -cvUnit(3, 'rem'), scale: .96 }, '>=.5');
                gsap.set(item, { autoAlpha: 0 });
             })
