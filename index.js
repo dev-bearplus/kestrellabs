@@ -1196,8 +1196,10 @@ const mainScript = () => {
 
                const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
                const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
+               const isAtChangeEdgeX = this.currentX <= (this.minX + $(this.el).find('.home-hero-img-coordi').width()  + cvUnit(4, 'rem'));
+               const isAtChangeEdgeY = this.currentY >= (this.maxY - $(this.el).find('.home-hero-img-coordi').height()/2  - cvUnit(4, 'rem'));
                const isAtEdge = isAtEdgeX || isAtEdgeY;
-
+               console.log(isAtChangeEdgeY)
                const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
                const scale = lerp(currentScale, isAtEdge ? 1.2 : 1, 0.08);
 
@@ -1234,8 +1236,8 @@ const mainScript = () => {
                });
                gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: 1 - lerpedColorAlpha });
                gsap.set($(this.el).find('.home-hero-img-coordi'), {
-                  x: isAtEdgeX ? coordiX : defaultCoordiX,
-                  y: isAtEdgeY ? coordiY : defaultCoordiY,
+                  x: isAtChangeEdgeX ? coordiX : defaultCoordiX,
+                  y: isAtChangeEdgeY ? coordiY : defaultCoordiY,
                });
                $('[data-control="x"]').text(this.targetX.toFixed(0));
                $('[data-control="y"]').text(this.targetY.toFixed(0));
