@@ -1911,7 +1911,7 @@ const mainScript = () => {
          }
          onEnter() {
             gsap.set($(this.el).find('.home-why-main-line'), { opacity: 1 })
-            gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
+            // gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
          }
          onLeave() {
             gsap.set($(this.el).find('.home-why-main-line'), { opacity: 0 })
