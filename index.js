@@ -2040,7 +2040,11 @@ const mainScript = () => {
          }
          onTrigger() {
             this.animationScrub();
+            if(viewport.w < 768) {
+               this.swiperCard();
+            }
             this.interact();
+
          }
          animationScrub() {
             const tabItems = $(this.el).find('.product-key-tab-item');
@@ -2105,6 +2109,15 @@ const mainScript = () => {
                smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: index > 0 ? heightTab*-1 : heightTab*-1 - 1 });
             });
          }
+         swiperCard() {
+            $('.product-key-tab-cms').addClass('swiper');
+            $('.product-key-tab-list').addClass('swiper-wrapper');
+            $('.product-key-tab-item').addClass('swiper-slide');
+            new Swiper('.product-key-tab-cms', {
+               slidesPerView: 'auto',
+               spaceBetween: 0,
+            });
+         }
       },
       How : class extends TriggerSetup {
          constructor() { 
@@ -2116,7 +2129,9 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationScrub();
+            if(viewport.w > 767) {
+               this.animationScrub();
+            }
             this.interact();
          }
          animationScrub() {
@@ -2164,7 +2179,6 @@ const mainScript = () => {
             $(this.el).find('.product-faq-item').on('click', function() {
                activeAccordion($(this).index());
             });
-            activeAccordion(0);
          }
          destroy() {
          }
