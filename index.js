@@ -266,8 +266,8 @@ const mainScript = () => {
 				this.lenis.destroy();
 			}
          this.lenis = new Lenis({
-               content: document.querySelector('.main-content'),
-               wrapper: document.querySelector('.main-inner'),
+               content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
+               wrapper: data?.next?.container || document.querySelector('.main-inner'),
                syncTouch: true,
                smoothTouch: false,
                infinite: false,
@@ -1515,6 +1515,7 @@ const mainScript = () => {
             });
          }
          destroy() {
+               cancelAnimationFrame(this.raf);
                if (this.tlOnce) {
                   this.tlOnce.kill();
                }
