@@ -371,6 +371,39 @@ const mainScript = () => {
 			console.warn("Webflow reinit failed:", e);
 		}
    };
+   class ParallaxImage {
+      constructor({ el, scaleOffset = 0.3 }) {
+          this.el = el;
+          this.elWrap = null;
+          this.scaleOffset = scaleOffset;
+          this.init();
+      }
+      init() {
+          this.elWrap = this.el.parentElement;
+          this.setup();
+      }
+      setup() {
+          gsap.set(this.el, { height: '120%' });
+          this.scrub();
+      }
+      scrub() {
+          let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
+          let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
+          this.updateOnScroll(dist, total);
+          smoothScroll.lenis.on('scroll', () => {
+              this.updateOnScroll(dist, total);
+          });
+      }
+      updateOnScroll(dist, total) {
+          if (this.el) {
+              if (isInViewport(this.elWrap)) {
+                  let percent = this.elWrap.getBoundingClientRect().bottom / total;
+                  gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
+                  gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
+              }
+          }
+      }
+  }
    class Mouse {
       constructor() {
          this.mousePos = {x: 0, y: 0};
@@ -767,7 +800,7 @@ const mainScript = () => {
           this.duration = duration;
       }
       setup() {
-          let allSlideItems = $(this.wrapEl).find('.heading');
+          let allSlideItems = $(this.wrapEl).find('.text-rotate');
           this.tlMaster = gsap.timeline({
               paused: true,
               onComplete: () => {
@@ -1517,8 +1550,8 @@ const mainScript = () => {
                   scrub: true,
                }
             });
-            let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars'});
-            this.tlStickFade.to(title.chars, { color: '#282828', stagger: 0.03 })
+            let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars, lines'});
+            this.tlStickFade.fromTo(title.chars, {color: '#b3b3af'}, { color: '#282828', stagger: 0.03 })
          }
          animationReveal() {
             let partnerMarquee = new Marquee(
@@ -1769,6 +1802,9 @@ const mainScript = () => {
             this.animationScrub()
          }
          setup() {
+            $('.home-platform-img-item-inner img').each((index, item) => {
+               new ParallaxImage({ el: item, scaleOffset: 0.1 });
+            });
          }
          interact() {}
          animationScrub() {
@@ -1905,10 +1941,13 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
+            this.setup();
             this.animationScrub();
             this.interact();
          }
          animationScrub() {
+         }
+         setup() {
          }
          interact() {
             const activeAccordion = (idx) => {
