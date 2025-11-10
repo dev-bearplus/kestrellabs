@@ -1987,6 +1987,7 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
+            this.animMarquee();
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -1997,7 +1998,6 @@ const mainScript = () => {
                }
             })
 
-            this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
@@ -2017,12 +2017,11 @@ const mainScript = () => {
                }
             })
 
-            this.animationReveal(this.tlEnter);
          }
          playOnce() {
             this.tlOnce.play();
          }
-         animationReveal(timeline) {
+         animMarquee() {
             let partnerMarquee = new Marquee(
                $(this.el).find('.product-hero-logo-cms'),
                $(this.el).find('.product-hero-logo-list'), 40);
@@ -2187,6 +2186,112 @@ const mainScript = () => {
          constructor() { super(); }
       }
    }
+   const PricingPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+            this.requestAnimationFrameSticky = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector('.product-hero-wrap');
+            if (mode === 'once') {
+               this.setupOnce(data);
+            } else if (mode === 'enter') {
+               this.setupEnter(data);
+            }
+            else return;
+            this.checkSticky();
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: .3,
+               onStart: () => {
+                  $('[data-init-hidden]').removeAttr('data-init-hidden');
+               }
+            })
+
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+            })
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom+=50%',
+                  end: 'bottom top-=50%',
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               }
+            })
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+            $('.pricing-hero-tab-item').on('click', function() {
+               const type = $(this).attr('data-type');
+               $('.pricing-hero-tab-item').removeClass('active');
+               $(this).addClass('active');
+               $('.pricing-hero-package-item').each((index, item) => {
+                  let pricing = $(item).attr(type);
+                  $(item).find('.pricing-hero-package-item-title .heading').text(pricing);
+               });
+            });
+         }
+         checkSticky() {
+            let heightHeader = $('.header').height() - $('.pricing-hero-package-wrap .line-horizital').eq(0).height();
+            if(!$('.header').hasClass('on-hide')) {
+               $('.pricing-hero-package-wrap').css('top', heightHeader);
+            } else {
+               $('.pricing-hero-package-wrap').css('top', 0);
+            }
+            this.requestAnimationFrameSticky = requestAnimationFrame(this.checkSticky.bind(this));
+         }
+         destroy() {
+            cancelAnimationFrame(this.requestAnimationFrameSticky);
+         }
+      },
+    
+      Faq: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.product-faq-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.interact();
+         }
+         interact() {
+            const activeAccordion = (idx) => {
+               $(this.el).find('.product-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
+               $(this.el).find('.product-faq-item').eq(idx).siblings().find('.product-faq-item-sub').slideUp();
+               $(this.el).find('.product-faq-item').eq(idx).find('.product-faq-item-sub').slideToggle();
+            }
+            $(this.el).find('.product-faq-item-sub').hide();
+
+            $(this.el).find('.product-faq-item').on('click', function() {
+               activeAccordion($(this).index());
+            });
+         }
+         destroy() {
+         }
+      },
+      Footer: class extends Footer {
+         constructor() { super(); }
+      }
+   }
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -2265,9 +2370,13 @@ const mainScript = () => {
    class ProductPageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class PricingPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
+      pricing: new PricingPageManager(PricingPage),
    };
 
 	const SCRIPT = {
@@ -2287,6 +2396,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.product.destroy(data);
+         }
+      },
+      pricing: {
+         namespace: 'pricing',
+         afterEnter(data) {
+            PageManagerRegistry.pricing.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.pricing.destroy(data);
          }
       }
 	};
