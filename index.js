@@ -2203,7 +2203,12 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
-            this.checkSticky();
+            if(viewport.w < 991) {
+               this.swiperCard();
+            }
+            else {
+               this.checkSticky();
+            }
             this.interact();
          }
          setupOnce(data) {
@@ -2258,6 +2263,22 @@ const mainScript = () => {
                $('.pricing-hero-package-wrap').css('top', 0);
             }
             this.requestAnimationFrameSticky = requestAnimationFrame(this.checkSticky.bind(this));
+         }
+         swiperCard() {
+            $('.pricing-hero-package-block').remove();
+            $('.pricing-hero-package-wrap').addClass('swiper');
+            $('.pricing-hero-package').addClass('swiper-wrapper');
+            $('.pricing-hero-package-item').addClass('swiper-slide');
+            new Swiper('.pricing-hero-package-wrap', {
+               slidesPerView: 'auto',
+               spaceBetween: 0,
+               pagination: {
+                  el: '.pricing-hero-pagi',
+                  bulletClass: 'pricing-hero-pagi-item',
+                  bulletActiveClass: 'active',
+                  clickable: true,  
+               },
+            });
          }
          destroy() {
             cancelAnimationFrame(this.requestAnimationFrameSticky);
