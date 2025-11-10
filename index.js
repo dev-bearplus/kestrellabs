@@ -2203,10 +2203,10 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
-            if(viewport.w < 991) {
+            if(viewport.w < 991 && viewport.w >= 768) {
                this.swiperCard();
             }
-            else {
+            if(viewport.w > 991) {
                this.checkSticky();
             }
             this.interact();
