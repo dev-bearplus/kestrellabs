@@ -907,17 +907,16 @@ const mainScript = () => {
          }
       }
       toggleNav() {
-         $(this.el).find('.header-ham').on('click', this.handleClick.bind(this));
-         $(this.el).find('.header-menu-link, .header-logo, .header-btn').on('click', () => setTimeout(() => this.close(), 800));
-         $(window).on('click', (e) => {
-            if (!$('.header-ham:hover').length)
-               if (!$('.header-menu:hover').length)
-                     this.close();
-         })
-      }
-      handleClick(e) {
-         e.preventDefault();
-         this.isOpen ? this.close() : this.open();
+         $(this.el).find('.heading-menu-btn').on('click', function(){
+            $('.header-menu').toggleClass('active');
+         });
+         if(viewport.w < 991) {
+            $('.header-menu-item.has-submenu').on('click', function(e){
+               e.preventDefault();
+               $(this).toggleClass('active');
+               $(this).next('.header-menu-dropdown').slideToggle();
+            });
+         }
       }
       open() {
          if (this.isOpen) return;
