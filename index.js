@@ -404,6 +404,16 @@ const mainScript = () => {
           }
       }
   }
+  function mapFormToObject(ele) {
+   return ([...new FormData(ele).entries()].reduce(
+       (prev, cur) => {
+           const name = cur[0];
+           const val = cur[1];
+           return { ...prev, [name]: val };
+       },
+       {}
+   ));
+}
    class Mouse {
       constructor() {
          this.mousePos = {x: 0, y: 0};
@@ -2312,6 +2322,193 @@ const mainScript = () => {
          constructor() { super(); }
       }
    }
+   const ContactPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector('.contact-hero-wrap');
+            if (mode === 'once') {
+               this.setupOnce(data);
+            } else if (mode === 'enter') {
+               this.setupEnter(data);
+            }
+            else return;
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: .3,
+               onStart: () => {
+                  $('[data-init-hidden]').removeAttr('data-init-hidden');
+               }
+            })
+
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+            })
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom+=50%',
+                  end: 'bottom top-=50%',
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               }
+            })
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+            $(this.el).find('.contact-hero-form-input').on('blur', function() {
+               if($(this).val()) {
+                  $(this).parent().addClass('active');
+               } else {
+                  $(this).parent().removeClass('active');
+               }
+            });
+            // check event on focus for .contact-hero-form-input amd check no  .contact-hero-form-input focus will...
+            $(this.el).find('.contact-hero-form-input').on('focus', function() {
+               let data = $(this).attr('data-name');
+               $('.contact-hero-image-item').removeClass('active');
+               $(`.contact-hero-image-item[data-name="${data}"]`).addClass('active');
+            });
+            $(this.el).find('.contact-hero-form-input').on('focusout', function() {
+               $('.contact-hero-image-item').removeClass('active');
+               $(`.contact-hero-image-item[data-name="default"]`).addClass('active');
+            });
+            this.submitHubspot();
+         }
+         submitHubspot() {
+            const hubspot = {
+               portalId: 145687733,
+               formId: "69790463-8651-4e07-ad64-45f9c23549e9",
+               fields: [
+                   { name: 'firstname', value: (data) => data['First name'] },
+                   { name: 'lastname', value: (data) => data['Last name'] },
+                   { name: 'phone', value: (data) => data['Phone number'] },
+                   { name: 'email', value: (data) => data['Email'] },
+                   { name: 'message', value: (data) => data['Message'] }
+               ]
+           }
+           const { portalId, formId, fields } = hubspot;
+           let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+           const mapField = (data) => {
+               if (!fields.length) return [];
+
+               const result = fields.map((field) => {
+                   const { name, value } = field;
+                   if (!value) {
+                       return {
+                           name,
+                           value: data[name] || ""
+                       }
+                   }
+                   else {
+                       const getValue = value(data);
+                       return {
+                           name,
+                           value: getValue || ''
+                       }
+                   }
+               })
+               return result;
+           }
+           const $form = $(this.el).find("#contact-form");
+           const requiredNames = ['First-Name', 'Last-Name', 'Phone-Number', 'Email'];
+           const updateSubmitState = function ($f) {
+               let allFilled = true;
+               requiredNames.forEach(function (name) {
+                   const $input = $f.find('[name="' + name + '"]');
+                   if ($input.length) {
+                       const v = String($input.val() ?? '').trim();
+                       if (v.length === 0) allFilled = false;
+                   }
+               });
+               const $btn = $f.find('[type="submit"]');
+               if (allFilled) $btn.removeClass('disable'); else $btn.addClass('disable');
+           };
+           updateSubmitState($form);
+           $form.on('input change', '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]', function () {
+               updateSubmitState($form);
+           });
+           console.log($form.find('[type="submit"]'))
+           $form.find('[type="submit"]').on('click', function (e) {
+               e.preventDefault();
+               const data = mapFormToObject($form.get(0));
+               console.log(data);
+               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+               let isValid = true;
+               requiredNames.forEach(function (name) {
+                   if (!Object.prototype.hasOwnProperty.call(data, name)) return;
+                   const v = String(data[name] ?? '').trim();
+                   let hasError = false;
+                   if (name === 'Phone-Number') {
+                       hasError = v !== '' && !/^\d+$/.test(v);
+                   } else if (name === 'Email') {
+                     console.log(v, emailRegex.test(v));
+                       hasError = v !== '' && !emailRegex.test(v);
+                   }
+                   const $input = $form.find('[name="' + name + '"]');
+                   const $parent = $input.parent();
+                   console.log($input);
+                   if (hasError) {
+                       $parent.addClass('error');
+                       isValid = false;
+                   } else {
+                       $parent.removeClass('error');
+                   }
+               });
+               console.log(isValid);
+               if (!isValid) return;
+               const mappedFields = mapField(data);
+               const dataSend = {
+                   fields: mappedFields,
+                   context: {
+                       pageUri: window.location.href,
+                       pageName: 'Contact page'
+                   }
+               };
+               $.ajax({
+                   url: url,
+                   method: 'POST',
+                   data: JSON.stringify(dataSend),
+                   dataType: 'json',
+                   headers: {
+                       accept: 'application/json',
+                       'Access-Control-Allow-Origin': '*',
+                   },
+                   contentType: 'application/json',
+                   success: function (response) {
+                       console.log(response);
+                   },
+                   error: function (xhr, resp, text) {
+                       console.log(xhr, resp, text)
+                   }
+               });
+           })
+         }
+         destroy() {
+         }
+      },
+      Footer: class extends Footer {
+         constructor() { super(); }
+      }
+   }
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -2393,10 +2590,14 @@ const mainScript = () => {
    class PricingPageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class ContactPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
       pricing: new PricingPageManager(PricingPage),
+      contact: new ContactPageManager(ContactPage),
    };
 
 	const SCRIPT = {
@@ -2425,6 +2626,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.pricing.destroy(data);
+         }
+      },
+      contact: {
+         namespace: 'contact',
+         afterEnter(data) {
+            PageManagerRegistry.contact.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.contact.destroy(data);
          }
       }
 	};
