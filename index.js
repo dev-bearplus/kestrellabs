@@ -2205,9 +2205,7 @@ const mainScript = () => {
             if(viewport.w < 991 && viewport.w >= 768) {
                this.swiperCard();
             }
-            if(viewport.w > 991) {
-               this.checkSticky();
-            }
+            this.checkSticky();
             this.interact();
          }
          setupOnce(data) {
@@ -2257,9 +2255,11 @@ const mainScript = () => {
          checkSticky() {
             let heightHeader = $('.header').height() - $('.pricing-hero-package-wrap .line-horizital').eq(0).height();
             if(!$('.header').hasClass('on-hide')) {
-               $('.pricing-hero-package-wrap').css('top', heightHeader);
+               viewport.w > 991 && $('.pricing-hero-package-wrap').css('top', heightHeader);
+               viewport.w < 768 && $('.pricing-hero-tab-wrap').css('top', heightHeader);
             } else {
-               $('.pricing-hero-package-wrap').css('top', 0);
+               viewport.w > 991 && $('.pricing-hero-package-wrap').css('top', 0);
+               viewport.w < 768 && $('.pricing-hero-tab-wrap').css('top', 0);
             }
             this.requestAnimationFrameSticky = requestAnimationFrame(this.checkSticky.bind(this));
          }
