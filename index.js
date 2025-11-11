@@ -2253,7 +2253,7 @@ const mainScript = () => {
             });
          }
          checkSticky() {
-            let heightHeader = $('.header').height() - $('.pricing-hero-package-wrap .line-horizital').eq(0).height();
+            let heightHeader = viewport.w > 991 ? $('.header').height() - $('.pricing-hero-package-wrap .line-horizital').eq(0).height() : $('.header').height();
             if(!$('.header').hasClass('on-hide')) {
                viewport.w > 991 && $('.pricing-hero-package-wrap').css('top', heightHeader);
                viewport.w < 768 && $('.pricing-hero-tab-wrap').css('top', heightHeader);
