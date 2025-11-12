@@ -732,6 +732,7 @@ const mainScript = () => {
          })
       }
       enterSetup(data) {
+         reinitializeWebflow(data);
          globalHooks.triggerEnterSetup(data);
       }
       enterPlay(data) {
@@ -755,7 +756,6 @@ const mainScript = () => {
          globalChange.update(data);
 
          documentHeightObserver('init', data);
-         reinitializeWebflow(data);
          if (data.current.container) {
             data.current.container.remove();
          }
@@ -2570,6 +2570,44 @@ const mainScript = () => {
          initImage() {
             $('.about-team-item-img').each((index, item) => {
                $(item).find('.about-team-item-img-item').eq(1).addClass('item-hover');
+            });
+         }
+         destroy() {
+         }
+      },
+      Team: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.about-team-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.interact();
+         }
+         interact() {
+            $('.about-team-item').each((index, item) => {
+               let itemOpens =$(item).find('[data-popup="open"]');
+               itemOpens.each((index, itemOpen) => {
+                  $(itemOpen).on('click', function() {
+                     let parent = $(itemOpen).closest('.about-team-item');
+                     $('.about-team-popup').addClass('active');
+                     $('.main').addClass('has-popup')
+                     smoothScroll.stop();
+                  });
+               });
+            });
+            $('.about-team-popup-close').on('click', function() {
+               $('.about-team-popup').removeClass('active');
+               $('.main').removeClass('has-popup');
+               smoothScroll.start();
+
+            });
+            $('.about-team-popup').on('click', function(e) {
+               if(!$(e.target).closest('.about-team-popup-content').length) {
+                  $('.about-team-popup').removeClass('active');
+                  $('.main').removeClass('has-popup');
+                  smoothScroll.start();
+               }
             });
          }
          destroy() {
