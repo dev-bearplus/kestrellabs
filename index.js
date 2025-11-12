@@ -876,7 +876,10 @@ const mainScript = () => {
          }
       }
       update(data) {
-         console.log("update link & mode")
+         console.log("update link & mode");
+         if($('.header-menu').hasClass('active')) {
+            $('.header-menu').removeClass('active');
+         }
       }
       updateOnScroll(inst) {
          this.toggleHide(inst);
