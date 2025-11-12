@@ -2512,6 +2512,73 @@ const mainScript = () => {
          constructor() { super(); }
       }
    }
+   const AboutPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector('.about-hero-wrap');
+            if (mode === 'once') {
+               this.setupOnce(data);
+            } else if (mode === 'enter') {
+               this.setupEnter(data);
+            }
+            else return;
+            this.initImage();
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: .3,
+               onStart: () => {
+                  $('[data-init-hidden]').removeAttr('data-init-hidden');
+               }
+            })
+
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+            })
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top bottom+=50%',
+                  end: 'bottom top-=50%',
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               }
+            })
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+
+         }
+         initImage() {
+            $('.about-team-item-img').each((index, item) => {
+               $(item).find('.about-team-item-img-item').eq(1).addClass('item-hover');
+            });
+         }
+         destroy() {
+         }
+      },
+      Footer: class extends Footer {
+         constructor() { super(); }
+      }
+   }
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -2596,11 +2663,15 @@ const mainScript = () => {
    class ContactPageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class AboutPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
       pricing: new PricingPageManager(PricingPage),
       contact: new ContactPageManager(ContactPage),
+      about: new AboutPageManager(AboutPage),
    };
 
 	const SCRIPT = {
@@ -2638,6 +2709,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.contact.destroy(data);
+         }
+      },
+      about: {
+         namespace: 'about',
+         afterEnter(data) {
+            PageManagerRegistry.about.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.about.destroy(data);
          }
       }
 	};
