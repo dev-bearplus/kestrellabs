@@ -1708,8 +1708,10 @@ const mainScript = () => {
                   scrub: true
                }
             });
-            this.tlStickFade
-               .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
+            if(viewport.w > 767) {
+               this.tlStickFade
+                  .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
+            }
             this.tl = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -1898,6 +1900,13 @@ const mainScript = () => {
             else if (viewport.w <= 767) {
                this.swiperCard();
             }
+            $('.home-why-item').on('mouseenter', function() {
+               $(this).addClass('active');
+            });
+            $('.home-why-item').on('mouseleave', function() {
+               $(this).removeClass('active');
+            });
+            
          }
          stickerCard() {
             this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
@@ -1956,11 +1965,11 @@ const mainScript = () => {
          }
          onEnter() {
             gsap.set($(this.el).find('.home-why-main-line'), { opacity: 1 })
-            gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
+            // gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 1 })
          }
          onLeave() {
             gsap.set($(this.el).find('.home-why-main-line'), { opacity: 0 })
-            gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 0 })
+            // gsap.set($(this.el).find('.home-why-item-sticky'), { opacity: 0 })
          }
          moveLine() {
             if (!this.stickerCardWrap) return;
