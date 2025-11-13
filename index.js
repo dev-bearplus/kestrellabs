@@ -1888,12 +1888,6 @@ const mainScript = () => {
             else if (viewport.w <= 767) {
                this.swiperCard();
             }
-            $('.home-why-item').on('mouseenter', function() {
-               $(this).addClass('active');
-            });
-            $('.home-why-item').on('mouseleave', function() {
-               $(this).removeClass('active');
-            });
          }
          stickerCard() {
             this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
