@@ -302,6 +302,7 @@ const mainScript = () => {
 			if (this.lenis) {
             this.lenis.start();
 			}
+         console.log('start');
          $('.body').css('overflow', 'initial');
 		}
 
@@ -309,6 +310,7 @@ const mainScript = () => {
 			if (this.lenis) {
 				this.lenis.stop();
          }
+         console.log('stop');
          $('.body').css('overflow', 'hidden');
 		}
 
@@ -1613,11 +1615,19 @@ const mainScript = () => {
                   clickable: true,  
                },
                on: {
-                  slideChangeTransitionStart: function(swiper) {
+                  setTranslate: function(swiper) {
+                     console.log('fffstart');
                      smoothScroll.stop();
                   },
-                  slideChangeTransitionEnd: function(swiper) {
+                  touchEnd: function(swiper) {
+                     console.log('fffend');
                      smoothScroll.start();
+                  },
+                  slideChange: function(swiper) {
+                     // check index active of swiper slide 
+                     const indexActive = swiper.activeIndex;
+                     $('.home-problem-pagi-item').removeClass('active');
+                     $('.home-problem-pagi-item').eq(indexActive).addClass('active');
                   }
                }
             });
@@ -1910,10 +1920,12 @@ const mainScript = () => {
                   clickable: true,  
                },
                on: {
-                  slideChangeTransitionStart: function(swiper) {
+                  setTranslate: function(swiper) {
+                     console.log('fffstart');
                      smoothScroll.stop();
                   },
-                  slideChangeTransitionEnd: function(swiper) {
+                  touchEnd: function(swiper) {
+                     console.log('fffend');
                      smoothScroll.start();
                   }
                }
@@ -2312,10 +2324,12 @@ const mainScript = () => {
                   clickable: true,  
                },
                on: {
-                  slideChangeTransitionStart: function(swiper) {
+                  setTranslate: function(swiper) {
+                     console.log('fffstart');
                      smoothScroll.stop();
                   },
-                  slideChangeTransitionEnd: function(swiper) {
+                  touchEnd: function(swiper) {
+                     console.log('fffend');
                      smoothScroll.start();
                   }
                }
