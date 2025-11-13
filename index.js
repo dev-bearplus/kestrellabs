@@ -1559,7 +1559,7 @@ const mainScript = () => {
          setup() {
             this.tlStickFade = gsap.timeline({
                scrollTrigger: {
-                  trigger: this.el.querySelector('.home-intro-content'),
+                  trigger: this.el.querySelector('.home-intro-content-title'),
                   start: 'center bottom+=10%',
                   end: `center top+=40%`,
                   scrub: true,
@@ -1612,6 +1612,14 @@ const mainScript = () => {
                   bulletActiveClass: 'active',
                   clickable: true,  
                },
+               on: {
+                  slideChangeTransitionStart: function(swiper) {
+                     smoothScroll.stop();
+                  },
+                  slideChangeTransitionEnd: function(swiper) {
+                     smoothScroll.start();
+                  }
+               }
             });
          }
       },
@@ -1696,9 +1704,9 @@ const mainScript = () => {
                scrollTrigger: {
                   trigger: this.el,
                   start: 'top 50%',
-                  end: `bottom-=${cvUnit(100, 'vh')} bottom`,
+                  end: `bottom-=${cvUnit(30, 'vh')} bottom`,
                   scrub: true,
-                  onToggle: (self) => {
+                  onUpdate: (self) => {
                      if (self.isActive) {
                         $(this.el).find('.home-map').removeClass('expanded');
                      }
@@ -1774,7 +1782,6 @@ const mainScript = () => {
                   y: 0,
                   stagger: { amount: 0.02, from: 'random' }
                }, "<=0")
-
                // Use shared logic for similar steps
                .to($(this.el).find('.home-map-main-img:nth-child(4) .home-map-main-img-inner'), introStep('item4', 0))
                .to($(this.el).find('.home-map-main-img:nth-child(5) .home-map-main-img-inner'), introStep('item5', 1))
@@ -1794,6 +1801,8 @@ const mainScript = () => {
                         activeIntro(4);
                         activeItems.add('item8');
                      } else if ((progress === 0 || progress === 1) && activeItems.has('item8')) {
+                        $('.home-map-main-img-sub-hover').removeClass('active');
+                        $('.home-map-number-wrap').removeClass('active');
                         activeItems.delete('item8');
                      }
                   }
@@ -1817,6 +1826,10 @@ const mainScript = () => {
             this.animationScrub()
          }
          setup() {
+            if(viewport.w > 991) {
+               let centerStick = (viewport.h - $('.home-platform-content-inner').height()) / 2;
+               $('.home-platform-content-inner').css('top', `${centerStick}px`);
+            }
          }
          interact() {}
          animationScrub() {
@@ -1896,6 +1909,14 @@ const mainScript = () => {
                   bulletActiveClass: 'active',
                   clickable: true,  
                },
+               on: {
+                  slideChangeTransitionStart: function(swiper) {
+                     smoothScroll.stop();
+                  },
+                  slideChangeTransitionEnd: function(swiper) {
+                     smoothScroll.start();
+                  }
+               }
             });
          }
          render() {
@@ -2290,6 +2311,14 @@ const mainScript = () => {
                   bulletActiveClass: 'active',
                   clickable: true,  
                },
+               on: {
+                  slideChangeTransitionStart: function(swiper) {
+                     smoothScroll.stop();
+                  },
+                  slideChangeTransitionEnd: function(swiper) {
+                     smoothScroll.start();
+                  }
+               }
             });
          }
          destroy() {
