@@ -203,6 +203,47 @@ const mainScript = () => {
          init
       }
    })();
+
+   class ParallaxImage {
+      constructor({ el, scaleOffset = 0.1 }) {
+         this.el = el;
+         this.elWrap = null;
+         this.scaleOffset = scaleOffset;
+         this.init();
+      }
+      init() {
+         this.elWrap = this.el.parentElement;
+         this.setup();
+      }
+      setup() {
+         console.log($(this.el).hasClass('img-abs'))
+         // Calculate width/height: scaleOffset 0.1 = 105%, 0.2 = 115%, 0.3 = 125%
+         // Formula: 100% + 5% (base) + (scaleOffset - 0.1) * 100%
+         const scalePercent = 100 + 5 + ((this.scaleOffset - 0.1) * 100);
+         gsap.set(this.el, {
+            width: scalePercent + '%',
+            height: $(this.el).hasClass('img-abs') ? scalePercent + '%' : 'auto'
+         });
+         this.scrub();
+      }
+      scrub() {
+         let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
+         let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
+         this.updateOnScroll(dist, total);
+         smoothScroll.lenis.on('scroll', () => {
+            this.updateOnScroll(dist, total);
+         });
+      }
+      updateOnScroll(dist, total) {
+            if (this.el) {
+               if (isInViewport(this.elWrap)) {
+                  let percent = this.elWrap.getBoundingClientRect().top / total;
+                  gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
+                  gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
+               }
+            }
+      }
+   }
    class Marquee {
       constructor(list, item, duration = 40) {
          this.list = list;
@@ -373,49 +414,16 @@ const mainScript = () => {
 			console.warn("Webflow reinit failed:", e);
 		}
    };
-   class ParallaxImage {
-      constructor({ el, scaleOffset = 0.3 }) {
-          this.el = el;
-          this.elWrap = null;
-          this.scaleOffset = scaleOffset;
-          this.init();
-      }
-      init() {
-          this.elWrap = this.el.parentElement;
-          this.setup();
-      }
-      setup() {
-          gsap.set(this.el, { height: '120%' });
-          this.scrub();
-      }
-      scrub() {
-          let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
-          let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
-          this.updateOnScroll(dist, total);
-          smoothScroll.lenis.on('scroll', () => {
-              this.updateOnScroll(dist, total);
-          });
-      }
-      updateOnScroll(dist, total) {
-          if (this.el) {
-              if (isInViewport(this.elWrap)) {
-                  let percent = this.elWrap.getBoundingClientRect().bottom / total;
-                  gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
-                  gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
-              }
-          }
-      }
-  }
-  function mapFormToObject(ele) {
-   return ([...new FormData(ele).entries()].reduce(
-       (prev, cur) => {
-           const name = cur[0];
-           const val = cur[1];
-           return { ...prev, [name]: val };
-       },
-       {}
-   ));
-}
+   function mapFormToObject(ele) {
+      return ([...new FormData(ele).entries()].reduce(
+         (prev, cur) => {
+            const name = cur[0];
+            const val = cur[1];
+            return { ...prev, [name]: val };
+         },
+         {}
+      ));
+   }
    class Mouse {
       constructor() {
          this.mousePos = {x: 0, y: 0};
@@ -1504,7 +1512,7 @@ const mainScript = () => {
                   lineItem.css('top', `${calcVerticalPos(line.y)}px`)
                      .css('--clip-half', `${calcHorizontalClip(line.x)}%`);
                });
-               
+
             });
             horizontalLinesRight.forEach((line, index) => {
                const invertedClip = 100 - calcHorizontalClip(line.x);
@@ -1553,9 +1561,9 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationScrub();
-            this.animationReveal();
             this.setup();
+            this.animationReveal();
+            this.animationScrub();
             this.interact();
          }
          setup() {
@@ -1578,6 +1586,7 @@ const mainScript = () => {
             partnerMarquee.play();
          }
          animationScrub() {
+            new ParallaxImage({ el: $(this.el).find('.home-intro-img-inner img').get(0) });
          }
          interact() {
          }
@@ -1612,7 +1621,7 @@ const mainScript = () => {
                   el: '.home-problem-pagi',
                   bulletClass: 'home-problem-pagi-item',
                   bulletActiveClass: 'active',
-                  clickable: true,  
+                  clickable: true,
                },
                on: {
                   setTranslate: function(swiper) {
@@ -1624,7 +1633,7 @@ const mainScript = () => {
                      smoothScroll.start();
                   },
                   slideChange: function(swiper) {
-                     // check index active of swiper slide 
+                     // check index active of swiper slide
                      const indexActive = swiper.activeIndex;
                      $('.home-problem-pagi-item').removeClass('active');
                      $('.home-problem-pagi-item').eq(indexActive).addClass('active');
@@ -1827,6 +1836,7 @@ const mainScript = () => {
          constructor() {
             super();
             this.el = null;
+            this.tl = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-platform-wrap');
@@ -1834,8 +1844,8 @@ const mainScript = () => {
          }
          onTrigger() {
             this.setup();
-            this.interact();
             this.animationScrub()
+            this.interact();
          }
          setup() {
             if(viewport.w > 991) {
@@ -1845,6 +1855,8 @@ const mainScript = () => {
          }
          interact() {}
          animationScrub() {
+            $(this.el).find('.home-platform-img-item-inner img').each((_, item) => new ParallaxImage({ el: item }));
+
             const contentItems = $(this.el).find('.home-platform-content-inner');
             const totalItems = contentItems.length;
 
@@ -1873,23 +1885,29 @@ const mainScript = () => {
             });
          }
          destroy() {
+            if (this.tl) {
+               this.tl.kill();
+               this.tl = null;
+            }
          }
       },
       WhyUs: class extends TriggerSetup {
          constructor() {
             super();
             this.el = null;
+            this.raf = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-why-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationScrub();
             this.animationReveal();
+            this.animationScrub();
             this.interact();
          }
          animationScrub() {
+            $(this.el).find('.home-why-item-img img').each((_, item) => new ParallaxImage({ el: item }));
          }
          animationReveal() {
          }
@@ -1906,7 +1924,7 @@ const mainScript = () => {
             $('.home-why-item').on('mouseleave', function() {
                $(this).removeClass('active');
             });
-            
+
          }
          stickerCard() {
             this.stickerCardWrap = $(this.el).find('.home-why-main-wrap').get(0);
@@ -1926,7 +1944,7 @@ const mainScript = () => {
                   el: '.home-why-pagi',
                   bulletClass: 'home-why-pagi-item',
                   bulletActiveClass: 'active',
-                  clickable: true,  
+                  clickable: true,
                },
                on: {
                   setTranslate: function(swiper) {
@@ -1999,9 +2017,10 @@ const mainScript = () => {
             this.animationScrub();
             this.interact();
          }
-         animationScrub() {
-         }
          setup() {
+         }
+         animationScrub() {
+            $(this.el).find('.home-usecase-img-item img').each((_, item) => new ParallaxImage({ el: item }));
          }
          interact() {
             const activeAccordion = (idx) => {
@@ -2124,7 +2143,7 @@ const mainScript = () => {
                         if(index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
-   
+
                            gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
                            gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
                            gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
@@ -2132,7 +2151,7 @@ const mainScript = () => {
                            if(progress > 0.65) {
                               $(items).removeClass('active');
                               $(item).addClass('active');
-                           }  
+                           }
                         }
                      },
                      onEnter: () => {
@@ -2173,7 +2192,7 @@ const mainScript = () => {
          }
       },
       How : class extends TriggerSetup {
-         constructor() { 
+         constructor() {
             super();
             this.tl = null;
          }
@@ -2330,7 +2349,7 @@ const mainScript = () => {
                   el: '.pricing-hero-pagi',
                   bulletClass: 'pricing-hero-pagi-item',
                   bulletActiveClass: 'active',
-                  clickable: true,  
+                  clickable: true,
                },
                on: {
                   setTranslate: function(swiper) {
@@ -2348,7 +2367,7 @@ const mainScript = () => {
             cancelAnimationFrame(this.requestAnimationFrameSticky);
          }
       },
-    
+
       Faq: class extends TriggerSetup {
          constructor() { super(); }
          trigger(data) {
