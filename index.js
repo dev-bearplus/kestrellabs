@@ -2127,7 +2127,7 @@ const mainScript = () => {
                let itemImgCurrent = $('.product-key-main-img-main').eq(index);
                let itemLabelPrev = $('.product-key-main-left-main').eq(index - 1);
                let itemLabelCurrent = $('.product-key-main-left-main').eq(index);
-               let heightHeader = $('.header').height();
+               let heightHeader = $('.header').height() - $('.header').find('.line-horizital').eq(0).height();
                const tlItem = gsap.timeline({
                   scrollTrigger: {
                      trigger: item,
