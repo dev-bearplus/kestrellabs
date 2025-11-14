@@ -242,29 +242,34 @@ const mainScript = () => {
       }
    }
    class Marquee {
-      constructor(list, item, duration = 40) {
+      constructor(list, item, duration = 40, direction) {
          this.list = list;
          this.item = item;
          this.duration = duration;
+         this.direction = direction || 'left';
       }
-      setup(isReverse) {
+      setup() {
          const cloneAmount = Math.ceil($(window).width() / this.list.width()) + 1;
-
          let itemClone = this.item.clone();
          let itemWidth = this.item.width();
          this.list.html('');
          new Array(cloneAmount).fill().forEach(() => {
             let html = itemClone.clone()
             html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
-            if (isReverse) {
-                  html.css('animation-direction', 'reverse');
+            if(this.direction == 'left') {
+               html.addClass('marquee-left');
+            } else {
+               html.addClass('marquee-right');
             }
-            html.addClass('marquee-left');
             this.list.append(html);
          });
       }
       play() {
-         $(this.list).find('.marquee-left').addClass('anim');
+         if(this.direction == 'left') {
+            $(this.list).find('.marquee-left').addClass('anim');
+         } else {
+            $(this.list).find('.marquee-right').addClass('anim');
+         }
       }
    }
 	class SmoothScroll {
@@ -2354,10 +2359,11 @@ const mainScript = () => {
                const type = $(this).attr('data-type');
                $('.pricing-hero-tab-item').removeClass('active');
                $(this).addClass('active');
-               $('.pricing-hero-package-item').each((index, item) => {
-                  let pricing = $(item).attr(type);
-                  $(item).find('.pricing-hero-package-item-title .heading').text(pricing);
-               });
+               if(type == 'year') {
+                  $('.pricing-hero-package-item-title-wrap').addClass('active');
+               } else {
+                  $('.pricing-hero-package-item-title-wrap').removeClass('active');
+               }
             });
          }
          animationScrub() {
@@ -2712,12 +2718,15 @@ const mainScript = () => {
          trigger(data) {
             this.el = data.next.container.querySelector('.about-team-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
+            this.popup = this.el.querySelector('.about-team-popup');
          }
          onTrigger() {
             this.interact();
          }
          setup () {
-            // $('.about-team-item').addClass('active');
+            $(this.el).find('.about-team-popup').remove();
+            $('.body-inner').append(this.popup);
+
          }
          interact() {
             $('.about-team-item').each((index, item) => {
@@ -2728,6 +2737,25 @@ const mainScript = () => {
                      $('.about-team-popup').addClass('active');
                      $('.main').addClass('has-popup')
                      smoothScroll.stop();
+                     parent.find('[data-team]').each((index, item) => {
+                        let nameData = $(item).attr('data-team');
+                        if(nameData == 'image') {
+                           let src = $(item).attr('src');
+                           $(`.about-team-popup [data-team=${nameData}]`).attr('src', src);
+                        }
+                        else if(nameData == 'linkin') {
+                           let linkin = $(item).attr('href');
+                           $(`.about-team-popup [data-team=${nameData}]`).attr('href', linkin);
+                        }
+                        else if(nameData == 'description') {
+                           let description = $(item).html();
+                           $(`.about-team-popup [data-team=${nameData}]`).html(description);
+                        }
+                        else {
+                           let text = $(item).text();
+                           $(`.about-team-popup [data-team=${nameData}]`).text(text);
+                        }
+                     });
                   });
                });
             });
@@ -2746,6 +2774,70 @@ const mainScript = () => {
             });
          }
          destroy() {
+            $(this.el).find('.about-team-popup').remove();
+            $('.about-team').append(this.popup);
+         }
+      },
+      Inves: class extends TriggerSetup {
+         constructor() { 
+            super(); 
+            this.el = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.about-inves-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.setup();
+            this.interact();
+         }
+         setup() {
+            $(this.el).find('.about-inves-logo-list').each((index, item) => {
+               let direction = $(item).attr('data-direction');
+               console.log(direction)
+               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
+               marqueeLogo.setup();
+               marqueeLogo.play();
+            });
+         }
+         interact() {            
+         }
+         destroy() {
+            
+         }
+      },
+      Job: class extends TriggerSetup {
+         constructor() { super(); }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.about-job-wrap');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.setup();
+            this.interact();
+         }
+         setup() {
+            new Swiper('.about-job-cms', {
+               slidesPerView: 2,
+               pagination: {
+                  el: '.about-job-pagination',
+                  clickable: true,
+               },
+               navigation: {
+                  nextEl: '.about-job-navi-item.item-next',
+                  prevEl: '.about-job-navi-item.item-prev',
+               },
+               pagination: {
+                  el: '.about-job-pagi',
+                  type: "fraction",
+                },
+            });
+         }
+         interact() {
+           
+         }
+         destroy() {
+            
          }
       },
       Footer: class extends Footer {
