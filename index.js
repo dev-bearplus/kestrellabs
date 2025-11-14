@@ -216,9 +216,6 @@ const mainScript = () => {
          this.setup();
       }
       setup() {
-         console.log($(this.el).hasClass('img-abs'))
-         // Calculate width/height: scaleOffset 0.1 = 105%, 0.2 = 115%, 0.3 = 125%
-         // Formula: 100% + 5% (base) + (scaleOffset - 0.1) * 100%
          const scalePercent = 100 + 5 + ((this.scaleOffset - 0.1) * 100);
          gsap.set(this.el, {
             width: scalePercent + '%',
@@ -878,6 +875,8 @@ const mainScript = () => {
       constructor() {
          this.el = null;
          this.isOpen = false;
+         this.listDependent = [];
+         this.hideTimeout = null;
       }
       init(data) {
          this.el = document.querySelector('.header');
@@ -887,13 +886,20 @@ const mainScript = () => {
       }
       update(data) {
          console.log("update link & mode");
-         if($('.header-menu').hasClass('active')) {
-            $('.header-menu').removeClass('active');
+
+         if($(this.el).find('.header-menu').hasClass('active')) {
+            $(this.el).find('.header-menu').removeClass('active');
          }
+         if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
+         }
+         this.updateOnScroll(smoothScroll.lenis);
       }
       updateOnScroll(inst) {
          this.toggleHide(inst);
          this.toggleScroll(inst);
+         this.onHideDependent();
       }
       toggleScroll(inst) {
          if (inst.scroll > $(this.el).height() * 1) {
@@ -912,29 +918,50 @@ const mainScript = () => {
             if (inst.scroll > ($(this.el).height() * 3)) {
                $(this.el).addClass("on-hide");
                $(this.el).removeClass("on-hide");
-               setTimeout(() => {
-                  if (
-                     inst.scroll > ($(this.el).height() * 3) &&
-                     inst.scroll === smoothScroll.scroller.scrollY
-                     && inst.velocity === 0
-                     && !$(this.el).hasClass('on-hide')
-                     && !$(this.el).is(':hover')
-                  ) {
+
+               if (
+                  inst.scroll > ($(this.el).height() * 3) &&
+                  inst.scroll === smoothScroll.scroller.scrollY
+                  && inst.velocity === 0
+                  && !$(this.el).hasClass('on-hide')
+                  && !$(this.el).is(':hover')
+               ) {
+                  this.hideTimeout = setTimeout(() => {
                      $(this.el).addClass('on-hide');
-                  }
-               }, 2500);
+                  }, 1500);
+               }
             }
          }
          else {
             $(this.el).removeClass("on-hide");
          }
       }
+      registerDependent(dependentEl) {
+         this.listDependent.push(dependentEl);
+      }
+      unregisterDependent(dependentEl) {
+         if (this.listDependent.includes(dependentEl)) {
+            this.listDependent = this.listDependent.filter((item) => item !== dependentEl);
+         }
+      }
+      onHideDependent() {
+         let heightHeader = $(this.el).height() - cvUnit(viewport.w > 991 ? 1 : 0, 'rem');
+         if(!$(this.el).hasClass('on-hide')) {
+            this.listDependent.forEach((item) => {
+               $(item).css('top', heightHeader);
+            });
+         } else {
+            this.listDependent.forEach((item) => {
+               $(item).css('top', 0);
+            });
+         }
+      }
       toggleNav() {
-         $(this.el).find('.heading-menu-btn').on('click', function(){
-            $('.header-menu').toggleClass('active');
+         $(this.el).find('.heading-menu-btn').on('click', () => {
+            $(this.el).find('.header-menu').toggleClass('active');
          });
          if(viewport.w < 991) {
-            $('.header-menu-item.has-submenu').on('click', function(e){
+            $(this.el).find('.header-menu-item.has-submenu').on('click', function(e){
                e.preventDefault();
                $(this).toggleClass('active');
                $(this).next('.header-menu-dropdown').slideToggle();
@@ -943,17 +970,17 @@ const mainScript = () => {
       }
       open() {
          if (this.isOpen) return;
-         $('.header').addClass('on-open-nav');
-         $('.header-ham').addClass('active');
+         $(this.el).addClass('on-open-nav');
+         $(this.el).find('.header-ham').addClass('active');
          this.isOpen = true;
          smoothScroll.lenis.stop();
       }
       close() {
-            if (!this.isOpen) return;
-            $('.header').removeClass('on-open-nav');
-            $('.header-ham').removeClass('active');
-            this.isOpen = false;
-            smoothScroll.lenis.start();
+         if (!this.isOpen) return;
+         $(this.el).removeClass('on-open-nav');
+         $(this.el).find('.header-ham').removeClass('active');
+         this.isOpen = false;
+         smoothScroll.lenis.start();
       }
    }
    const header = new Header();
@@ -1221,7 +1248,6 @@ const mainScript = () => {
                const isAtChangeEdgeX = this.currentX <= (this.minX + $(this.el).find('.home-hero-img-coordi').width()  + cvUnit(4, 'rem'));
                const isAtChangeEdgeY = this.currentY >= (this.maxY - $(this.el).find('.home-hero-img-coordi').height()/2  - cvUnit(4, 'rem'));
                const isAtEdge = isAtEdgeX || isAtEdgeY;
-               console.log(isAtChangeEdgeY)
                const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
                const scale = lerp(currentScale, isAtEdge ? 1.2 : 1, 0.08);
 
@@ -2116,18 +2142,18 @@ const mainScript = () => {
                this.swiperCard();
             }
             this.interact();
-
          }
          animationScrub() {
             const tabItems = $(this.el).find('.product-key-tab-item');
             const items = $(this.el).find('.product-key-main-title-inner');
+            header.registerDependent($(this.el).find('.product-key-tab-wrap'));
 
             items.each((index, item) => {
-               let itemImgPrev = $('.product-key-main-img-main').eq(index - 1);
-               let itemImgCurrent = $('.product-key-main-img-main').eq(index);
-               let itemLabelPrev = $('.product-key-main-left-main').eq(index - 1);
-               let itemLabelCurrent = $('.product-key-main-left-main').eq(index);
-               let heightHeader = $('.header').height() - $('.header').find('.line-horizital').eq(0).height();
+               let itemImgPrev = $(this.el).find('.product-key-main-img-main').eq(index - 1);
+               let itemImgCurrent = $(this.el).find('.product-key-main-img-main').eq(index);
+               let itemLabelPrev = $(this.el).find('.product-key-main-left-main').eq(index - 1);
+               let itemLabelCurrent = $(this.el).find('.product-key-main-left-main').eq(index);
+               let heightHeader = $(header.el).height();
                const tlItem = gsap.timeline({
                   scrollTrigger: {
                      trigger: item,
@@ -2135,11 +2161,6 @@ const mainScript = () => {
                      end: 'bottom bottom',
                      scrub: true,
                      onUpdate: (self) => {
-                        if(!$('.header').hasClass('on-hide')) {
-                           $('.product-key-tab-wrap').css('top', heightHeader);
-                        } else {
-                           $('.product-key-tab-wrap').css('top', 0);
-                        }
                         if(index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
@@ -2170,6 +2191,17 @@ const mainScript = () => {
                   }
                });
                tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
+
+               // const tlParallax = gsap.timeline({
+               //    scrollTrigger: {
+               //       trigger: item,
+               //       start: 'top top',
+               //       end: 'bottom bottom',
+               //       scrub: true,
+               //       markers: true
+               //    }
+               // })
+               // tlParallax.to(itemImgCurrent, { y: 100, stagger: 0.1 });
             });
          }
          interact() {
@@ -2189,6 +2221,9 @@ const mainScript = () => {
                slidesPerView: 'auto',
                spaceBetween: 0,
             });
+         }
+         destroy() {
+            header.unregisterDependent($(this.el).find('.product-key-tab-wrap'));
          }
       },
       How : class extends TriggerSetup {
@@ -2266,10 +2301,9 @@ const mainScript = () => {
             this.tlOnce = null;
             this.tlEnter = null;
             this.tlTriggerEnter = null;
-            this.requestAnimationFrameSticky = null;
          }
          setup(data, mode) {
-            this.el = data.next.container.querySelector('.product-hero-wrap');
+            this.el = data.next.container.querySelector('.pricing-hero-wrap');
             if (mode === 'once') {
                this.setupOnce(data);
             } else if (mode === 'enter') {
@@ -2279,7 +2313,7 @@ const mainScript = () => {
             if(viewport.w < 991 && viewport.w >= 768) {
                this.swiperCard();
             }
-            this.checkSticky();
+            this.animationScrub();
             this.interact();
          }
          setupOnce(data) {
@@ -2326,16 +2360,9 @@ const mainScript = () => {
                });
             });
          }
-         checkSticky() {
-            let heightHeader = viewport.w > 991 ? $('.header').height() - $('.pricing-hero-package-wrap .line-horizital').eq(0).height() : $('.header').height();
-            if(!$('.header').hasClass('on-hide')) {
-               viewport.w > 991 && $('.pricing-hero-package-wrap').css('top', heightHeader);
-               viewport.w < 768 && $('.pricing-hero-tab-wrap').css('top', heightHeader);
-            } else {
-               viewport.w > 991 && $('.pricing-hero-package-wrap').css('top', 0);
-               viewport.w < 768 && $('.pricing-hero-tab-wrap').css('top', 0);
-            }
-            this.requestAnimationFrameSticky = requestAnimationFrame(this.checkSticky.bind(this));
+         animationScrub() {
+            viewport.w > 991 && header.registerDependent($(this.el).find('.pricing-hero-package-wrap'));
+            viewport.w < 768 && header.registerDependent($(this.el).find('.pricing-hero-tab-wrap'));
          }
          swiperCard() {
             $('.pricing-hero-package-block').remove();
@@ -2364,7 +2391,8 @@ const mainScript = () => {
             });
          }
          destroy() {
-            cancelAnimationFrame(this.requestAnimationFrameSticky);
+            header.unregisterDependent($(this.el).find('.pricing-hero-package-wrap'));
+            header.unregisterDependent($(this.el).find('.pricing-hero-tab-wrap'));
          }
       },
 
@@ -2651,28 +2679,30 @@ const mainScript = () => {
             this.animateImage();
          }
          animateImage() {
-            const images = $('.about-hero-item');
-            this.tlScrub = gsap.timeline({
-               scrollTrigger: {
-                  trigger: this.el,
-                  start: `top bottom-=${cvUnit(100, 'vh')}`,
-                  end: `bottom+=${cvUnit(20, 'vh')} bottom`,
-                  scrub: true,
-                  markers: true,
+            let currentIndex = 0;
+            let interval = null;
+
+            const activeIndex = () => {
+               $(this.el).find('.about-hero-item').eq(currentIndex).addClass('active').siblings().removeClass('active');
+            }
+            const startInterval = () => {
+               if (interval) {
+                     clearInterval(interval);
                }
-            })
-            images.each((index, item) => {
-               if(index ==0) {
-                  this.tlScrub.fromTo(item, { autoAlpha: 1 }, { autoAlpha: 0 })
-               }
-               else if(index == images.length - 1) {
-                  this.tlScrub.fromTo(item, { autoAlpha: 0 }, { autoAlpha: 1 }, '>=-.4')
-               }
-               else {
-                  this.tlScrub.fromTo(item, { autoAlpha: 0 }, { autoAlpha: 1 }, '>=-.4')
-                  this.tlScrub.fromTo(item, { autoAlpha: 1 }, { autoAlpha: 0 })
-               }
-            });
+
+               interval = setInterval(() => {
+                     currentIndex++;
+                     if (currentIndex >= $(this.el).find('.about-hero-item').length) {
+                        currentIndex = 0;
+                     }
+                     activeIndex();
+               }, 3200);
+            }
+            setTimeout(() => {
+               currentIndex++;
+               activeIndex();
+               startInterval();
+            }, 2500);
          }
          destroy() {
          }
