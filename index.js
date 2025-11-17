@@ -2403,8 +2403,9 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
-            $('.pricing-hero-tab-item').on('click', function() {
-               const type = $(this).attr('data-type');
+            $(this.el).find('.pricing-hero-tab-item').on('click', (e) => {
+               const type = $(e.currentTarget).attr('data-type');
+               console.log('khanh',$(this.el));
                $('.pricing-hero-tab-item').removeClass('active');
                $(this).addClass('active');
                if(type == 'year') {
@@ -2813,7 +2814,7 @@ const mainScript = () => {
                itemOpens.each((index, itemOpen) => {
                   $(itemOpen).on('click', () => {
                      let parent = $(itemOpen).closest('.about-team-item');
-                     $(this.el).find('.about-team-popup').addClass('active');
+                     $('.about-team-popup').addClass('active');
                      $('.main').addClass('has-popup')
                      smoothScroll.stop();
                      parent.find('[data-team]').each((index, item) => {
@@ -2838,12 +2839,12 @@ const mainScript = () => {
                   });
                });
             });
-            $(this.el).find('.about-team-popup-close').on('click', () => {
-               $(this.el).find('.about-team-popup').removeClass('active');
+            $('.about-team-popup-close').on('click', () => {
+               $('.about-team-popup').removeClass('active');
                $('.main').removeClass('has-popup');
                smoothScroll.start();
             });
-            $(this.el).find('.about-team-popup').on('click', (e) => {
+            $('.about-team-popup').on('click', (e) => {
                if(!$(e.target).closest('.about-team-popup-content').length) {
                   $('.about-team-popup').removeClass('active');
                   $('.main').removeClass('has-popup');
@@ -2852,8 +2853,8 @@ const mainScript = () => {
             });
          }
          destroy() {
-            $(this.el).find('.about-team-popup').remove();
-            $('.about-team').append(this.popup);
+            $('.about-team-popup').remove();
+            $(this.el).find('.about-team').append(this.popup);
          }
       },
       Inves: class extends TriggerSetup {
@@ -2926,7 +2927,80 @@ const mainScript = () => {
       Footer: class extends Footer {
          constructor() { super(); }
       }
-   }
+   };
+   const SchedulePage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".schedule-hero-wrap");
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+            });
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               },
+            });
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+           
+         }
+         
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+         }
+      },
+      Footer: class extends Footer {
+         constructor() {
+            super();
+         }
+      },
+   };
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
