@@ -2818,10 +2818,15 @@ const mainScript = () => {
          }
          setup() {
             new Swiper('.about-job-cms', {
-               slidesPerView: 2,
+               slidesPerView: 'auto',
                pagination: {
                   el: '.about-job-pagination',
                   clickable: true,
+               },
+               breakpoints: {
+                  768: {
+                     slidesPerView: 2,
+                  },
                },
                navigation: {
                   nextEl: '.about-job-navi-item.item-next',
