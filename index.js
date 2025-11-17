@@ -8,7 +8,7 @@ const mainScript = () => {
    const ySetter = (el) => gsap.quickSetter(el, 'y', 'px');
    const xGetter = (el) => gsap.getProperty(el, 'x');
    const yGetter = (el) => gsap.getProperty(el, 'y');
-
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	const viewport = {
 		get w() {
 			return window.innerWidth;
@@ -1022,6 +1022,7 @@ const mainScript = () => {
       }
       interact() {
          this.hoverLogo();
+         this.validForm();
       }
       hoverLogo() {
          this.footerLogoWrap = $(this.el).find('.footer-img-wrap').get(0);
@@ -1034,7 +1035,24 @@ const mainScript = () => {
          this.targetY = 0;
          this.isEntered = false;
       }
-
+      validForm() {
+         //debouce on input
+         const debounce = (func, timeout = 300) => {
+            let timer;
+            return (...args) => {
+               clearTimeout(timer);
+               timer = setTimeout(() => func.apply(this, args), timeout);
+            };
+         };
+         $(this.el).find('.footer-form input').on('input', debounce((e) => {
+            const value = $(e.currentTarget).val();
+            if (emailRegex.test(value)) { 
+               $(e.currentTarget).parent().find('button[type="submit"]').addClass('active');
+            } else {
+               $(e.currentTarget).parent().find('button[type="submit"]').removeClass('active');
+            }
+         }, 300));
+      }
       render() {
          if (isMouseInArea(this.footerLogoWrap, mouse.mousePos)) {
             if (!this.isEntered) {
@@ -2568,7 +2586,6 @@ const mainScript = () => {
             });
             $form.find('[type="submit"]').on("click", function (e) {
                const data = mapFormToObject($form.get(0));
-               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                let isValid = true;
                requiredNames.forEach(function (name) {
                   if (!Object.prototype.hasOwnProperty.call(data, name)) return;
@@ -3088,12 +3105,16 @@ const mainScript = () => {
    class AboutPageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class SchedulePageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
       pricing: new PricingPageManager(PricingPage),
       contact: new ContactPageManager(ContactPage),
       about: new AboutPageManager(AboutPage),
+      schedule: new SchedulePageManager(SchedulePage),
    };
 
 	const SCRIPT = {
@@ -3140,6 +3161,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.about.destroy(data);
+         }
+      },
+      schedule: {
+         namespace: 'schedule',
+         afterEnter(data) {
+            PageManagerRegistry.schedule.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.schedule.destroy(data);
          }
       }
 	};
