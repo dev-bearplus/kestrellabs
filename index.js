@@ -3018,6 +3018,137 @@ const mainScript = () => {
          }
       },
    };
+   const PolicyPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".policy-hero-wrap");
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            this.initTableContent();
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+            });
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               },
+            });
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+           $(this.el).find('.policy-hero-table-item').on('click', (e) => {
+            let dataTitle = $(e.currentTarget).closest('.policy-hero-table-item').attr('data-title');
+            let content = $(this.el).find(`.policy-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
+            let offset = -100;
+            smoothScroll.scrollTo(content, {
+               offset: offset,
+               duration: 1,
+            });
+            $('.policy-hero-table-item').removeClass('active');
+            $(e.currentTarget).closest('.policy-hero-table-item').addClass('active');
+           });
+           smoothScroll.lenis.on('scroll', () => {
+            this.itemContentActiveCheck($(this.el).find('.policy-hero-content-richtext h2'));
+           });
+           if(viewport.w < 992){
+            header.registerDependent($(this.el).find('.policy-hero-table'));
+            $(this.el).find('.policy-hero-table-head').on('click', (e) => {
+               $(e.currentTarget).closest('.policy-hero-table-head').toggleClass('active');
+               $('.policy-hero-table-list').slideToggle();
+            });
+           }
+           else {
+            header.unregisterDependent($(this.el).find('.policy-hero-table-inner'));
+           }
+         }
+         itemContentActiveCheck(el) {
+            for (let i = 0; i < $(el).length; i++) {
+                let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+                console.log(top)
+                if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
+                    $('.policy-hero-table-item').removeClass('active');
+                    $('.policy-hero-table-item').eq(i).addClass('active');
+                }
+                }
+          }
+          initTableContent() {
+            $(this.el).find('.policy-content-number').text($('.policy-hero-content-richtext h2').length);
+            let titleLeft = $(this.el).find('.policy-hero-table-item').eq(0).clone();
+            $(this.el).find('.policy-hero-table-item').remove();
+            $(this.el).find('.policy-hero-content-richtext h2').each((i, el) => {
+                $(el).attr('data-title', `toch-${i}`);
+                let titleLeftClone = titleLeft.clone();
+                if(i == 0) {
+                    titleLeftClone.addClass('active');
+                }
+                let index = `${i+1}.`
+                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
+                titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(0).text(index);
+                titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(1).text(cleanText);
+                titleLeftClone.attr('data-title', `toch-${i}`);
+                $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
+            })
+          }
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+            if(viewport.w < 992){
+               header.unregisterDependent($(this.el).find('.policy-hero-table'));
+            }
+            else {
+               header.unregisterDependent($(this.el).find('.policy-hero-table-inner'));
+            }
+         }
+      },
+
+      Footer: class extends Footer {
+         constructor() {
+            super();
+         }
+      },
+   };
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -3108,6 +3239,9 @@ const mainScript = () => {
    class SchedulePageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class PolicyPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
@@ -3115,6 +3249,7 @@ const mainScript = () => {
       contact: new ContactPageManager(ContactPage),
       about: new AboutPageManager(AboutPage),
       schedule: new SchedulePageManager(SchedulePage),
+      policy: new PolicyPageManager(PolicyPage),
    };
 
 	const SCRIPT = {
@@ -3170,6 +3305,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.schedule.destroy(data);
+         }
+      },
+      policy: {
+         namespace: 'policy',
+         afterEnter(data) {
+            PageManagerRegistry.policy.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.policy.destroy(data);
          }
       }
 	};
