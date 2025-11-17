@@ -309,16 +309,27 @@ const mainScript = () => {
 				this.lenis.destroy();
 			}
          this.lenis = new Lenis({
-               content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
                wrapper: data?.next?.container || document.querySelector('.main-inner'),
-               syncTouch: true,
+               content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
+               syncTouch: false,
+               smoothWheel: true,
                smoothTouch: false,
                infinite: false,
          })
+         let scrollTimeout = null;
 			this.lenis.on("scroll", (e) => {
 				this.updateOnScroll(e);
-				ScrollTrigger.update();
-			});
+            ScrollTrigger.update();
+
+            clearTimeout(scrollTimeout);
+            if (Math.abs(e.velocity) > 0.1) {
+               data?.next?.container.classList.remove('lenis-stopped');
+            }
+
+            scrollTimeout = setTimeout(() => {
+               data?.next?.container.classList.add('lenis-stopped');
+            }, 150);
+         });
       }
       reachedThreshold(threshold) {
          if (!threshold) return false;
@@ -1161,7 +1172,7 @@ const mainScript = () => {
             // }
          }
          rotateText() {
-            let headingFlipping = new FlipText('.home-hero-title-wrap', {});
+            let headingFlipping = new FlipText($(this.el).find('.home-hero-title-wrap').get(0), {});
             headingFlipping.setup();
             headingFlipping.play();
          }
@@ -1570,16 +1581,19 @@ const mainScript = () => {
             });
          }
          destroy() {
-               cancelAnimationFrame(this.raf);
-               if (this.tlOnce) {
-                  this.tlOnce.kill();
-               }
-               if (this.tlEnter) {
-                  this.tlEnter.kill();
-               }
-               if (this.tlTriggerEnter) {
-                  this.tlTriggerEnter.kill();
-               }
+            if (this.raf) {
+               this.raf = null;
+            }
+            cancelAnimationFrame(this.raf);
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
          }
       },
       Intro: class extends TriggerSetup {
@@ -1600,7 +1614,7 @@ const mainScript = () => {
          setup() {
             this.tlStickFade = gsap.timeline({
                scrollTrigger: {
-                  trigger: this.el.querySelector('.home-intro-content-title'),
+                  trigger: $(this.el).find('.home-intro-content-title').get(0),
                   start: 'center bottom+=10%',
                   end: `center top+=40%`,
                   scrub: true,
@@ -1696,13 +1710,13 @@ const mainScript = () => {
             const parent = $(this.el).find('.home-map-main-img-inner').get(0);
             const parentRect = parent.getBoundingClientRect();
 
-            ['item1', 'item2', 'item3'].forEach((itemName) => {
-               const item = $(this.el).find(`.home-map-number[data-number="${itemName}"]`).get(0);
-               const itemRect = item.getBoundingClientRect();
-               const relativeLeft = itemRect.left - parentRect.left + gap + itemRect.width;
-               const relativeTop = itemRect.top - parentRect.top;
+            $(this.el).find('.home-map-number-wrap').each((index, item) => {
+               let number = $(item).find('.home-map-number').get(0);
+               const numberRect = number.getBoundingClientRect();
+               const relativeLeft = numberRect.left - parentRect.left + gap + numberRect.width;
+               const relativeTop = numberRect.top - parentRect.top;
 
-               $(this.el).find(`.home-map-main-img-sub-hover[data-hover="${itemName}"]`).css({
+               $(this.el).find(`.home-map-main-img-sub-hover`).eq(index).css({
                   left: `${relativeLeft}px`,
                   top: `${relativeTop}px`,
                });
@@ -1880,8 +1894,8 @@ const mainScript = () => {
          }
          setup() {
             if(viewport.w > 991) {
-               let centerStick = (viewport.h - $('.home-platform-content-inner').height()) / 2;
-               $('.home-platform-content-inner').css('top', `${centerStick}px`);
+               let centerStick = (viewport.h - $(this.el).find('.home-platform-content-inner').height()) / 2;
+               $(this.el).find('.home-platform-content-inner').css('top', `${centerStick}px`);
             }
          }
          interact() {}
@@ -1893,7 +1907,7 @@ const mainScript = () => {
 
             this.tl = gsap.timeline({
                scrollTrigger: {
-                  trigger: '.home-platform-content',
+                  trigger: $(this.el).find('.home-platform-content').get(0),
                   start: 'top bottom',
                   end: 'bottom top',
                   scrub: true,
@@ -1904,7 +1918,6 @@ const mainScript = () => {
                      contentItems.each((index, item) => {
                         const startProgress = index * itemThreshold;
                         const endProgress = (index + 1) * itemThreshold;
-                        console.log(progress, startProgress, endProgress);
                         if (progress >= startProgress && progress < endProgress) {
                            $(item).addClass('active');
                         } else {
@@ -1949,10 +1962,10 @@ const mainScript = () => {
             else if (viewport.w <= 767) {
                this.swiperCard();
             }
-            $('.home-why-item').on('mouseenter', function() {
+            $(this.el).find('.home-why-item').on('mouseenter', function() {
                $(this).addClass('active');
             });
-            $('.home-why-item').on('mouseleave', function() {
+            $(this.el).find('.home-why-item').on('mouseleave', function() {
                $(this).removeClass('active');
             });
 
@@ -1965,25 +1978,23 @@ const mainScript = () => {
             this.isEntered = false;
          }
          swiperCard() {
-            $('.home-why-main-cms').addClass('swiper');
-            $('.home-why-main').addClass('swiper-wrapper');
-            $('.home-why-item').addClass('swiper-slide');
-            new Swiper('.home-why-main-cms', {
+            $(this.el).find('.home-why-main-cms').addClass('swiper');
+            $(this.el).find('.home-why-main').addClass('swiper-wrapper');
+            $(this.el).find('.home-why-item').addClass('swiper-slide');
+            new Swiper($(this.el).find('.home-why-main-cms').get(0), {
                slidesPerView: 1,
                spaceBetween: cvUnit(12, 'rem'),
                pagination: {
-                  el: '.home-why-pagi',
+                  el: $(this.el).find('.home-why-pagi').get(0),
                   bulletClass: 'home-why-pagi-item',
                   bulletActiveClass: 'active',
                   clickable: true,
                },
                on: {
-                  setTranslate: function(swiper) {
-                     console.log('fffstart');
+                  setTranslate: (swiper) => {
                      smoothScroll.stop();
                   },
-                  touchEnd: function(swiper) {
-                     console.log('fffend');
+                  touchEnd: (swiper) => {
                      smoothScroll.start();
                   }
                }
@@ -2055,8 +2066,7 @@ const mainScript = () => {
          }
          interact() {
             const activeAccordion = (idx) => {
-               $('.home-usecase-img-item').removeClass('active');
-               $('.home-usecase-img-item').eq(idx).addClass('active');
+               $(this.el).find('.home-usecase-img-item').eq(idx).addClass('active').siblings().removeClass('active');
                $(this.el).find('.home-usecase-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
                $(this.el).find('.home-usecase-faq-item').eq(idx).siblings().find('.home-usecase-faq-item-sub').slideUp();
                $(this.el).find('.home-usecase-faq-item').eq(idx).find('.home-usecase-faq-item-sub').slideToggle();
@@ -2133,10 +2143,22 @@ const mainScript = () => {
             partnerMarquee.play();
          }
          destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
          }
       },
       Key: class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() {
+            super();
+            this.el = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-key-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
@@ -2174,39 +2196,58 @@ const mainScript = () => {
                            gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
                            gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
                            gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
-                           if(progress > 0.65) {
-                              $(items).removeClass('active');
-                              $(item).addClass('active');
-                           }
+                           // if(progress > 0.65) {
+                              // $(items).removeClass('active');
+                              // $(item).addClass('active');
+                           // }
                         }
                      },
                      onEnter: () => {
                         console.log('start');
                         tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
+                        // tabItems.eq(index).addClass('active');
                      },
                      onEnterBack: () => {
                         tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
+                        // tabItems.eq(index).addClass('active');
                      },
                      onLeaveEnter: () => {
                         tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
+                        // tabItems.eq(index).addClass('active');
                      }
                   }
                });
                tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
 
-               // const tlParallax = gsap.timeline({
-               //    scrollTrigger: {
-               //       trigger: item,
-               //       start: 'top top',
-               //       end: 'bottom bottom',
-               //       scrub: true,
-               //       markers: true
-               //    }
-               // })
-               // tlParallax.to(itemImgCurrent, { y: 100, stagger: 0.1 });
+               const tlParallax = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: $(item).find('.product-key-main-title').get(0),
+                     start: `top-=${cvUnit(10, 'vh')} bottom`,
+                     end: `bottom+=${cvUnit(10, 'vh')} top`,
+                     endTrigger: $(item).find('.product-key-main-sub').get(0),
+                     scrub: true,
+                     markers: true
+                  }
+               })
+               gsap.set($(item).find('.product-key-main-title, .product-key-main-sub'), {
+                  scale: 0.95,
+                  transformOrigin: ` 0% var(--transform-y-origin)`,
+                  'transform-style': 'preserve-3d',
+                  rotateX: 10,
+                  perspective: cvUnit(500, 'rem'),
+                  color: '#b4b4b0'
+               });
+               tlParallax
+                  .to($(item).find('.product-key-main-title, .product-key-main-sub'),
+                  {
+                     keyframes: {
+                        scale: [.95, 1, .95],
+                        rotateX: [-10, 0, 10],
+                        '--transform-y-origin': ['0%', '100%', '0%'],
+                        color: ['#b4b4b0', '#282828', '#b4b4b0'],
+                     }
+                  },
+               )
             });
          }
          interact() {
@@ -2234,6 +2275,7 @@ const mainScript = () => {
       How : class extends TriggerSetup {
          constructor() {
             super();
+            this.el = null;
             this.tl = null;
          }
          trigger(data) {
@@ -2269,10 +2311,16 @@ const mainScript = () => {
          interact() {
          }
          destroy() {
+            if (this.tl) {
+               this.tl.kill();
+            }
          }
       },
       Faq: class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() {
+            super();
+            this.el = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-faq-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
@@ -2360,9 +2408,9 @@ const mainScript = () => {
                $('.pricing-hero-tab-item').removeClass('active');
                $(this).addClass('active');
                if(type == 'year') {
-                  $('.pricing-hero-package-item-title-wrap').addClass('active');
+                  $(this.el).find('.pricing-hero-package-item-title-wrap').addClass('active');
                } else {
-                  $('.pricing-hero-package-item-title-wrap').removeClass('active');
+                  $(this.el).find('.pricing-hero-package-item-title-wrap').removeClass('active');
                }
             });
          }
@@ -2371,26 +2419,24 @@ const mainScript = () => {
             viewport.w < 768 && header.registerDependent($(this.el).find('.pricing-hero-tab-wrap'));
          }
          swiperCard() {
-            $('.pricing-hero-package-block').remove();
-            $('.pricing-hero-package-wrap').addClass('swiper');
-            $('.pricing-hero-package').addClass('swiper-wrapper');
-            $('.pricing-hero-package-item').addClass('swiper-slide');
-            new Swiper('.pricing-hero-package-wrap', {
+            $(this.el).find('.pricing-hero-package-block').remove();
+            $(this.el).find('.pricing-hero-package-wrap').addClass('swiper');
+            $(this.el).find('.pricing-hero-package').addClass('swiper-wrapper');
+            $(this.el).find('.pricing-hero-package-item').addClass('swiper-slide');
+            new Swiper($(this.el).find('.pricing-hero-package-wrap').get(0), {
                slidesPerView: 'auto',
                spaceBetween: 0,
                pagination: {
-                  el: '.pricing-hero-pagi',
+                  el: $(this.el).find('.pricing-hero-pagi').get(0),
                   bulletClass: 'pricing-hero-pagi-item',
                   bulletActiveClass: 'active',
                   clickable: true,
                },
                on: {
                   setTranslate: function(swiper) {
-                     console.log('fffstart');
                      smoothScroll.stop();
                   },
                   touchEnd: function(swiper) {
-                     console.log('fffend');
                      smoothScroll.start();
                   }
                }
@@ -2399,11 +2445,23 @@ const mainScript = () => {
          destroy() {
             header.unregisterDependent($(this.el).find('.pricing-hero-package-wrap'));
             header.unregisterDependent($(this.el).find('.pricing-hero-tab-wrap'));
+
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
          }
       },
-
       Faq: class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() {
+            super();
+            this.el = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-faq-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
@@ -2431,203 +2489,209 @@ const mainScript = () => {
       }
    }
    const ContactPage = {
-     Hero: class {
-       constructor() {
-         this.el = null;
-         this.tlOnce = null;
-         this.tlEnter = null;
-         this.tlTriggerEnter = null;
-       }
-       setup(data, mode) {
-         this.el = data.next.container.querySelector(".contact-hero-wrap");
-         if (mode === "once") {
-           this.setupOnce(data);
-         } else if (mode === "enter") {
-           this.setupEnter(data);
-         } else return;
-         this.interact();
-       }
-       setupOnce(data) {
-         this.tlOnce = gsap.timeline({
-           paused: true,
-           delay: 0.3,
-           onStart: () => {
-             $("[data-init-hidden]").removeAttr("data-init-hidden");
-           },
-         });
-       }
-       setupEnter(data) {
-         this.tlEnter = gsap.timeline({
-           paused: true,
-           onStart: () =>
-             $("[data-init-hidden]").removeAttr("data-init-hidden"),
-         });
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".contact-hero-wrap");
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+            });
 
-         this.tlTriggerEnter = gsap.timeline({
-           scrollTrigger: {
-             trigger: this.el,
-             start: "top bottom+=50%",
-             end: "bottom top-=50%",
-             once: true,
-             onEnter: () => this.tlEnter.play(),
-             onEnterBack: () => this.tlEnter.play(),
-             onStart: () =>
-               $("[data-init-hidden]").removeAttr("data-init-hidden"),
-           },
-         });
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               },
+            });
 
-         this.interact();
-       }
-       playOnce() {
-         this.tlOnce.play();
-       }
-       interact() {
-         const $form = $(this.el).find("#contact-form");
-         $(this.el).find(".contact-hero-form-input").on("blur", function () {
-             if ($(this).val()) {
-               $(this).parent().addClass("active");
-             } else {
-               $(this).parent().removeClass("active");
-             }
-           });
-         const onSuccessForm = (formID) => {
-           setTimeout(() => {
-             $(this.el).find(formID).trigger("reset");
-             $(this.el).find(".input-field-grp").removeClass("filled");
-             this.submitHubspot();
-           }, 1000);
-         };
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+            const $form = $(this.el).find("#contact-form");
+            $(this.el).find(".contact-hero-form-input").on("blur", function () {
+               if ($(this).val()) {
+                  $(this).parent().addClass("active");
+               } else {
+                  $(this).parent().removeClass("active");
+               }
+            });
+            const onSuccessForm = (formID) => {
+               setTimeout(() => {
+                  $(this.el).find(formID).trigger("reset");
+                  $(this.el).find(".input-field-grp").removeClass("filled");
+                  this.submitHubspot();
+               }, 1000);
+            };
 
-         formSubmitEvent.init({
-           onlyWorkOnThisFormName: "Contact Form",
-           onSuccess: () => onSuccessForm("#contact-form"),
-         });
-         $('button[type="submit"]').on("pointerenter", function () {
-           if ($(this).prop("disabled")) {
-             $(this).prop("disabled", false);
-           }
-         });
-         $form.find('[type="submit"]').on("click", function (e) {
-           const data = mapFormToObject($form.get(0));
-           console.log(data);
-           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-           let isValid = true;
-           requiredNames.forEach(function (name) {
-             if (!Object.prototype.hasOwnProperty.call(data, name)) return;
-             const v = String(data[name] ?? "").trim();
-             let hasError = false;
-             if (name === "Phone-Number") {
-               hasError = v !== "" && !/^\d+$/.test(v);
-             } else if (name === "Email") {
-               console.log(v, emailRegex.test(v));
-               hasError = v !== "" && !emailRegex.test(v);
-             }
-             const $input = $form.find('[name="' + name + '"]');
-             const $parent = $input.parent();
-             console.log($input);
-             if (hasError) {
-               $parent.addClass("error");
-               isValid = false;
-             } else {
-               $parent.removeClass("error");
-             }
-           });
-           console.log(isValid);
-           if (!isValid) {
-            e.preventDefault();
-           }
-         });
-         const requiredNames = ["First-Name", "Last-Name", "Phone-Number", "Email"];
-         const updateSubmitState = function ($f) {
-           let allFilled = true;
-           requiredNames.forEach(function (name) {
-             const $input = $f.find('[name="' + name + '"]');
-             if ($input.length) {
-               const v = String($input.val() ?? "").trim();
-               if (v.length === 0) allFilled = false;
-             }
-           });
-           const $btn = $f.find('[type="submit"]');
-           if (allFilled) $btn.removeClass("disable");
-           else $btn.addClass("disable");
-         };
-         updateSubmitState($form);
-         $form.on(
-           "input change",
-           '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]',
-           function () {
-             updateSubmitState($form);
-           }
-         );
-       }
-       submitHubspot() {
-         const hubspot = {
-           portalId: 145687733,
-           formId: "69790463-8651-4e07-ad64-45f9c23549e9",
-           fields: [
-             { name: "firstname", value: (data) => data["First name"] },
-             { name: "lastname", value: (data) => data["Last name"] },
-             { name: "phone", value: (data) => data["Phone number"] },
-             { name: "email", value: (data) => data["Email"] },
-             { name: "message", value: (data) => data["Message"] },
-           ],
-         };
+            formSubmitEvent.init({
+               onlyWorkOnThisFormName: "Contact Form",
+               onSuccess: () => onSuccessForm("#contact-form"),
+            });
+            $('button[type="submit"]').on("pointerenter", function () {
+               if ($(this).prop("disabled")) {
+                  $(this).prop("disabled", false);
+               }
+            });
+            $form.find('[type="submit"]').on("click", function (e) {
+               const data = mapFormToObject($form.get(0));
+               const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+               let isValid = true;
+               requiredNames.forEach(function (name) {
+                  if (!Object.prototype.hasOwnProperty.call(data, name)) return;
+                  const v = String(data[name] ?? "").trim();
+                  let hasError = false;
+                  if (name === "Phone-Number") {
+                     hasError = v !== "" && !/^\d+$/.test(v);
+                  } else if (name === "Email") {
+                     hasError = v !== "" && !emailRegex.test(v);
+                  }
+                  const $input = $form.find('[name="' + name + '"]');
+                  const $parent = $input.parent();
+                  if (hasError) {
+                     $parent.addClass("error");
+                     isValid = false;
+                  } else {
+                     $parent.removeClass("error");
+                  }
+               });
+               if (!isValid) {
+                  e.preventDefault();
+               }
+            });
+            const requiredNames = ["First-Name", "Last-Name", "Phone-Number", "Email"];
+            const updateSubmitState = function ($f) {
+               let allFilled = true;
+               requiredNames.forEach(function (name) {
+                  const $input = $f.find('[name="' + name + '"]');
+                  if ($input.length) {
+                  const v = String($input.val() ?? "").trim();
+                  if (v.length === 0) allFilled = false;
+                  }
+               });
+               const $btn = $f.find('[type="submit"]');
+               if (allFilled) $btn.removeClass("disable");
+               else $btn.addClass("disable");
+            };
+            updateSubmitState($form);
+            $form.on(
+            "input change",
+            '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]',
+            function () {
+               updateSubmitState($form);
+            }
+            );
+         }
+         submitHubspot() {
+            const hubspot = {
+            portalId: 145687733,
+            formId: "69790463-8651-4e07-ad64-45f9c23549e9",
+            fields: [
+               { name: "firstname", value: (data) => data["First name"] },
+               { name: "lastname", value: (data) => data["Last name"] },
+               { name: "phone", value: (data) => data["Phone number"] },
+               { name: "email", value: (data) => data["Email"] },
+               { name: "message", value: (data) => data["Message"] },
+            ],
+            };
          const { portalId, formId, fields } = hubspot;
          let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
          const data = mapFormToObject($form.get(0));
          const mapField = (data) => {
-           if (!fields.length) return [];
+            if (!fields.length) return [];
 
-           const result = fields.map((field) => {
-             const { name, value } = field;
-             if (!value) {
+            const result = fields.map((field) => {
+               const { name, value } = field;
+               if (!value) {
                return {
-                 name,
-                 value: data[name] || "",
+                  name,
+                  value: data[name] || "",
                };
-             } else {
+               } else {
                const getValue = value(data);
                return {
-                 name,
-                 value: getValue || "",
+                  name,
+                  value: getValue || "",
                };
-             }
-           });
-           return result;
+               }
+            });
+            return result;
          };
          const mappedFields = mapField(data);
          const dataSend = {
-           fields: mappedFields,
-           context: {
-             pageUri: window.location.href,
-             pageName: "Contact page",
-           },
+            fields: mappedFields,
+            context: {
+               pageUri: window.location.href,
+               pageName: "Contact page",
+            },
          };
          $.ajax({
-           url: url,
-           method: "POST",
-           data: JSON.stringify(dataSend),
-           dataType: "json",
-           headers: {
-             accept: "application/json",
-             "Access-Control-Allow-Origin": "*",
-           },
-           contentType: "application/json",
-           success: function (response) {
-             console.log(response);
-           },
-           error: function (xhr, resp, text) {
-             console.log(xhr, resp, text);
-           },
+            url: url,
+            method: "POST",
+            data: JSON.stringify(dataSend),
+            dataType: "json",
+            headers: {
+               accept: "application/json",
+               "Access-Control-Allow-Origin": "*",
+            },
+            contentType: "application/json",
+            success: function (response) {
+               console.log(response);
+            },
+            error: function (xhr, resp, text) {
+               console.log(xhr, resp, text);
+            },
          });
-       }
-       destroy() {}
-     },
-     Footer: class extends Footer {
-       constructor() {
-         super();
-       }
-     },
+         }
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+         }
+      },
+      Footer: class extends Footer {
+         constructor() {
+            super();
+         }
+      },
    };
    const AboutPage = {
       Hero: class {
@@ -2635,7 +2699,6 @@ const mainScript = () => {
             this.el = null;
             this.tlOnce = null;
             this.tlEnter = null;
-            this.tlScrub = null;
             this.tlTriggerEnter = null;
          }
          setup(data, mode) {
@@ -2686,17 +2749,18 @@ const mainScript = () => {
          }
          animateImage() {
             let currentIndex = 0;
-            let interval = null;
+            this.interval = null;
 
             const activeIndex = () => {
                $(this.el).find('.about-hero-item').eq(currentIndex).addClass('active').siblings().removeClass('active');
             }
             const startInterval = () => {
-               if (interval) {
-                     clearInterval(interval);
+               if (this.interval) {
+                  clearInterval(this.interval);
+                  this.interval = null;
                }
 
-               interval = setInterval(() => {
+               this.interval = setInterval(() => {
                      currentIndex++;
                      if (currentIndex >= $(this.el).find('.about-hero-item').length) {
                         currentIndex = 0;
@@ -2711,10 +2775,25 @@ const mainScript = () => {
             }, 2500);
          }
          destroy() {
+            if (this.interval) {
+               clearInterval(this.interval);
+            }
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
          }
       },
       Team: class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() {
+            super();
+            this.el = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.about-team-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
@@ -2729,12 +2808,12 @@ const mainScript = () => {
 
          }
          interact() {
-            $('.about-team-item').each((index, item) => {
+            $(this.el).find('.about-team-item').each((index, item) => {
                let itemOpens =$(item).find('[data-popup="open"]');
                itemOpens.each((index, itemOpen) => {
-                  $(itemOpen).on('click', function() {
+                  $(itemOpen).on('click', () => {
                      let parent = $(itemOpen).closest('.about-team-item');
-                     $('.about-team-popup').addClass('active');
+                     $(this.el).find('.about-team-popup').addClass('active');
                      $('.main').addClass('has-popup')
                      smoothScroll.stop();
                      parent.find('[data-team]').each((index, item) => {
@@ -2759,13 +2838,12 @@ const mainScript = () => {
                   });
                });
             });
-            $('.about-team-popup-close').on('click', function() {
-               $('.about-team-popup').removeClass('active');
+            $(this.el).find('.about-team-popup-close').on('click', () => {
+               $(this.el).find('.about-team-popup').removeClass('active');
                $('.main').removeClass('has-popup');
                smoothScroll.start();
-
             });
-            $('.about-team-popup').on('click', function(e) {
+            $(this.el).find('.about-team-popup').on('click', (e) => {
                if(!$(e.target).closest('.about-team-popup-content').length) {
                   $('.about-team-popup').removeClass('active');
                   $('.main').removeClass('has-popup');
@@ -2779,8 +2857,8 @@ const mainScript = () => {
          }
       },
       Inves: class extends TriggerSetup {
-         constructor() { 
-            super(); 
+         constructor() {
+            super();
             this.el = null;
          }
          trigger(data) {
@@ -2800,10 +2878,10 @@ const mainScript = () => {
                marqueeLogo.play();
             });
          }
-         interact() {            
+         interact() {
          }
          destroy() {
-            
+
          }
       },
       Job: class extends TriggerSetup {
@@ -2839,10 +2917,10 @@ const mainScript = () => {
             });
          }
          interact() {
-           
+
          }
          destroy() {
-            
+
          }
       },
       Footer: class extends Footer {
