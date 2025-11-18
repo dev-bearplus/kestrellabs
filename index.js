@@ -3043,6 +3043,7 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.masterTimeline = null;
+            this.numberItem = 3;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".resource-hero-wrap");
@@ -3051,6 +3052,7 @@ const mainScript = () => {
             } else if (mode === "enter") {
                this.setupEnter(data);
             } else return;
+            this.initLoadMore();
             this.initContent();
             this.interact();
          }
@@ -3089,28 +3091,24 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
-           $(this.el).find('.resource-hero-search-ic').on('click', () => {
-            this.searchItem($(this.el).find('.resource-hero-search-input').val());
-           });
-         //   $(this.el).find('.resource-hero-search-input').on('keyup', (e) => {
-         //    e.preventDefault();
-         //    if(e.key === 'Enter'){
-         //       this.searchItem($(this.el).find('.resource-hero-search-input').val());
-         //    }
-         //   });
+            $(this.el).find('.resource-hero-search-ic').on('click', () => {
+               this.searchItem($(this.el).find('.resource-hero-search-input').val());
+            });
             $(this.el).find('.resource-hero-search-form').on('keypress', (e) => {
                if(e.which === 13 ) {
                   e.preventDefault();
                   this.searchItem($(this.el).find('.resource-hero-search-input').val());
                }
             });
+            $(this.el).find('.resource-hero-load').on('click', () => {
+               this.loadMore();
+            });
          }
          initContent() {
-            console.log('initContent');
             $(this.el).find('.resource-hero-item').each((index, item) => {
                let tl = gsap.timeline({
                   scrollTrigger: {
-                     trigger: $(item).get(0),
+                     trigger: item,
                      start: 'top top+=75%',
                      once: true,
                   },
@@ -3124,25 +3122,23 @@ const mainScript = () => {
                   tweenArr: [
                      new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
                      new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-                     new ScaleDash({el: $(item).find('.resource-hero-item-date .line'), type: 'top'}),
-                     new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-title'), isDisableRevert: true}),
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt '), type: 'bottom'}),
+                     new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
+                     new FadeIn({el: $(item).find('.resource-hero-item-img-inner').get(0), type: 'bottom'}),
+                     new ScaleDash({el: $(item).find('.resource-hero-item-img .line').get(0), type: 'top'}),
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true}),
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt ')}),
                      new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
                   ]
                });
             });
          }
          searchItem(val){
-            if(this.masterTimeline){
-               this.masterTimeline.destroy();
-               this.masterTimeline = null;
-            }
+            $(this.el).find('.resource-hero-load-wrap').hide();
             $(this.el).find('.resource-hero-item').hide();
             $(this.el).find('.resource-hero-item').each((index, item) => {
                let title = $(item).find('.resource-hero-item-title .heading');
-               console.log(title.attr('data-title'));
-               if(title.attr('data-title').includes(val)){
+               console.log('khanh', title.attr('data-title'));
+               if(title.attr('data-title')?.toLowerCase().includes(val?.toLowerCase())){
                   $(item).show();
                   this.activeItem($(item));
                }
@@ -3150,22 +3146,44 @@ const mainScript = () => {
          }
          activeItem(item){
             ScrollTrigger.refresh();
-            new MasterTimeline({
-               triggerInit: $(item).get(0),
-               timeline: null,
-               tweenArr: [
-                  new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
-                  new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-                  new ScaleDash({el: $(item).find('.resource-hero-item-date .line'), type: 'top'}),
-                  new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
-                  new FadeIn({el: $(item).find('.resource-hero-item-title')}),
-                  new FadeIn({el: $(item).find('.resource-hero-item-sub '), type: 'bottom'}),
-                  new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
-               ]
-            });
+            new FadeIn({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
+            new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
+            new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
+            new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
+            new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true}),
+            new FadeIn({el: $(item).find('.resource-hero-item-sub .txt ')}),
+            new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
          }
-         resetAnimItem(item){
-            $()
+         initLoadMore() {
+            if(this.numberItem > $(this.el).find('.resource-hero-item').length) {
+               $(this.el).find('.resource-hero-load-wrap').hide();
+            }
+            else {
+               $(this.el).find('.resource-hero-item').each((index, item) => {
+                  if(index >= this.numberItem) {
+                     $(item).hide();
+                     $(item).addClass('hide');
+                  }
+               });
+            }
+         }
+         loadMore() {
+            this.numberItem += 3;
+            $(this.el).find('.resource-hero-item').each((index, item) => {
+               console.log('index', index, this.numberItem);
+               if(index < this.numberItem) {
+                  console.log('item', item);
+                  $(item).addClass('active');
+               }
+            });
+            $(this.el).find('.resource-hero-item.hide.active').each((index, item) => {
+                  $(item).show();
+                  this.activeItem($(item));
+                  $(item).removeClass('hide');
+            });
+            if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
+               $(this.el).find('.resource-hero-load-more').hide();
+            }
          }
          destroy() {
             if (this.tlOnce) {

@@ -272,7 +272,6 @@ class FadeSplitText {
     }
     destroy() {
         this.animation.kill();
-        this.textSplit.words.forEach((word) => word.remove());
     }
 }
 
@@ -298,7 +297,6 @@ class TextTypewriter {
     }
     destroy() {
         this.animation.kill();
-        this.DOM.el.remove();
     }
 }
 class FadeIn {
@@ -345,7 +343,6 @@ class FadeIn {
     }
     destroy() {
         this.animation.kill();
-        this.DOM.el.remove();
     }
 }
 class ScaleDash {
@@ -354,6 +351,7 @@ class ScaleDash {
         this.type = type || 'default';
         this.delay = delay;
         this.widthItem = this.DOM.el.offsetWidth || 0;
+        console.log('widthItem', this.widthItem);
         this.heightItem = this.DOM.el.offsetHeight || 0;
         this.options = {
             top: {
@@ -436,7 +434,6 @@ class ScaleLine {
     }
     destroy() {
         this.animation.kill();
-        this.DOM.el.remove();
     }
 }
 class ScaleInset {
@@ -460,6 +457,5 @@ class ScaleInset {
     }
     destroy() {
         this.animation.kill();
-        this.DOM.el.remove();
     }
 }
