@@ -311,7 +311,7 @@ const mainScript = () => {
          this.lenis = new Lenis({
                wrapper: data?.next?.container || document.querySelector('.main-inner'),
                content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
-               syncTouch: false,
+               syncTouch: true,
                smoothWheel: true,
                smoothTouch: false,
                infinite: false,
@@ -3033,6 +3033,7 @@ const mainScript = () => {
             } else if (mode === "enter") {
                this.setupEnter(data);
             } else return;
+            this.loadTermlyPolicy();
             this.initTableContent();
             this.interact();
          }
@@ -3099,7 +3100,6 @@ const mainScript = () => {
          itemContentActiveCheck(el) {
             for (let i = 0; i < $(el).length; i++) {
                 let top = $(el).eq(i).get(0).getBoundingClientRect().top;
-                console.log(top)
                 if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
                     $('.policy-hero-table-item').removeClass('active');
                     $('.policy-hero-table-item').eq(i).addClass('active');
@@ -3124,6 +3124,30 @@ const mainScript = () => {
                 $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
             })
           }
+          async loadTermlyPolicy() {
+            const policyUrl = 'https://app.termly.io/policy-viewer/policy.html?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const fullUrl = proxyUrl + encodeURIComponent(policyUrl);
+            
+            try {
+                $('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
+                
+                const response = await fetch(fullUrl);      // ✅ Thêm await
+                const html = await response.text();         // ✅ Chuyển response thành text
+                // Parse HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                let content = doc.body.innerHTML;
+                console.log('content', content);
+                
+                content = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                $('.policy-hero-content-richtext').html(content);
+                
+            } catch (error) {
+                console.error('Error loading policy:', error);
+                $('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
+            }
+        }
          destroy() {
             if (this.tlOnce) {
                this.tlOnce.kill();
