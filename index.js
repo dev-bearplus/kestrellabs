@@ -17,6 +17,25 @@ const mainScript = () => {
 			return window.innerHeight;
 		},
    };
+   function multiLineText(el){
+      let line = $(el).find('.line-anim');
+      let textMapLine = $(el).find('.bp-line');
+      let lineClone = line.clone();
+      console.log(lineClone)
+      if(textMapLine.length >1){
+          line.remove();
+          textMapLine.each((idx, item) => {
+            if(idx == 0){
+              $(item).attr('data-cursor-txtLink-child','')
+            }
+              $(item).css({
+                  position: 'relative',
+                  width: 'max-content'
+                });
+              $(item).append(lineClone.clone());
+          })
+      }
+  }
    const cvUnit = (val, unit) => {
       let result;
       switch (true) {
@@ -3018,6 +3037,92 @@ const mainScript = () => {
          }
       },
    };
+   const ResourcePage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".resource-hero-wrap");
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            this.initContent();
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+            });
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               },
+            });
+            this.initContent();
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+           
+         }
+         initContent() {
+            console.log('initContent');
+            $(this.el).find('.resource-hero-item').each((index, item) => {
+               new MasterTimeline({
+                  triggerInit: $(item),
+                  timeline: null,
+                  tweenArr: [
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true})
+                  ]
+               });
+               multiLineText($(item).find('.resource-hero-item-title .heading'));
+            });
+         }
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+         }
+      },
+      Footer: class extends Footer {
+         constructor() {
+            super();
+         }
+      },
+   };
    const PolicyPage = {
       Hero: class {
          constructor() {
@@ -3260,6 +3365,9 @@ const mainScript = () => {
    class PolicyPageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class ResourcePageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
@@ -3268,6 +3376,7 @@ const mainScript = () => {
       about: new AboutPageManager(AboutPage),
       schedule: new SchedulePageManager(SchedulePage),
       policy: new PolicyPageManager(PolicyPage),
+      resource: new ResourcePageManager(ResourcePage),
    };
 
 	const SCRIPT = {
@@ -3332,6 +3441,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.policy.destroy(data);
+         }
+      },
+      resource: {
+         namespace: 'resource',
+         afterEnter(data) {
+            PageManagerRegistry.resource.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.resource.destroy(data);
          }
       }
 	};

@@ -238,6 +238,7 @@ class FadeSplitText {
             this.textSplit = SplitText.create(this.DOM.el, {
                 type: this.splitType === 'words' ? "lines words" : 'lines',
                 mask: "lines",
+                linesClass: 'bp-line',
                 autoSplit: true,
                 onSplit: (self) => {
                     gsap.set(self[this.splitType], { autoAlpha: 0, yPercent: 100 });
