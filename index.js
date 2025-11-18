@@ -3118,14 +3118,13 @@ const mainScript = () => {
                     multiLineText($(item).find('.resource-hero-item-title'));
                   },
                });
-               let widthLineDate = $(item).find('.resource-hero-item-date .line').width();
                this.masterTimeline = new MasterTimeline({
                   triggerInit: $(item).get(0),
                   timeline: tl,
                   tweenArr: [
                      new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
                      new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-                     gsap.fromTo($(item).find('.resource-hero-item-date .line'), {width: 0}, {width: widthLineDate, duration: .8, ease: 'power1.out'}),
+                     new ScaleDash({el: $(item).find('.resource-hero-item-date .line'), type: 'top'}),
                      new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
                      new FadeSplitText({el: $(item).find('.resource-hero-item-title'), isDisableRevert: true}),
                      new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt '), type: 'bottom'}),
@@ -3151,14 +3150,13 @@ const mainScript = () => {
          }
          activeItem(item){
             ScrollTrigger.refresh();
-            let widthLineDate = $(item).find('.resource-hero-item-date .line').width();
             new MasterTimeline({
                triggerInit: $(item).get(0),
                timeline: null,
                tweenArr: [
                   new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
                   new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-                  gsap.fromTo($(item).find('.resource-hero-item-date .line'), {width: 0}, {width: widthLineDate, duration: .8, ease: 'power1.out'}),
+                  new ScaleDash({el: $(item).find('.resource-hero-item-date .line'), type: 'top'}),
                   new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
                   new FadeIn({el: $(item).find('.resource-hero-item-title')}),
                   new FadeIn({el: $(item).find('.resource-hero-item-sub '), type: 'bottom'}),

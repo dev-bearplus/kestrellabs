@@ -353,7 +353,7 @@ class ScaleDash {
         this.DOM = { el: el };
         this.type = type || 'default';
         this.delay = delay;
-        this.widthItem = gsap.getProperty(this.DOM.el, 'width');
+        this.widthItem = gsap.getProperty(this.DOM.el, 'width') || 0;
         this.heightItem = gsap.getProperty(this.DOM.el, 'height');
         this.options = {
             top: {
