@@ -348,6 +348,49 @@ class FadeIn {
         this.DOM.el.remove();
     }
 }
+class ScaleDash {
+    constructor({ el, type, isCenter, delay, isDisableRevert, ...props }) {
+        this.DOM = { el: el };
+        this.type = type || 'default';
+        this.delay = delay;
+        this.widthItem = gsap.getProperty(this.DOM.el, 'width');
+        this.heightItem = gsap.getProperty(this.DOM.el, 'height');
+        this.options = {
+            top: {
+                set: { height: 0, transformOrigin: isCenter ? 'center center' : 'top left' },
+                to: { height: this.heightItem }
+            },
+            bottom: {
+                set: { height: 0, transformOrigin: isCenter ? 'center center' : 'bottom left' },
+                to: { height: this.heightItem }
+            },
+            left: {
+                set: { width: 0, transformOrigin: isCenter ? 'center center' : 'top left' },
+                to: { width: this.widthItem }
+            },
+            right: {
+                set: { width: 0, transformOrigin: isCenter ? 'center center' : 'top right' },
+                to: { width: this.widthItem }
+            },
+            default: {
+                set: { height: 0, transformOrigin: isCenter ? 'center center' : 'top left' },
+                to: { height: this.heightItem }
+            }
+        };
+        this.animation = gsap.fromTo(this.DOM.el,
+            { ...this.options[this.type]?.set || this.options.default.set },
+            { ...this.options[this.type]?.to || this.options.default.to,
+                duration: 1.2,
+                ease: 'power1.out',
+                clearProps: isDisableRevert ? '' : 'all',
+                ...props
+            });
+    }
+    destroy() {
+        this.animation.kill();
+        this.DOM.el.remove();
+    }
+}
 class ScaleLine {
     constructor({ el, type, isCenter, delay, isDisableRevert, ...props }) {
         if (!el) return;
