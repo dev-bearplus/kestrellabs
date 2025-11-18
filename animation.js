@@ -353,8 +353,8 @@ class ScaleDash {
         this.DOM = { el: el };
         this.type = type || 'default';
         this.delay = delay;
-        this.widthItem = gsap.getProperty(this.DOM.el, 'width') || 0;
-        this.heightItem = gsap.getProperty(this.DOM.el, 'height');
+        this.widthItem = this.DOM.el.offsetWidth || 0;
+        this.heightItem = this.DOM.el.offsetHeight || 0;
         this.options = {
             top: {
                 set: { height: 0, transformOrigin: isCenter ? 'center center' : 'top left' },
