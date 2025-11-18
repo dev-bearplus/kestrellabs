@@ -257,9 +257,6 @@ class FadeSplitText {
                                 self.revert();
                                 convertHyphen(self.elements[0]);
                             }
-                            if (this.DOM.el.querySelectorAll('.txt-strike').length !== 0) {
-                                this.DOM.el.querySelectorAll('.txt-strike').forEach(element => element.classList.add('active'));
-                            }
                         },
                         ...props
                     });

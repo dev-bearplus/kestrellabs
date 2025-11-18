@@ -3135,16 +3135,15 @@ const mainScript = () => {
             });
          }
          searchItem(val){
-            console.log('searchItem', val);
+            if(this.masterTimeline){
+               this.masterTimeline.destroy();
+               this.masterTimeline = null;
+            }
             $(this.el).find('.resource-hero-item').hide();
             $(this.el).find('.resource-hero-item').each((index, item) => {
                let title = $(item).find('.resource-hero-item-title .heading');
                console.log(title.attr('data-title'));
                if(title.attr('data-title').includes(val)){
-                  if(this.masterTimeline){
-                     this.masterTimeline.destroy();
-                     this.masterTimeline = null;
-                  }
                   $(item).show();
                   this.activeItem($(item));
                }
