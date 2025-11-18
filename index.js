@@ -21,18 +21,16 @@ const mainScript = () => {
       let line = $(el).find('.line-anim');
       let textMapLine = $(el).find('.bp-line');
       let lineClone = line.clone();
-      console.log(lineClone)
+      console.log(textMapLine)
       if(textMapLine.length >1){
           line.remove();
           textMapLine.each((idx, item) => {
-            if(idx == 0){
-              $(item).attr('data-cursor-txtLink-child','')
-            }
-              $(item).css({
-                  position: 'relative',
-                  width: 'max-content'
-                });
-              $(item).append(lineClone.clone());
+            console.log(idx)
+            $(item).css({
+               position: 'relative',
+               width: 'max-content'
+               });
+            $(item).append(lineClone.clone());
           })
       }
   }
@@ -3044,6 +3042,7 @@ const mainScript = () => {
             this.tlOnce = null;
             this.tlEnter = null;
             this.tlTriggerEnter = null;
+            this.masterTimeline = null;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".resource-hero-wrap");
@@ -3090,20 +3089,86 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
-           
+           $(this.el).find('.resource-hero-search-ic').on('click', () => {
+            this.searchItem($(this.el).find('.resource-hero-search-input').val());
+           });
+         //   $(this.el).find('.resource-hero-search-input').on('keyup', (e) => {
+         //    e.preventDefault();
+         //    if(e.key === 'Enter'){
+         //       this.searchItem($(this.el).find('.resource-hero-search-input').val());
+         //    }
+         //   });
+            $(this.el).find('.resource-hero-search-form').on('keypress', (e) => {
+               if(e.which === 13 ) {
+                  e.preventDefault();
+                  this.searchItem($(this.el).find('.resource-hero-search-input').val());
+               }
+            });
          }
          initContent() {
             console.log('initContent');
             $(this.el).find('.resource-hero-item').each((index, item) => {
-               new MasterTimeline({
-                  triggerInit: $(item),
-                  timeline: null,
+               let tl = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: $(item).get(0),
+                     start: 'top top+=75%',
+                     once: true,
+                  },
+                  onComplete: () => {
+                    multiLineText($(item).find('.resource-hero-item-title'));
+                  },
+               });
+               let widthLineDate = $(item).find('.resource-hero-item-date .line').width();
+               this.masterTimeline = new MasterTimeline({
+                  triggerInit: $(item).get(0),
+                  timeline: tl,
                   tweenArr: [
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true})
+                     new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
+                     new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
+                     gsap.fromTo($(item).find('.resource-hero-item-date .line'), {width: 0}, {width: widthLineDate, duration: .8, ease: 'power1.out'}),
+                     new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-title'), isDisableRevert: true}),
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt '), type: 'bottom'}),
+                     new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
                   ]
                });
-               multiLineText($(item).find('.resource-hero-item-title .heading'));
             });
+         }
+         searchItem(val){
+            console.log('searchItem', val);
+            $(this.el).find('.resource-hero-item').hide();
+            $(this.el).find('.resource-hero-item').each((index, item) => {
+               let title = $(item).find('.resource-hero-item-title .heading');
+               console.log(title.attr('data-title'));
+               if(title.attr('data-title').includes(val)){
+                  if(this.masterTimeline){
+                     this.masterTimeline.destroy();
+                     this.masterTimeline = null;
+                  }
+                  $(item).show();
+                  this.activeItem($(item));
+               }
+            });
+         }
+         activeItem(item){
+            ScrollTrigger.refresh();
+            let widthLineDate = $(item).find('.resource-hero-item-date .line').width();
+            new MasterTimeline({
+               triggerInit: $(item).get(0),
+               timeline: null,
+               tweenArr: [
+                  new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
+                  new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
+                  gsap.fromTo($(item).find('.resource-hero-item-date .line'), {width: 0}, {width: widthLineDate, duration: .8, ease: 'power1.out'}),
+                  new ScaleInset({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
+                  new FadeIn({el: $(item).find('.resource-hero-item-title')}),
+                  new FadeIn({el: $(item).find('.resource-hero-item-sub '), type: 'bottom'}),
+                  new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
+               ]
+            });
+         }
+         resetAnimItem(item){
+            $()
          }
          destroy() {
             if (this.tlOnce) {

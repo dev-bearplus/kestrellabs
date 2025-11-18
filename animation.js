@@ -54,6 +54,10 @@ class MasterTimeline {
         };
         this.tweenArr.forEach((item) => this.timeline.add(item.animation, item.delay || `<=${this.stagger}` || "<=.1"));
     }
+    destroy() {
+        this.timeline.kill();
+        this.tweenArr.forEach((item) => item.destroy?.());
+    }
 }
 class RevealText {
     constructor({ el, color, delay, isDisableRevert, isHighlight = false, isFast = false, ...props }) {
@@ -269,6 +273,10 @@ class FadeSplitText {
 
         })
     }
+    destroy() {
+        this.animation.kill();
+        this.textSplit.words.forEach((word) => word.remove());
+    }
 }
 
 class TextTypewriter {
@@ -290,6 +298,10 @@ class TextTypewriter {
     init() {
     }
     stop() {
+    }
+    destroy() {
+        this.animation.kill();
+        this.DOM.el.remove();
     }
 }
 class FadeIn {
@@ -333,6 +345,10 @@ class FadeIn {
     init() {
         if (!this.DOM.el) return;
         gsap.set(this.DOM.el, { ...this.options[this.type]?.set || this.options.default.set });
+    }
+    destroy() {
+        this.animation.kill();
+        this.DOM.el.remove();
     }
 }
 class ScaleLine {
@@ -378,6 +394,10 @@ class ScaleLine {
 
         gsap.set(this.DOM.el, { ...this.options[this.type]?.set || this.options.default.set });
     }
+    destroy() {
+        this.animation.kill();
+        this.DOM.el.remove();
+    }
 }
 class ScaleInset {
     constructor({el, elInner, delay, duration, isDisableRevert }) {
@@ -397,5 +417,9 @@ class ScaleInset {
         if (!this.DOM.el) return;
         gsap.set(this.DOM.el, { clipPath: `inset(20% round ${this.borderRad}px)` });
         gsap.set(this.DOM.elInner, { scale: 1.4, autoAlpha: 0 });
+    }
+    destroy() {
+        this.animation.kill();
+        this.DOM.el.remove();
     }
 }
