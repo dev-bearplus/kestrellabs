@@ -3279,7 +3279,7 @@ const mainScript = () => {
             });
            }
            else {
-            header.unregisterDependent($(this.el).find('.policy-hero-table-inner'));
+            header.registerDependent($(this.el).find('.policy-hero-table-inner'));
            }
          }
          itemContentActiveCheck(el) {
@@ -3342,6 +3342,245 @@ const mainScript = () => {
             }
             else {
                header.unregisterDependent($(this.el).find('.policy-hero-table-inner'));
+            }
+         }
+      },
+
+      Footer: class extends Footer {
+         constructor() {
+            super();
+         }
+      },
+   };
+   const TpResourcePage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".tp-resource-hero-wrap");
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            // this.loadTermlyPolicy();
+            this.initTableContent();
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+            });
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play(),
+                  onStart: () =>
+                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               },
+            });
+
+            this.interact();
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+            this.actionShare();
+           $(this.el).find('.tp-resource-hero-table-item').on('click', (e) => {
+            let dataTitle = $(e.currentTarget).closest('.tp-resource-hero-table-item').attr('data-title');
+            let content = $(this.el).find(`.tp-resource-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
+            let offset = -100;
+            smoothScroll.scrollTo(content, {
+               offset: offset,
+               duration: 1,
+            });
+            $('.tp-resource-hero-table-item').removeClass('active');
+            $(e.currentTarget).closest('.tp-resource-hero-table-item').addClass('active');
+           });
+           smoothScroll.lenis.on('scroll', () => {
+            this.itemContentActiveCheck($(this.el).find('.tp-resource-hero-content-richtext h2'));
+           });
+           if(viewport.w < 992){
+            header.registerDependent($(this.el).find('.tp-resource-hero-table'));
+            $(this.el).find('.tp-resource-hero-table-head').on('click', (e) => {
+               $(e.currentTarget).closest('.tp-resource-hero-table-head').toggleClass('active');
+               $('.tp-resource-hero-table-list').slideToggle();
+            });
+           }
+           else {
+            let heightTableContentWrap = $(this.el).find('.tp-resource-hero-table-content-wrap').outerHeight();
+            let heightTableContent = $(this.el).find('.tp-resource-hero-table-content').outerHeight();
+            console.log('heightTableContentWrap', heightTableContentWrap);
+            console.log('heightTableContent', heightTableContent);
+            if(heightTableContent > heightTableContentWrap) {
+               console.log('prevent');
+               $(this.el).find('.tp-resource-hero-table-content-wrap').attr('data-lenis-prevent', 'true');
+            }
+            header.registerDependent($(this.el).find('.tp-resource-hero-table-inner'));
+           }
+         }
+         itemContentActiveCheck(el) {
+            for (let i = 0; i < $(el).length; i++) {
+                let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+                if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
+                    $('.tp-resource-hero-table-item').removeClass('active');
+                    $('.tp-resource-hero-table-item').eq(i).addClass('active');
+                }
+                }
+          }
+          initTableContent() {
+            $(this.el).find('.tp-resource-content-number').text($('.tp-resource-hero-content-richtext h2').length);
+            let titleLeft = $(this.el).find('.tp-resource-hero-table-item').eq(0).clone();
+            $(this.el).find('.tp-resource-hero-table-item').remove();
+            $(this.el).find('.tp-resource-hero-content-richtext h2').each((i, el) => {
+                $(el).attr('data-title', `toch-${i}`);
+                let titleLeftClone = titleLeft.clone();
+                if(i == 0) {
+                    titleLeftClone.addClass('active');
+                }
+                let index = `${i+1}.`
+                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
+                titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(0).text(index);
+                titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(1).text(cleanText);
+                titleLeftClone.attr('data-title', `toch-${i}`);
+                $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
+            })
+          }
+          async loadTermlyPolicy() {
+            const policyUrl = 'https://app.termly.io/policy-viewer/policy.html?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const fullUrl = 'https://app.termly.io/api/v1/snippets/documents/f2fe4436-2654-4543-bf1e-07963e3f5f83/website';
+            
+            try {
+                $('.tp-resource-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
+                
+                const response = await fetch(fullUrl);      // ✅ Thêm await
+                const data = await response.json();  
+                console.log('data', data);
+                $('.tp-resource-hero-content-richtext').html(data.content);
+                
+            } catch (error) {
+                console.error('Error loading policy:', error);
+                $('.tp-resource-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
+            }
+         }
+         actionShare() {
+            $('.tp-resource-hero-share-item').on('click', function(e) {
+                e.preventDefault();
+                const shareType = $(this).data('share');
+                const currentURL = window.location.href;
+                const pageTitle = document.title;
+                const encodedURL = encodeURIComponent(currentURL);
+                const encodedTitle = encodeURIComponent(pageTitle);
+                switch(shareType) {
+                    case 'fb':
+                        const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodedURL}`;
+                        window.open(facebookURL, 'facebook-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                        break;
+
+                    case 'x':
+                        const twitterURL = `https://twitter.com/intent/tweet?url=${encodedURL}&text=${encodedTitle}`;
+                        window.open(twitterURL, 'twitter-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                        break;
+
+                    case 'linkin':
+                        const linkedinURL = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedURL}`;
+                        window.open(linkedinURL, 'linkedin-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                        break;
+
+                    case 'link':
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(currentURL).then(function() {
+                                showCopySuccess();
+                            }).catch(function(err) {
+                                console.error('Failed to copy: ', err);
+                                fallbackCopyTextToClipboard(currentURL);
+                            });
+                        } else {
+                            fallbackCopyTextToClipboard(currentURL);
+                        }
+                        break;
+
+                    default:
+                        console.warn('Unknown share type:', shareType);
+                }
+            });
+       
+           function fallbackCopyTextToClipboard(text) {
+               const textArea = document.createElement("textarea");
+               textArea.value = text;
+               textArea.style.position = "fixed";
+               textArea.style.left = "-999999px";
+               textArea.style.top = "-999999px";
+               document.body.appendChild(textArea);
+               textArea.focus();
+               textArea.select();
+               
+               try {
+                   const successful = document.execCommand('copy');
+                   if (successful) {
+                       showCopySuccess();
+                   } else {
+                       showCopyError();
+                   }
+               } catch (err) {
+                   console.error('Fallback: Unable to copy', err);
+                   showCopyError();
+               }
+               
+               document.body.removeChild(textArea);
+           }
+       
+            function showCopySuccess() {
+               showNotification('Copied to clipboard', 'success');
+            }
+            function showCopyError() {
+               showNotification('Failed to copy link.', 'error');
+            }
+            function showNotification(message, type) {
+               $('.tp-resource-hero-share-item-tooltip .txt').text(message)
+               $('.tp-resource-hero-share-item-tooltip').addClass('active');
+               setTimeout(function() {
+               $('.tp-resource-hero-share-item-tooltip').removeClass('active')
+               }, 1000);
+            }
+         }
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+            if(viewport.w < 992){
+               header.unregisterDependent($(this.el).find('.tp-resource-hero-table'));
+            }
+            else {
+               header.unregisterDependent($(this.el).find('.tp-resource-hero-table-inner'));
             }
          }
       },
@@ -3448,6 +3687,9 @@ const mainScript = () => {
    class ResourcePageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class TpResourcePageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
@@ -3457,6 +3699,7 @@ const mainScript = () => {
       schedule: new SchedulePageManager(SchedulePage),
       policy: new PolicyPageManager(PolicyPage),
       resource: new ResourcePageManager(ResourcePage),
+      tpResource: new TpResourcePageManager(TpResourcePage),
    };
 
 	const SCRIPT = {
@@ -3530,6 +3773,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.resource.destroy(data);
+         }
+      },
+      tpResource: {
+         namespace: 'tpResource',
+         afterEnter(data) {
+            PageManagerRegistry.tpResource.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.tpResource.destroy(data);
          }
       }
 	};
