@@ -2440,9 +2440,8 @@ const mainScript = () => {
          interact() {
             $(this.el).find('.pricing-hero-tab-item').on('click', (e) => {
                const type = $(e.currentTarget).attr('data-type');
-               console.log('khanh',$(this.el));
                $('.pricing-hero-tab-item').removeClass('active');
-               $(this).addClass('active');
+               $(e.currentTarget).addClass('active');
                if(type == 'year') {
                   $(this.el).find('.pricing-hero-package-item-title-wrap').addClass('active');
                } else {
