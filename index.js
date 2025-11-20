@@ -1284,62 +1284,102 @@ const mainScript = () => {
          }
          animateRuler() {
             if (!this.rulerWrap) return;
-               this.currentX = lerp(this.currentX, this.targetX, 0.3);
-               this.currentY = lerp(this.currentY, this.targetY, 0.3);
 
-               // Clamp the values
-               this.currentX = Math.max(this.minX, Math.min(this.currentX, this.maxX));
-               this.currentY = Math.max(this.minY, Math.min(this.currentY, this.maxY));
+            // Lerp and clamp current positions
+            this.currentX = Math.max(this.minX, Math.min(lerp(this.currentX, this.targetX, 0.3), this.maxX));
+            this.currentY = Math.max(this.minY, Math.min(lerp(this.currentY, this.targetY, 0.3), this.maxY));
 
-               let normalizedX = normalize(this.currentX, this.rulerWrap.offsetWidth) * this.rulerWrap.offsetWidth / 2;
-               let normalizedY = normalize(this.currentY, this.rulerWrap.offsetHeight) * this.rulerWrap.offsetHeight / 2;
+            // Cache DOM elements and dimensions
+            const $el = $(this.el);
+            const $verticalLine = $el.find('.home-hero-curor-line.line-vertical');
+            const $horizontalLine = $el.find('.home-hero-curor-line.line-horizital');
+            const $plus = $el.find('.home-hero-img-plus');
+            const $interact = $el.find('.home-hero-interact');
+            const $coordi = $el.find('.home-hero-img-coordi');
 
-               const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
-               const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
-               const isAtChangeEdgeX = this.currentX <= (this.minX + $(this.el).find('.home-hero-img-coordi').width()  + cvUnit(4, 'rem'));
-               const isAtChangeEdgeY = this.currentY >= (this.maxY - $(this.el).find('.home-hero-img-coordi').height()/2  - cvUnit(4, 'rem'));
-               const isAtEdge = isAtEdgeX || isAtEdgeY;
-               const currentScale = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'scale') || 1;
-               const scale = lerp(currentScale, isAtEdge ? 1.2 : 1, 0.08);
+            const interactWidth = $interact.width();
+            const interactHeight = $interact.height();
+            const coordiWidth = $coordi.width();
+            const coordiHeight = $coordi.height();
+            const padding = cvUnit(4, 'rem');
+            const edgeThreshold = cvUnit(20, 'rem');
 
-               const currentOpacityVertical = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || 1;
-               const currentOpacityHorizontal = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || 1;
-               const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : 1, 0.1);
-               const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : 1, 0.1);
-               const currentOpacityVerticalLine = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-vertical').get(0), 'opacity') || .16;
-               const currentOpacityHorizontalLine = gsap.getProperty($(this.el).find('.home-hero-curor-line.line-horizital').get(0), 'opacity') || .16;
-               const autoAlphaVerticalLine = lerp(currentOpacityVerticalLine, isAtEdgeX ? 0 : .16, 0.1);
-               const autoAlphaHorizontalLine = lerp(currentOpacityHorizontalLine, isAtEdgeY ? 0 : .16, 0.1);
+            // Calculate normalized positions
+            const halfWidth = this.rulerWrap.offsetWidth / 2;
+            const halfHeight = this.rulerWrap.offsetHeight / 2;
+            const normalizedX = normalize(this.currentX, this.rulerWrap.offsetWidth) * halfWidth;
+            const normalizedY = normalize(this.currentY, this.rulerWrap.offsetHeight) * halfHeight;
 
-               const currentBackgroundColor = gsap.getProperty($(this.el).find('.home-hero-img-plus').get(0), 'backgroundColor');
-               const currentColorAlpha = parseFloat(currentBackgroundColor.split(',')[3]) || 0;
-               const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
-               const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
+            // Edge detection
+            const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
+            const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
+            const isAtChangeCoordiX = this.currentX <= this.minX + coordiWidth + edgeThreshold;
+            const isAtChangeCoordiY = this.currentY >= this.maxY - coordiHeight - edgeThreshold;
+            const isAtChangeInteractX = this.currentX <= this.maxX - interactWidth - edgeThreshold;
+            const isAtChangeInteractY = this.currentY >= this.maxY - interactHeight - edgeThreshold;
 
-               const defaultCoordiX = normalizedX - ($(this.el).find('.home-hero-img-coordi').width() / 2 + cvUnit(4, 'rem'));
-               const coordiX = normalizedX >= 0
-                  ? defaultCoordiX
-                  : normalizedX + ($(this.el).find('.home-hero-img-coordi').width() / 2 + cvUnit(4, 'rem'));
-               const defaultCoordiY = normalizedY + $(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem');
-               const coordiY = normalizedY >= 0
-                  ? normalizedY - ($(this.el).find('.home-hero-img-coordi').height() / 2 + cvUnit(4, 'rem'))
-                  : defaultCoordiY;
+            // Calculate lerped values
+            const currentScale = gsap.getProperty($plus.get(0), 'scale') || 1;
+            const scale = lerp(currentScale, (isAtEdgeX || isAtEdgeY) ? 1.2 : 1, 0.08);
 
-               gsap.set($(this.el).find('.home-hero-curor-line.line-vertical'), { x: normalizedX, autoAlpha: autoAlphaVerticalLine });
-               gsap.set($(this.el).find('.home-hero-curor-line.line-horizital'), { y: normalizedY, autoAlpha: autoAlphaHorizontalLine });
-               gsap.set($(this.el).find('.home-hero-img-plus'), {
-                  x: normalizedX,
-                  y: normalizedY,
-                  scale: scale,
-                  color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
-               });
-               gsap.set($(this.el).find('.home-hero-img-coordi'), { autoAlpha: 1 - lerpedColorAlpha });
-               gsap.set($(this.el).find('.home-hero-img-coordi'), {
-                  x: isAtChangeEdgeX ? coordiX : defaultCoordiX,
-                  y: isAtChangeEdgeY ? coordiY : defaultCoordiY,
-               });
-               $('[data-control="x"]').text(this.targetX.toFixed(0));
-               $('[data-control="y"]').text(this.targetY.toFixed(0));
+            const currentOpacityVertical = gsap.getProperty($verticalLine.get(0), 'opacity') || .16;
+            const currentOpacityHorizontal = gsap.getProperty($horizontalLine.get(0), 'opacity') || .16;
+            const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : .16, 0.1);
+            const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : .16, 0.1);
+
+            const currentBgColor = gsap.getProperty($plus.get(0), 'backgroundColor');
+            const currentColorAlpha = parseFloat(currentBgColor.split(',')[3]) || 0;
+            const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
+            const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
+
+            // Calculate positions with cached dimensions
+            const interactHalfWidth = interactWidth / 2 + padding;
+            const interactHalfHeight = interactHeight / 2 + padding;
+            const coordiHalfWidth = coordiWidth / 2 + padding;
+            const coordiHalfHeight = coordiHeight / 2 + padding;
+
+            const interactX = isAtChangeInteractX
+               ? normalizedX + interactHalfWidth
+               : normalizedX - interactHalfWidth;
+
+            const interactY = isAtChangeInteractY
+               ? normalizedY - interactHalfHeight
+               : normalizedY + interactHalfHeight;
+
+            const defaultCoordiX = normalizedX - coordiHalfWidth;
+            const coordiX = normalizedX >= 0
+               ? defaultCoordiX
+               : normalizedX + coordiHalfWidth;
+
+            const defaultCoordiY = !isAtChangeCoordiX
+               ? normalizedY + coordiHalfHeight
+               : normalizedY - coordiHalfHeight;
+            const coordiY = normalizedY >= 0
+               ? normalizedY - coordiHalfHeight
+               : defaultCoordiY;
+
+            // Apply all transforms
+            gsap.set($verticalLine, { x: normalizedX, autoAlpha: autoAlphaVertical });
+            gsap.set($horizontalLine, { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+            gsap.set($plus, {
+               x: normalizedX,
+               y: normalizedY,
+               scale: scale,
+               color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
+            });
+            gsap.set($interact, {
+               x: interactX,
+               y: isAtChangeInteractX ? interactY : normalizedY - interactHalfHeight,
+               autoAlpha: 1 - lerpedColorAlpha
+            });
+            gsap.set($coordi, {
+               x: isAtChangeCoordiX ? coordiX : defaultCoordiX,
+               y: isAtChangeCoordiY ? coordiY : defaultCoordiY,
+               autoAlpha: 1 - lerpedColorAlpha
+            });
+
+            $('[data-control="x"]').text(this.targetX.toFixed(0));
+            $('[data-control="y"]').text(this.targetY.toFixed(0));
          }
          drawBox() {
             this.box = null;
@@ -1453,8 +1493,8 @@ const mainScript = () => {
                      );
 
                      if (isOverlapping) {
-                        if (!$('.home-hero-intro').hasClass('hide')) {
-                           $('.home-hero-intro').addClass('hide');
+                        if (!$('.home-hero-interact').hasClass('hidden')) {
+                           $('.home-hero-interact').addClass('hidden');
                         }
                         $(item).addClass('active');
                      } else {
@@ -2231,24 +2271,24 @@ const mainScript = () => {
                            gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
                            gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
                            gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
-                           // if(progress > 0.65) {
-                              // $(items).removeClass('active');
-                              // $(item).addClass('active');
-                           // }
+                           if(progress > 0.65) {
+                              $(items).removeClass('active');
+                              $(item).addClass('active');
+                           }
                         }
                      },
                      onEnter: () => {
                         console.log('start');
                         tabItems.removeClass('active');
-                        // tabItems.eq(index).addClass('active');
+                        tabItems.eq(index).addClass('active');
                      },
                      onEnterBack: () => {
                         tabItems.removeClass('active');
-                        // tabItems.eq(index).addClass('active');
+                        tabItems.eq(index).addClass('active');
                      },
                      onLeaveEnter: () => {
                         tabItems.removeClass('active');
-                        // tabItems.eq(index).addClass('active');
+                        tabItems.eq(index).addClass('active');
                      }
                   }
                });
@@ -2660,54 +2700,54 @@ const mainScript = () => {
                { name: "message", value: (data) => data["Message"] },
             ],
             };
-         const { portalId, formId, fields } = hubspot;
-         let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
-         const data = mapFormToObject($form.get(0));
-         const mapField = (data) => {
-            if (!fields.length) return [];
+            const { portalId, formId, fields } = hubspot;
+            let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
+            const data = mapFormToObject($form.get(0));
+            const mapField = (data) => {
+               if (!fields.length) return [];
 
-            const result = fields.map((field) => {
-               const { name, value } = field;
-               if (!value) {
-               return {
-                  name,
-                  value: data[name] || "",
-               };
-               } else {
-               const getValue = value(data);
-               return {
-                  name,
-                  value: getValue || "",
-               };
-               }
+               const result = fields.map((field) => {
+                  const { name, value } = field;
+                  if (!value) {
+                  return {
+                     name,
+                     value: data[name] || "",
+                  };
+                  } else {
+                  const getValue = value(data);
+                  return {
+                     name,
+                     value: getValue || "",
+                  };
+                  }
+               });
+               return result;
+            };
+            const mappedFields = mapField(data);
+            const dataSend = {
+               fields: mappedFields,
+               context: {
+                  pageUri: window.location.href,
+                  pageName: "Contact page",
+               },
+            };
+            $.ajax({
+               url: url,
+               method: "POST",
+               data: JSON.stringify(dataSend),
+               dataType: "json",
+               headers: {
+                  accept: "application/json",
+                  "Access-Control-Allow-Origin": "*",
+               },
+               contentType: "application/json",
+               success: function (response) {
+                  console.log(response);
+               },
+               error: function (xhr, resp, text) {
+                  console.log(xhr, resp, text);
+               },
             });
-            return result;
-         };
-         const mappedFields = mapField(data);
-         const dataSend = {
-            fields: mappedFields,
-            context: {
-               pageUri: window.location.href,
-               pageName: "Contact page",
-            },
-         };
-         $.ajax({
-            url: url,
-            method: "POST",
-            data: JSON.stringify(dataSend),
-            dataType: "json",
-            headers: {
-               accept: "application/json",
-               "Access-Control-Allow-Origin": "*",
-            },
-            contentType: "application/json",
-            success: function (response) {
-               console.log(response);
-            },
-            error: function (xhr, resp, text) {
-               console.log(xhr, resp, text);
-            },
-         });
          }
          destroy() {
             if (this.tlOnce) {
