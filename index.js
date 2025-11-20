@@ -1699,11 +1699,13 @@ const mainScript = () => {
             this.tlStickFade.fromTo(title.chars, {color: '#b3b3af'}, { color: '#282828', stagger: 0.03 })
          }
          animationReveal() {
-            let partnerMarquee = new Marquee(
-               $(this.el).find('.home-intro-partner-cms'),
-               $(this.el).find('.home-intro-partner-list'), 40);
-            partnerMarquee.setup();
-            partnerMarquee.play();
+            $(this.el).find('.about-inves-logo-list').each((index, item) => {
+               let direction = $(item).attr('data-direction');
+               console.log(direction)
+               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
+               marqueeLogo.setup();
+               marqueeLogo.play();
+            });
          }
          animationScrub() {
             new ParallaxImage({ el: $(this.el).find('.home-intro-img-inner img').get(0) });
@@ -2212,8 +2214,8 @@ const mainScript = () => {
          }
          animMarquee() {
             let partnerMarquee = new Marquee(
-               $(this.el).find('.product-hero-logo-cms'),
-               $(this.el).find('.product-hero-logo-list'), 40);
+               $(this.el).find('.about-inves-logo-cms'),
+               $(this.el).find('.about-inves-logo-list'), 40);
             partnerMarquee.setup();
             partnerMarquee.play();
          }
