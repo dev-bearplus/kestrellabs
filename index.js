@@ -2149,7 +2149,6 @@ const mainScript = () => {
                $(this.el).find('.home-usecase-faq-item').eq(idx).find('.home-usecase-faq-item-sub').slideToggle();
             }
             $(this.el).find('.home-usecase-faq-item-sub').hide();
-
             $(this.el).find('.home-usecase-faq-item').on('click', function() {
                activeAccordion($(this).index());
             });
@@ -2776,6 +2775,8 @@ const mainScript = () => {
             this.tlOnce = null;
             this.tlEnter = null;
             this.tlTriggerEnter = null;
+            this.tlImage = null;
+            this.tlScrubContent = null;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.about-hero-wrap');
@@ -2824,36 +2825,46 @@ const mainScript = () => {
             this.animateImage();
          }
          animateImage() {
-            let currentIndex = 0;
-            this.interval = null;
-
-            const activeIndex = () => {
-               $(this.el).find('.about-hero-item').eq(currentIndex).addClass('active').siblings().removeClass('active');
-            }
-            const startInterval = () => {
-               if (this.interval) {
-                  clearInterval(this.interval);
-                  this.interval = null;
+            this.tlImage = gsap.timeline({
+               paused: true,
+            });
+            let imageItems = $(this.el).find('.about-hero-item');
+            imageItems.each((index, item) => {
+               if(index == 0) return;
+               if(index == imageItems.length - 1) {
+                  this.tlImage.to(imageItems.not(imageItems.last()), {opacity: 0, duration: 1});
+                  this.tlImage.fromTo($(item).find('svg path').eq(0), {opacity: 0}, {opacity: 1, duration: 1.2, onStart: () => {
+                     $(this.el).find('.about-hero-bg').addClass('active');
+                     this.updateGrind();
+                  }}, '<=.3');
+                  this.tlImage.fromTo($(item).find('svg path').eq(1), {opacity: 0}, {opacity: 1, duration: 1}, '<=.5');
+               } else {
+                  this.tlImage
+                     .fromTo(item, {opacity: 0}, {opacity: 1, duration: .8})
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-brand'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.05})
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
-
-               this.interval = setInterval(() => {
-                     currentIndex++;
-                     if (currentIndex >= $(this.el).find('.about-hero-item').length) {
-                        currentIndex = 0;
-                     }
-                     activeIndex();
-               }, 3200);
-            }
-            setTimeout(() => {
-               currentIndex++;
-               activeIndex();
-               startInterval();
-            }, 2500);
+            });
+            this.tlImage.play();
+            this.tlScrubContent = gsap.timeline({
+               paused: true,
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: 'top-=1px top',
+                  end: 'bottom top',
+                  scrub: true,
+                  markers: true,
+               }
+            });
+            let heightContent = $(this.el).find('.about-intro').outerHeight();
+            this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: heightContent, duration: 1, ease: 'power3'});
+            // this.tlScrubContent.play();
          }
+         updateGrind() {
+            $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
+            requestAnimationFrame(this.updateGrind.bind(this))
+        }
          destroy() {
-            if (this.interval) {
-               clearInterval(this.interval);
-            }
             if (this.tlOnce) {
                this.tlOnce.kill();
             }
@@ -2862,6 +2873,9 @@ const mainScript = () => {
             }
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
+            }
+            if (this.tlImage) {
+               this.tlImage.kill();
             }
          }
       },
