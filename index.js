@@ -2825,6 +2825,30 @@ const mainScript = () => {
             this.animateImage();
          }
          animateImage() {
+            const $img = $('.about-hero-item:nth-child(2) img');
+            const $container = $img.parent();
+            const containerWidth = $container.width();
+            const containerHeight = $container.height();
+            const imgNaturalWidth = $img[0].naturalWidth;
+            const imgNaturalHeight = $img[0].naturalHeight;
+
+            const containerRatio = containerWidth / containerHeight;
+            const imgRatio = imgNaturalWidth / imgNaturalHeight;
+
+            let displayedWidth, displayedHeight;
+
+            if (imgRatio > containerRatio) {
+               displayedWidth = containerWidth;
+               displayedHeight = containerWidth / imgRatio;
+            } else {
+               displayedHeight = containerHeight;
+               displayedWidth = containerHeight * imgRatio;
+            }
+            $('.about-hero-item-deco').css({
+               width: `${displayedWidth}px`,
+               height: `${displayedHeight}px`,
+            });
+            header.registerDependent($(this.el).find('.about-hero-main'));
             this.tlImage = gsap.timeline({
             });
             let imageItems = $(this.el).find('.about-hero-item');
@@ -2844,17 +2868,18 @@ const mainScript = () => {
                      .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
+            let heightContent = $(this.el).find('.about-intro').outerHeight();
+            let heightHero = $(this.el).find('.about-hero').outerHeight() + heightContent;
             this.tlScrubContent = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
                   start: 'top-=1px top',
-                  end: 'bottom top',
+                  end: `bottom bottom`,
                   scrub: true,
-                  markers: true,
                }
             });
-            let heightContent = $(this.el).find('.about-intro').outerHeight();
-            this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: heightContent, duration: 1, ease: 'power3'});
+            $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
+            this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: `${heightContent}px`, duration: 1, ease: 'power3'});
          }
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
@@ -2873,6 +2898,10 @@ const mainScript = () => {
             if (this.tlImage) {
                this.tlImage.kill();
             }
+            if (this.tlScrubContent) {
+               this.tlScrubContent.kill();
+            }
+            header.unregisterDependent($(this.el).find('.about-hero-main'));
          }
       },
       Team: class extends TriggerSetup {
