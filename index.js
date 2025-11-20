@@ -2826,7 +2826,6 @@ const mainScript = () => {
          }
          animateImage() {
             this.tlImage = gsap.timeline({
-               paused: true,
             });
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
@@ -2845,9 +2844,7 @@ const mainScript = () => {
                      .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
-            this.tlImage.play();
             this.tlScrubContent = gsap.timeline({
-               paused: true,
                scrollTrigger: {
                   trigger: this.el,
                   start: 'top-=1px top',
@@ -2858,7 +2855,6 @@ const mainScript = () => {
             });
             let heightContent = $(this.el).find('.about-intro').outerHeight();
             this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: heightContent, duration: 1, ease: 'power3'});
-            // this.tlScrubContent.play();
          }
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
