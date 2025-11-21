@@ -751,9 +751,10 @@ const mainScript = () => {
                this.updateAfterTrans.bind(this)(data);
             }
          })
+         // this.tlLeave
+         //    .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
          this.tlLeave
-            .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
-
+               .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .8, ease: 'power1.inOut'})
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -767,8 +768,8 @@ const mainScript = () => {
             },
          })
 
-         this.tlEnter
-            .fromTo(data.next.container, { opacity: 0 }, { duration: .6, opacity: 1, clearProps: 'all' }, 0)
+            this.tlEnter
+               .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .8, ease: 'power1.out'})
          return this.tlEnter;
       }
       async play(data) {
@@ -784,7 +785,7 @@ const mainScript = () => {
          globalHooks.triggerEnterPlay(data);
       }
       updateBeforeTrans(data) {
-         gsap.set(data.next.container, { opacity: 0, 'pointer-events': 'none', zIndex: 1 })
+         // gsap.set(data.next.container, { opacity: 0, 'pointer-events': 'none', zIndex: 1 })
          smoothScroll.stop();
          smoothScroll.destroy();
          getAllScrollTrigger("kill");
@@ -2787,6 +2788,7 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.tlImage = null;
+            this.animationFrameGrind = null;
             this.tlScrubContent = null;
          }
          setup(data, mode) {
@@ -2898,7 +2900,7 @@ const mainScript = () => {
          }
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
-            requestAnimationFrame(this.updateGrind.bind(this))
+            this.animationFrameGrind = requestAnimationFrame(this.updateGrind.bind(this))
         }
          destroy() {
             if (this.tlOnce) {
@@ -2918,6 +2920,9 @@ const mainScript = () => {
             }
             if(viewport.w > 991) {
                header.unregisterDependent($(this.el).find('.about-hero-main'));
+            }
+            if(this.animationFrameGrind) {
+               cancelAnimationFrame(this.animationFrameGrind);
             }
          }
       },
@@ -3900,7 +3905,7 @@ const mainScript = () => {
                smoothScroll.init(data);
                globalChange.init(data);
                documentHeightObserver("init", data)
-            },
+            },            
             once(data) {
                loader.init(data);
                loader.play(data);
