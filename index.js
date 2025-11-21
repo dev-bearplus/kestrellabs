@@ -2867,9 +2867,9 @@ const mainScript = () => {
             });
             if(viewport.w > 991) {
                header.registerDependent($(this.el).find('.about-hero-main'));
-                  this.tlImage = gsap.timeline({
-               });
             }
+            this.tlImage = gsap.timeline({
+            });
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
                if(index == 0) return;
