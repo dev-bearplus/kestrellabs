@@ -754,7 +754,7 @@ const mainScript = () => {
          // this.tlLeave
          //    .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
          this.tlLeave
-               .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .8, ease: 'power1.inOut'})
+               .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -769,7 +769,7 @@ const mainScript = () => {
          })
 
             this.tlEnter
-               .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .8, ease: 'power1.out'})
+               .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
          return this.tlEnter;
       }
       async play(data) {

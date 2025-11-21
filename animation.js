@@ -386,7 +386,6 @@ class ScaleDash {
     }
     destroy() {
         this.animation.kill();
-        this.DOM.el.remove();
     }
 }
 class ScaleLine {
