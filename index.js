@@ -3287,8 +3287,9 @@ const mainScript = () => {
                   this.activeItem($(item));
                   $(item).removeClass('hide');
             });
+            console.log(this.numberItem, $(this.el).find('.resource-hero-item').length);
             if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
-               $(this.el).find('.resource-hero-load-more').hide();
+               $(this.el).find('.resource-hero-load-wrap').hide();
             }
          }
          destroy() {
