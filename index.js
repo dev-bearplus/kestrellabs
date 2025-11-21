@@ -755,6 +755,8 @@ const mainScript = () => {
          //    .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
          this.tlLeave
                .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
+               .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.inOut', xPercent: -50}, '<=0')
+               .to('.main-deco-inner .line-horizontal', {duration: .6, ease: 'power1.inOut', yPercent: -50}, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -770,6 +772,8 @@ const mainScript = () => {
 
             this.tlEnter
                .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
+               .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.out', xPercent: 0}, '<=0')
+               .to('.main-deco-inner .line-horizontal', {duration: .6, ease: 'power1.out', yPercent: 0}, '<=0')
          return this.tlEnter;
       }
       async play(data) {
