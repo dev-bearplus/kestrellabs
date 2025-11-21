@@ -160,6 +160,11 @@ const mainScript = () => {
          scrollTop()
       }
    };
+   function initNumberIndex(el) {
+      $(el).each((index, item) => {
+         $(item).find('.number-index').text(index<=9 ? `0${index + 1}` : index + 1);
+      });
+   }
    function scrollTop(onComplete) {
       if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -266,7 +271,7 @@ const mainScript = () => {
          this.direction = direction || 'left';
       }
       setup() {
-         const cloneAmount = Math.ceil($(window).width() / this.list.width()) + 1;
+         const cloneAmount = Math.ceil($(window).width() / this.item.width()) + 1;
          let itemClone = this.item.clone();
          let itemWidth = this.item.width();
          this.list.html('');
@@ -2137,6 +2142,7 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
+            initNumberIndex($(this.el).find('.home-usecase-faq-item'));
          }
          animationScrub() {
             $(this.el).find('.home-usecase-img-item img').each((_, item) => new ParallaxImage({ el: item }));
@@ -2241,10 +2247,16 @@ const mainScript = () => {
          }
          onTrigger() {
             this.animationScrub();
-            if(viewport.w < 768) {
+            this.setup();
+            this.interact();
+         }
+         setup() {
+            if(viewport.w < 992) {
                this.swiperCard();
             }
-            this.interact();
+            initNumberIndex($(this.el).find('.product-key-main-title-inner'));
+            initNumberIndex($(this.el).find('.product-key-main-left-main'));
+            initNumberIndex($(this.el).find('.product-key-tab-item'));
          }
          animationScrub() {
             const tabItems = $(this.el).find('.product-key-tab-item');
@@ -2847,9 +2859,11 @@ const mainScript = () => {
                width: `${displayedWidth}px`,
                height: `${displayedHeight}px`,
             });
-            header.registerDependent($(this.el).find('.about-hero-main'));
-            this.tlImage = gsap.timeline({
-            });
+            if(viewport.w > 991) {
+               header.registerDependent($(this.el).find('.about-hero-main'));
+                  this.tlImage = gsap.timeline({
+               });
+            }
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
                if(index == 0) return;
@@ -2867,18 +2881,20 @@ const mainScript = () => {
                      .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
-            let heightContent = $(this.el).find('.about-intro').outerHeight();
-            let heightHero = $(this.el).find('.about-hero').outerHeight() + heightContent;
-            this.tlScrubContent = gsap.timeline({
-               scrollTrigger: {
-                  trigger: this.el,
-                  start: 'top-=1px top',
-                  end: `bottom bottom`,
-                  scrub: true,
-               }
-            });
-            $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
-            this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: `${heightContent}px`, duration: 1, ease: 'power3'});
+            if(viewport.w > 991) {
+               let heightContent = $(this.el).find('.about-intro').outerHeight();
+               let heightHero = $(this.el).find('.about-hero').outerHeight() + heightContent;
+               this.tlScrubContent = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: this.el,
+                     start: 'top-=1px top',
+                     end: `bottom bottom`,
+                     scrub: true,
+                  }
+               });
+               $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
+               this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: `${heightContent}px`, duration: 1, ease: 'power3'});  
+            }
          }
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
@@ -2900,7 +2916,9 @@ const mainScript = () => {
             if (this.tlScrubContent) {
                this.tlScrubContent.kill();
             }
-            header.unregisterDependent($(this.el).find('.about-hero-main'));
+            if(viewport.w > 991) {
+               header.unregisterDependent($(this.el).find('.about-hero-main'));
+            }
          }
       },
       Team: class extends TriggerSetup {
