@@ -2302,7 +2302,6 @@ const mainScript = () => {
                      end: `bottom+=${cvUnit(10, 'vh')} top`,
                      endTrigger: $(item).find('.product-key-main-sub').get(0),
                      scrub: true,
-                     markers: true
                   }
                })
                gsap.set($(item).find('.product-key-main-title, .product-key-main-sub'), {
