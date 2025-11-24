@@ -21,11 +21,9 @@ const mainScript = () => {
       let line = $(el).find('.line-anim');
       let textMapLine = $(el).find('.bp-line');
       let lineClone = line.clone();
-      console.log(textMapLine)
       if(textMapLine.length >1){
           line.remove();
           textMapLine.each((idx, item) => {
-            console.log(idx)
             $(item).css({
                position: 'relative',
                width: 'max-content'
@@ -756,7 +754,7 @@ const mainScript = () => {
          this.tlLeave
                .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
                .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.inOut', xPercent: -50}, '<=0')
-               .to('.main-deco-inner .line-horizontal', {duration: .6, ease: 'power1.inOut', yPercent: -50}, '<=0')
+               .to('.main-deco-inner .line-horizital', {duration: .6, ease: 'power1.inOut', yPercent: -50}, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -773,7 +771,7 @@ const mainScript = () => {
             this.tlEnter
                .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
                .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.out', xPercent: 0}, '<=0')
-               .to('.main-deco-inner .line-horizontal', {duration: .6, ease: 'power1.out', yPercent: 0}, '<=0')
+               .to('.main-deco-inner .line-horizital', {duration: .6, ease: 'power1.out', yPercent: 0}, '<=0')
          return this.tlEnter;
       }
       async play(data) {
@@ -928,8 +926,6 @@ const mainScript = () => {
          }
       }
       update(data) {
-         console.log("update link & mode");
-
          if($(this.el).find('.header-menu').hasClass('active')) {
             $(this.el).find('.header-menu').removeClass('active');
          }
@@ -1711,7 +1707,6 @@ const mainScript = () => {
          animationReveal() {
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
                let direction = $(item).attr('data-direction');
-               console.log(direction)
                let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
@@ -1757,11 +1752,9 @@ const mainScript = () => {
                },
                on: {
                   setTranslate: function(swiper) {
-                     console.log('fffstart');
                      smoothScroll.stop();
                   },
                   touchEnd: function(swiper) {
-                     console.log('fffend');
                      smoothScroll.start();
                   },
                   slideChange: function(swiper) {
@@ -3013,7 +3006,6 @@ const mainScript = () => {
          setup() {
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
                let direction = $(item).attr('data-direction');
-               console.log(direction)
                let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
@@ -3190,8 +3182,6 @@ const mainScript = () => {
                   $("[data-init-hidden]").removeAttr("data-init-hidden"),
                },
             });
-            this.initContent();
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
@@ -3222,8 +3212,9 @@ const mainScript = () => {
                     multiLineText($(item).find('.resource-hero-item-title'));
                   },
                });
+               console.log('initmastertimeline', 'k0111111111111111111111');
                this.masterTimeline = new MasterTimeline({
-                  triggerInit: $(item).get(0),
+                  triggerInit: item,
                   timeline: tl,
                   tweenArr: [
                      new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
@@ -3243,7 +3234,6 @@ const mainScript = () => {
             $(this.el).find('.resource-hero-item').hide();
             $(this.el).find('.resource-hero-item').each((index, item) => {
                let title = $(item).find('.resource-hero-item-title .heading');
-               console.log('khanh', title.attr('data-title'));
                if(title.attr('data-title')?.toLowerCase().includes(val?.toLowerCase())){
                   $(item).show();
                   this.activeItem($(item));
@@ -3261,7 +3251,7 @@ const mainScript = () => {
             new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
          }
          initLoadMore() {
-            if(this.numberItem > $(this.el).find('.resource-hero-item').length) {
+            if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
                $(this.el).find('.resource-hero-load-wrap').hide();
             }
             else {
@@ -3276,9 +3266,7 @@ const mainScript = () => {
          loadMore() {
             this.numberItem += 3;
             $(this.el).find('.resource-hero-item').each((index, item) => {
-               console.log('index', index, this.numberItem);
                if(index < this.numberItem) {
-                  console.log('item', item);
                   $(item).addClass('active');
                }
             });
@@ -3287,7 +3275,6 @@ const mainScript = () => {
                   this.activeItem($(item));
                   $(item).removeClass('hide');
             });
-            console.log(this.numberItem, $(this.el).find('.resource-hero-item').length);
             if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
                $(this.el).find('.resource-hero-load-wrap').hide();
             }
@@ -3301,6 +3288,9 @@ const mainScript = () => {
             }
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
+            }
+            if(this.masterTimeline) {
+               this.masterTimeline.destroy();
             }
          }
       },
@@ -3538,10 +3528,7 @@ const mainScript = () => {
            else {
             let heightTableContentWrap = $(this.el).find('.tp-resource-hero-table-content-wrap').outerHeight();
             let heightTableContent = $(this.el).find('.tp-resource-hero-table-content').outerHeight();
-            console.log('heightTableContentWrap', heightTableContentWrap);
-            console.log('heightTableContent', heightTableContent);
             if(heightTableContent > heightTableContentWrap) {
-               console.log('prevent');
                $(this.el).find('.tp-resource-hero-table-content-wrap').attr('data-lenis-prevent', 'true');
             }
             header.registerDependent($(this.el).find('.tp-resource-hero-table-inner'));

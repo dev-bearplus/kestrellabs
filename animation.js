@@ -351,7 +351,6 @@ class ScaleDash {
         this.type = type || 'default';
         this.delay = delay;
         this.widthItem = this.DOM.el.offsetWidth || 0;
-        console.log('widthItem', this.widthItem);
         this.heightItem = this.DOM.el.offsetHeight || 0;
         this.options = {
             top: {
@@ -383,6 +382,11 @@ class ScaleDash {
                 clearProps: isDisableRevert ? '' : 'all',
                 ...props
             });
+    }
+    init() {
+        if (!this.DOM?.el) return;
+
+        gsap.set(this.DOM.el, { ...this.options[this.type]?.set || this.options.default.set });
     }
     destroy() {
         this.animation.kill();
