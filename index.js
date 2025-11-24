@@ -603,26 +603,21 @@ const mainScript = () => {
             }
          })
          this.tlLoadMaster
-            .to(this.tlLoading, { duration: this.tlLoading.totalDuration(), progress: 1, ease: 'none' })
+            .fromTo('.loading .loading-logo', { autoAlpha: 0 }, { duration: .4, autoAlpha: 1, ease: 'none' })
       }
       play(data) {
-          // requestAnimationFrame(() => {
-          //     this.devMode(data);
-          // })
-          // return;
          this.tlLoadMaster.play();
       }
       devMode(data) {
          this.onceSetup(data);
          this.oncePlay(data);
-         $('.loader').remove();
       }
       onceSetup(data) {
          globalHooks.triggerOnceSetup(data);
       }
       oncePlay(data) {
          globalHooks.triggerOncePlay(data);
-         $('.loader').css('pointer-events', 'none');
+         $('.loading').addClass('loaded');
          sessionStorage.setItem('isLoaded', true);
          if (viewport.w > 767) {
             $('.body').css({
