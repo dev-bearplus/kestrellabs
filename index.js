@@ -602,11 +602,43 @@ const mainScript = () => {
                   this.oncePlay(data);
             }
          })
+         let currentViewportWidth = viewport.w - cvUnit(16, 'rem');
+         let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
+         let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
+         console.log(borderHeight);
          this.tlLoadMaster
-            .fromTo('.loading .loading-logo', { '--loading-logo-dasharray': 0 }, { duration: 1.2, '--loading-logo-dasharray': 686, ease: 'none', onUpdate: () => {
-               const currentDashProgress = gsap.getProperty('.loading .loading-logo', '--loading-logo-dasharray')/686;
-               $('.loading-logo-txt .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
-            } })
+            .to('.loading .hexagon-animated', {
+               duration: 0.3,
+               '--loading-logo-dasharray': 200,
+               ease: 'power1.out'
+            })
+            .to('.loading .hexagon-animated', {
+               duration: 0.2,
+               '--loading-logo-dasharray': 350,
+               ease: 'power1.out'
+            })
+            .to('.loading .hexagon-animated', {
+               duration: 0.4, // Pause lâu hơn
+               '--loading-logo-dasharray': 380,
+               ease: 'none'
+            })
+            .to('.loading .hexagon-animated', {
+               duration: 0.3,
+               '--loading-logo-dasharray': 686,
+               ease: 'power2.in'
+            })
+            .to('.loading .hexagon-animated', {'width': currentViewportWidth, 'height': currentViewportHeight, duration: .6})
+            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .6}, '<=0')
+            .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
+            .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
+            .eventCallback('onUpdate', () => {
+               const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
+               $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
+               if(currentDashProgress >= 1) {
+                  $('.hexagon-stroke').addClass('active');
+                  $('.hexagon-animated .embed-ic').addClass('hidden')
+               }
+            });
       }
       play(data) {
          this.tlLoadMaster.play();
