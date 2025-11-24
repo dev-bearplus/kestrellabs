@@ -603,7 +603,10 @@ const mainScript = () => {
             }
          })
          this.tlLoadMaster
-            .fromTo('.loading .loading-logo', { autoAlpha: 0 }, { duration: .4, autoAlpha: 1, ease: 'none' })
+            .fromTo('.loading .loading-logo', { '--loading-logo-dasharray': 0 }, { duration: 1.2, '--loading-logo-dasharray': 686, ease: 'none', onUpdate: () => {
+               const currentDashProgress = gsap.getProperty('.loading .loading-logo', '--loading-logo-dasharray')/686;
+               $('.loading-logo-txt .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
+            } })
       }
       play(data) {
          this.tlLoadMaster.play();
