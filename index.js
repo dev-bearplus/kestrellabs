@@ -604,6 +604,7 @@ const mainScript = () => {
          })
          let currentViewportWidth = viewport.w - cvUnit(16, 'rem');
          let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
+         let widthHexagon = currentViewportHeight*200/231;
          let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
          console.log(borderHeight);
          this.tlLoadMaster
@@ -627,8 +628,9 @@ const mainScript = () => {
                '--loading-logo-dasharray': 686,
                ease: 'power2.in'
             })
-            .to('.loading .hexagon-animated', {'width': currentViewportWidth, 'height': currentViewportHeight, duration: .6})
-            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .6}, '<=0')
+            .to('.loading .hexagon-animated', {'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
+            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4}, '<=0')
+            .to('.loading .hexagon-animated', {'width': currentViewportWidth, duration: .6})
             .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
             .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
             .eventCallback('onUpdate', () => {
