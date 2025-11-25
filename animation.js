@@ -429,7 +429,7 @@ class ScaleLine {
             { ...this.options[this.type]?.set || this.options.default.set },
             { ...this.options[this.type]?.to || this.options.default.to,
                 duration: 1.2,
-                ease: 'power1.out',
+                ease: 'none',
                 clearProps: isDisableRevert ? '' : 'all',
                 ...props
             });
