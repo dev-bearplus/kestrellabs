@@ -321,6 +321,10 @@ class FadeIn {
                 set: { opacity: 0, x: parseRem(-32), ...from },
                 to: { opacity: 1, x: 0, ...to }
             },
+            none: {
+                set: { opacity: 0, ...from },
+                to: { opacity: 1, ...to }
+            },
             default: {
                 set: { opacity: 0, y: parseRem(32), ...from },
                 to: { opacity: 1, y: 0, ...to }

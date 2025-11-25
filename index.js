@@ -606,7 +606,6 @@ const mainScript = () => {
          let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
          let widthHexagon = currentViewportHeight*200/231;
          let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
-         console.log(borderHeight);
          this.tlLoadMaster
             .to('.loading .hexagon-animated', {
                duration: 0.3,
@@ -644,10 +643,6 @@ const mainScript = () => {
       }
       play(data) {
          this.tlLoadMaster.play();
-      }
-      devMode(data) {
-         this.onceSetup(data);
-         this.oncePlay(data);
       }
       onceSetup(data) {
          globalHooks.triggerOnceSetup(data);
@@ -1202,16 +1197,13 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
-            this.rotateText();
             this.interact();
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
                delay: .3,
-               onStart: () => {
-                  $('[data-init-hidden]').removeAttr('data-init-hidden');
-               }
+               onComplete: () => this.rotateText()
             })
 
             this.animationReveal(this.tlOnce);
@@ -1219,7 +1211,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               onComplete: () => this.rotateText()
             })
 
             this.tlTriggerEnter = gsap.timeline({
@@ -1230,7 +1222,6 @@ const mainScript = () => {
                   once: true,
                   onEnter: () => this.tlEnter.play(),
                   onEnterBack: () => this.tlEnter.play(),
-                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
                }
             })
 
@@ -1250,18 +1241,22 @@ const mainScript = () => {
             headingFlipping.play();
          }
          animationReveal(timeline) {
-            // new MasterTimeline({
-            //    timeline,
-            //    allowMobile: true,
-            //    tweenArr: [
-            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-title .heading').get(0), speed: .5 }),
-            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-btn .txt').get(0), rtl: true, speed: .5 }),
-            //       // new TextTypewriter({ el: $(this.el).find('.home-hero-sub .txt').get(0) }),
-            //       // ...Array.from($(this.el).find('.home-hero-work-item')).flatMap((el, idx) => [
-            //       //    new TextTypewriter({ el: $(this.el).find('.home-hero-work-item-title .txt').get(0), speed: .5 }),
-            //       // ])
-            //    ]
-            // });
+            new MasterTimeline({
+               timeline,
+               allowMobile: true,
+               tweenArr: [
+                  new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'bottom' }),
+                  new FadeIn({ el: $(this.el).find('.home-hero .bg-border'), type: 'center' }),
+                  new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading'), type: 'words' }),
+                  new FadeSplitText({ el: $(this.el).find('.home-hero-sub .txt:first-child'), type: 'words' }),
+                  new FadeSplitText({ el: $(this.el).find('.home-hero-btn .txt'), type: 'words' }),
+                  new FadeIn({ el: $(this.el).find('.home-hero-btn .btn-bg-ic:first-child'), type: 'bottom' }),
+                  ...Array.from($(this.el).find('.home-hero-work-item')).flatMap((item, idx) => [
+                     new FadeIn({ el: $(item).find('.home-hero-work-item-title'), type: 'bottom' }),
+                     new FadeIn({ el: $(item).find('.home-hero-work-item-ic'), type: 'bottom' }),
+                  ])
+               ]
+            });
             let taglineMarquee = new Marquee(
                $(this.el).find('.home-hero-work'),
                $(this.el).find('.home-hero-work-inner'), 40);
@@ -2828,22 +2823,26 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
-            this.interact();
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: .3,
+               delay: 0.4,
                onStart: () => {
+                  console.log(';lllllsetupOnce');
+                  this.interact();
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
                }
             })
-
+            this.tlOnce.to({}, { duration: 0.01 });
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               onStart: () => {
+                  $('[data-init-hidden]').removeAttr('data-init-hidden');
+                  this.interact();
+               }
             })
 
             this.tlTriggerEnter = gsap.timeline({
@@ -2857,8 +2856,7 @@ const mainScript = () => {
                   onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
                }
             })
-
-            this.interact();
+            this.tlEnter.to({}, { duration: 0.01 });
          }
          playOnce() {
             this.tlOnce.play();
@@ -3119,6 +3117,11 @@ const mainScript = () => {
             });
          }
          setupEnter(data) {
+            if (window.HubSpotConversations) {
+               window.HubSpotConversations.widget.remove();
+           }
+            $('script[src*="MeetingsEmbedCode.js"]').remove();
+            $.getScript('https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js');
             this.tlEnter = gsap.timeline({
                paused: true,
                onStart: () =>
@@ -3157,6 +3160,7 @@ const mainScript = () => {
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
             }
+            $('script[src*="MeetingsEmbedCode.js"]').remove();
          }
       },
       Footer: class extends Footer {
@@ -3729,12 +3733,13 @@ const mainScript = () => {
 
       initOnce(data) {
          const container = data.next.container;
+         gsap.set('.header', { yPercent: -100})
          container.addEventListener("onceSetup", (event) => {
             this.boundSetupHandler({ detail: event.detail, mode: 'once' });
          });
          container.addEventListener("oncePlay", this.boundOncePlayHandler);
       }
-
+      
       initEnter(data) {
          const container = data.next.container;
          container.addEventListener("enterSetup", (event) => {
@@ -3742,10 +3747,11 @@ const mainScript = () => {
          });
          container.addEventListener("enterPlay", this.boundEnterPlayHandler);
       }
-
+      
       oncePlayHandler(event) {
          this.sections.forEach(section => {
             if (section.playOnce) {
+               gsap.to('.header', { yPercent: 0, duration: 1, ease: 'power2.inOut' });
                section.playOnce(event.detail);
             }
          });
