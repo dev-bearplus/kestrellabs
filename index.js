@@ -3458,7 +3458,7 @@ const mainScript = () => {
             } else if (mode === "enter") {
                this.setupEnter(data);
             } else return;
-            // this.loadTermlyPolicy();
+            this.loadTermlyPolicy();
             this.initTableContent();
             this.interact();
          }
@@ -3550,16 +3550,15 @@ const mainScript = () => {
             })
           }
           async loadTermlyPolicy() {
-            const policyUrl = 'https://app.termly.io/policy-viewer/policy.html?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const fullUrl = 'https://app.termly.io/api/v1/snippets/documents/f2fe4436-2654-4543-bf1e-07963e3f5f83/website';
+            const fullUrl = 'http://localhost:8888/.netlify/functions/fetchPolicy?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
             
             try {
                 $('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
                 
-                const response = await fetch(fullUrl);      // ✅ Thêm await
-                const data = await response.json();  
-                console.log('data', data);
+                const response = await fetch(fullUrl);
+                const data = await response.json();
+                data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+                data.content = data.content.replace(/\s+style="[^"]*"/gi, '');
                 $('.policy-hero-content-richtext').html(data.content);
                 
             } catch (error) {
