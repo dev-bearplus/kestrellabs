@@ -231,18 +231,19 @@ class RevealTextReset  {
     }
 }
 class FadeSplitText {
-    constructor({ el, delay, splitType, isDisableRevert, ...props }) {
+    constructor({ el, delay, headingType, splitType, isDisableRevert, ...props }) {
         if (!el || el.textContent === '') return;
         this.DOM = { el: el };
         this.delay = delay;
         this.textSplit = null;
         this.splitType = splitType || 'words';
+        this.headingType = headingType || 'false';
         let animation;
         document.fonts.ready.then(() => {
             this.textSplit = SplitText.create(this.DOM.el, {
                 type: this.splitType === 'words' ? "lines words" : 'lines',
                 mask: "lines",
-                linesClass: 'bp-line',
+                linesClass: headingType ? 'bp-line heading-line' : 'bp-line',
                 autoSplit: true,
                 onSplit: (self) => {
                     gsap.set(self[this.splitType], { autoAlpha: 0, yPercent: 100 });

@@ -1215,7 +1215,7 @@ const mainScript = () => {
                      autoAlpha: .16,
                      duration: 0.5
                   });
-                  this.rotateText()
+                  // this.rotateText()
                   this.taglineMarquee.play();
                }
             })
@@ -1716,7 +1716,8 @@ const mainScript = () => {
             super();
             this.el = null;
             this.tlStickFade = null;
-            this.tl = null;
+            this.tlBody = null;
+            this.tlPartner = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-intro-wrap');
@@ -1729,6 +1730,7 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
+            
             this.tlStickFade = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-intro-content-title').get(0),
@@ -1737,11 +1739,19 @@ const mainScript = () => {
                   scrub: true,
                }
             });
-            this.tl = gsap.timeline({
+            this.tlBody = gsap.timeline({
                scrollTrigger: {
-                  trigger: this.el,
+                  trigger: $(this.el).find('.home-intro-body').get(0),
                   start: 'top+=45% bottom',
-                  markers: true,
+               },
+               onComplete: () => {
+                  
+               }
+            });
+            this.tlPartner = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.home-intro-partner-wrap').get(0),
+                  start: 'top+=55% bottom',
                },
                onComplete: () => {
                   
@@ -1749,18 +1759,7 @@ const mainScript = () => {
             });
             let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars, lines'});
             this.tlStickFade.fromTo(title.chars, {color: '#b3b3af'}, { color: '#282828', stagger: 0.03 })
-
-            new MasterTimeline({
-               timeline:this.tl,
-               tweenArr: [
-                  new ScaleLine({ el: $(this.el).find('.home-intro-body>.line'), type: 'top' }),
-                  new ScaleLine({ el: $(this.el).find('.home-intro-partner-wrap>.line'), type: 'top', delay: 1.2, ease: 'none'}),
-                  new FadeIn({ el: $(this.el).find('.home-intro-img').get(0), type: 'none' }),
-                  new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), isDisableRevert: true }),
-                  new FadeIn({ el: $(this.el).find('.home-intro-btn-txt .txt'), type: 'center', delay: .3 }),
-                  new FadeIn({ el: $(this.el).find('.home-intro-btn-ic'), type: 'center', delay: .1 }),
-               ]
-            });
+            
          }
          animationReveal() {
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
@@ -1768,6 +1767,35 @@ const mainScript = () => {
                let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
+            });
+            new MasterTimeline({
+               timeline:this.tlBody,
+               tweenArr: [
+                  new ScaleLine({ el: $(this.el).find('.home-intro-body>.line'), type: 'top' }),
+                  new FadeIn({ el: $(this.el).find('.home-intro-img').get(0), type: 'none' }),
+                  new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), isDisableRevert: true }),
+                  new FadeIn({ el: $(this.el).find('.home-intro-btn-txt .txt'), type: 'center', delay: 2 }),
+                  new FadeIn({ el: $(this.el).find('.home-intro-btn-ic'), type: 'center', delay: 2 }),
+                  new ScaleLine({ el: $(this.el).find('.home-intro-partner-wrap>.line'), type: 'top', delay: 1.3}),
+               ]
+            });
+            new MasterTimeline({
+               timeline:this.tlPartner,
+               tweenArr: [
+                  ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
+                    return [
+                      new ScaleLine({ el: $(item).find('.line.top'), type: 'left', delay: index * 0.1, ease: 'none' }),
+                      new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.1}),
+                      new ScaleLine({ el: $(item).find('.line.bot'), type: 'left', delay: index * 0.1, ease: 'none' }),
+                    ] 
+                  }),
+                  ...Array.from($(this.el).find('.home-intro-partner-inner')).flatMap((item, index) => {
+                    return [
+                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.1 }),
+                      $(item).find('.line.bot').length > 0 ? new ScaleDash({ el: $(item).find('.line.bot').get(0), type: 'left', delay: index * 0.1, ease: 'none' }) : null,
+                    ].filter(Boolean)
+                  })
+               ]
             });
          }
          animationScrub() {
@@ -1779,8 +1807,11 @@ const mainScript = () => {
             if (this.tlStickFade) {
                this.tlStickFade.kill();
             }
-            if (this.tl) {
-               this.tl.kill();
+            if (this.tlBody) {
+               this.tlBody.kill();
+            }
+            if (this.tlPartner) {
+               this.tlPartner.kill();
             }
          }
       },
@@ -1788,6 +1819,8 @@ const mainScript = () => {
          constructor() {
             super();
             this.el = null;
+            this.tlHead = null;
+            this.tlBody = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-problem-wrap');
@@ -1795,11 +1828,45 @@ const mainScript = () => {
          }
          onTrigger() {
             this.setup();
+            this.animationReveal();
          }
          setup() {
+            this.tlHead = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.home-problem-head').get(0),
+                  start: 'top+=65% bottom',
+               },
+            });
+            this.tlBody = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.home-problem-content').get(0),
+                  start: 'top+=55% bottom',
+               },
+            });
             if(viewport.w < 768) {
                this.swiperCard();
             }
+         }
+         animationReveal() {
+            new MasterTimeline({
+               timeline:this.tlHead,
+               tweenArr: [
+                  new FadeSplitText({ el: $(this.el).find('.home-problem-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.home-problem-sub .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.home-problem-title .heading').get(0)}),
+                  new ScaleLine({ el: $(this.el).find('.home-problem-content>.line'), type: 'top' }),
+               ]
+            });
+            $('.home-problem-item').each((index, item) => {
+               new MasterTimeline({
+                  timeline:this.tlBody,
+                  tweenArr: [
+                     new ScaleLine({ el: $(item).find('.line:not(".line-dash")'), type: 'top' }),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-title .heading').get(0)}),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-sub .txt').get(0)}),
+                  ]
+               });
+            });
          }
          swiperCard() {
             $('.home-problem-cms').addClass('swiper');
@@ -1829,6 +1896,9 @@ const mainScript = () => {
                   }
                }
             });
+         }
+         destroy() {
+            
          }
       },
       Map: class extends TriggerSetup {
