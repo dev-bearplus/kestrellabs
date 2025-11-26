@@ -3459,7 +3459,6 @@ const mainScript = () => {
                this.setupEnter(data);
             } else return;
             this.loadTermlyPolicy();
-            this.initTableContent();
             this.interact();
          }
          setupOnce(data) {
@@ -3497,8 +3496,12 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
-           $(this.el).find('.policy-hero-table-item').on('click', (e) => {
-            let dataTitle = $(e.currentTarget).closest('.policy-hero-table-item').attr('data-title');
+           $(this.el).find('.policy-hero-table-list').on('click', '.policy-hero-table-item', (e) => {
+            e.preventDefault();
+            if(viewport.w < 992) {
+               $('.policy-hero-table-list').slideUp();
+            }
+            let dataTitle = $(e.currentTarget).attr('data-title');
             let content = $(this.el).find(`.policy-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
             let offset = -100;
             smoothScroll.scrollTo(content, {
@@ -3506,7 +3509,7 @@ const mainScript = () => {
                duration: 1,
             });
             $('.policy-hero-table-item').removeClass('active');
-            $(e.currentTarget).closest('.policy-hero-table-item').addClass('active');
+            $(e.currentTarget).addClass('active');
            });
            smoothScroll.lenis.on('scroll', () => {
             this.itemContentActiveCheck($(this.el).find('.policy-hero-content-richtext h2'));
@@ -3521,6 +3524,24 @@ const mainScript = () => {
            else {
             header.registerDependent($(this.el).find('.policy-hero-table-inner'));
            }
+           $(this.el).find('.policy-hero-content-richtext').on('click', 'a', (e) => {
+            //check if link is include in the current url
+            let currentUrl = window.location.href;
+            let link = $(e.currentTarget).attr('href');
+            console.log('link', link);
+            if(link && link.startsWith('#')) {
+               e.preventDefault();
+               // get id in link
+               let id = link.split('#')[1];
+               console.log('id', id);
+               console.log($(`#${id}`));
+               smoothScroll.scrollTo(`#${id}`, {
+                  offset: -100,
+                  duration: 1,
+               });
+            }
+
+           })
          }
          itemContentActiveCheck(el) {
             for (let i = 0; i < $(el).length; i++) {
@@ -3550,17 +3571,18 @@ const mainScript = () => {
             })
           }
           async loadTermlyPolicy() {
-            const fullUrl = 'http://localhost:8888/.netlify/functions/fetchPolicy?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
+            const id = $('[policyUUID]').attr('policyUUID');
+            const fullUrl = `https://kestrellabs-bp.netlify.app/.netlify/functions/fetchPolicy?policyUUID=${id}`;
             
             try {
                 $('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
                 
-                const response = await fetch(fullUrl);
-                const data = await response.json();
+                const response = await fetch(fullUrl);      // ✅ Thêm await
+                const data = await response.json();  
                 data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-                data.content = data.content.replace(/\s+style="[^"]*"/gi, '');
                 $('.policy-hero-content-richtext').html(data.content);
-                
+                $('.policy-hero-content-richtext *:not(table):not(table *)').removeAttr('style');
+                this.initTableContent();
             } catch (error) {
                 console.error('Error loading policy:', error);
                 $('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
@@ -3606,7 +3628,6 @@ const mainScript = () => {
             } else if (mode === "enter") {
                this.setupEnter(data);
             } else return;
-            // this.loadTermlyPolicy();
             this.initTableContent();
             this.interact();
          }
@@ -3703,24 +3724,6 @@ const mainScript = () => {
                 $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
             })
           }
-          async loadTermlyPolicy() {
-            const policyUrl = 'https://app.termly.io/policy-viewer/policy.html?policyUUID=f2fe4436-2654-4543-bf1e-07963e3f5f83';
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const fullUrl = 'https://app.termly.io/api/v1/snippets/documents/f2fe4436-2654-4543-bf1e-07963e3f5f83/website';
-            
-            try {
-                $('.tp-resource-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
-                
-                const response = await fetch(fullUrl);      // ✅ Thêm await
-                const data = await response.json();  
-                console.log('data', data);
-                $('.tp-resource-hero-content-richtext').html(data.content);
-                
-            } catch (error) {
-                console.error('Error loading policy:', error);
-                $('.tp-resource-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
-            }
-         }
          actionShare() {
             $('.tp-resource-hero-share-item').on('click', function(e) {
                 e.preventDefault();
