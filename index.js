@@ -607,31 +607,15 @@ const mainScript = () => {
          let widthHexagon = currentViewportHeight*200/231;
          let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
          this.tlLoadMaster
-            .to('.loading .hexagon-animated', {
-               duration: 0.3,
-               '--loading-logo-dasharray': 200,
-               ease: 'power1.out'
-            })
-            .to('.loading .hexagon-animated', {
-               duration: 0.2,
-               '--loading-logo-dasharray': 350,
-               ease: 'power1.out'
-            })
-            .to('.loading .hexagon-animated', {
-               duration: 0.4, // Pause lâu hơn
-               '--loading-logo-dasharray': 380,
-               ease: 'none'
-            })
-            .to('.loading .hexagon-animated', {
-               duration: 0.3,
-               '--loading-logo-dasharray': 686,
-               ease: 'power2.in'
-            })
-            .to('.loading .hexagon-animated', {'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
-            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4}, '<=0')
-            .to('.loading .hexagon-animated', {'width': currentViewportWidth, duration: .6})
-            .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
-            .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
+            .to('.loading .hexagon-animated', {duration: 0.3,'--loading-logo-dasharray': 200, ease: 'power1.out'})
+            .to('.loading .hexagon-animated', {duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out'})
+            .to('.loading .hexagon-animated', {duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none'})
+            .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
+            .to('.loading .hexagon-animated', {'width': viewport.w > 991 ? widthHexagon : currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
+            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
+            .to('.loading .hexagon-animated',{ 'width': currentViewportWidth, duration: .6 }, viewport.w > 991 ? undefined : '+=0')
+            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
+            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
             .eventCallback('onUpdate', () => {
                const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
                $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
@@ -764,7 +748,8 @@ const mainScript = () => {
       constructor() {
          this.tlLeave = null;
          this.tlEnter = null;
-         this.el = document.querySelector('.trans');
+         this.el = document.querySelector('.main-deco');
+         this.widthLineVertical = this.el.querySelector('.line-vertical').offsetWidth;
       }
       leaveAnim(data) {
          // Store promise để chờ HubSpot load
@@ -801,8 +786,7 @@ const mainScript = () => {
          //    .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
          this.tlLeave
                .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
-               .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.inOut', xPercent: -50}, '<=0')
-               .to('.main-deco-inner .line-horizital', {duration: .6, ease: 'power1.inOut', yPercent: -50}, '<=0')
+               .fromTo('html', {'--size--line': '0'}, {'--size--line': this.widthLineVertical, duration: .6, ease: 'power1.inOut'}, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -815,12 +799,10 @@ const mainScript = () => {
                }, 100);
             },
          })
-
-            this.tlEnter
-               .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
-               .to('.main-deco-inner .line-vertical', {duration: .6, ease: 'power1.out', xPercent: 0}, '<=0')
-               .to('.main-deco-inner .line-horizital', {duration: .6, ease: 'power1.out', yPercent: 0}, '<=0')
-         return this.tlEnter;
+         this.tlEnter
+            .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
+            .fromTo('html', {'--size-line': this.widthLineVertical}, {'--size-line': 0, duration: .6, ease: 'power1.inOut'}, '<=0')
+      return this.tlEnter;
       }
       async play(data) {
          await pageTrans.leaveAnim(data).then(async () => {
@@ -987,7 +969,7 @@ const mainScript = () => {
          this.updateOnScroll(smoothScroll.lenis);
       }
       updateOnScroll(inst) {
-         this.toggleHide(inst);
+         viewport.w > 991 && this.toggleHide(inst);
          this.toggleScroll(inst);
          this.onHideDependent();
       }
@@ -1001,16 +983,16 @@ const mainScript = () => {
       }
       toggleHide(inst) {
          if (inst.direction == 1) {
-            if (inst.scroll > ($(this.el).height() * 3)) {
+            if (inst.scroll > ($(this.el).height() * 5)) {
                $(this.el).addClass('on-hide');
             }
          } else if (inst.direction == -1) {
-            if (inst.scroll > ($(this.el).height() * 3)) {
+            if (inst.scroll > ($(this.el).height() * 5)) {
                $(this.el).addClass("on-hide");
                $(this.el).removeClass("on-hide");
 
                if (
-                  inst.scroll > ($(this.el).height() * 3) &&
+                  inst.scroll > ($(this.el).height() * 5) &&
                   inst.scroll === smoothScroll.scroller.scrollY
                   && inst.velocity === 0
                   && !$(this.el).hasClass('on-hide')
@@ -1018,7 +1000,7 @@ const mainScript = () => {
                ) {
                   this.hideTimeout = setTimeout(() => {
                      $(this.el).addClass('on-hide');
-                  }, 1500);
+                  }, 100);
                }
             }
          }
@@ -1035,7 +1017,7 @@ const mainScript = () => {
          }
       }
       onHideDependent() {
-         let heightHeader = $(this.el).height() - cvUnit(viewport.w > 991 ? 1 : 0, 'rem');
+         let heightHeader = $(this.el).height() - cvUnit(1, 'rem');
          if(!$(this.el).hasClass('on-hide')) {
             this.listDependent.forEach((item) => {
                $(item).css('top', heightHeader);
@@ -1873,16 +1855,18 @@ const mainScript = () => {
                   new FadeSplitText({ el: $(this.el).find('.home-problem-label .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-problem-sub .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-problem-title .heading').get(0)}),
-                  new ScaleLine({ el: $(this.el).find('.home-problem-content>.line'), type: 'top' }),
                ]
             });
             $('.home-problem-item').each((index, item) => {
                new MasterTimeline({
                   timeline:this.tlBody,
                   tweenArr: [
-                     new ScaleLine({ el: $(item).find('.line:not(".line-dash")'), type: 'top' }),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-title .txt').get(0)}),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-num .txt').get(0)}),
+                     new ScaleInset({ el: $(item).find('.home-problem-item-img').get(0) }),
                      new FadeSplitText({ el: $(item).find('.home-problem-item-title .heading').get(0)}),
                      new FadeSplitText({ el: $(item).find('.home-problem-item-sub .txt').get(0)}),
+
                   ]
                });
             });
@@ -1979,10 +1963,10 @@ const mainScript = () => {
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active')
                }
             });
-            $(document).on('click', function(e) {
+            $(document).on('click', (e) => {
                if (!$(e.target).closest('.home-map-number').length) {
                   $(this.el).find('.home-map-number-wrap').removeClass('active');
-                  $('.home-map-main-img-sub-hover').removeClass('active');
+                  $(this.el).find('.home-map-main-img-sub-hover').removeClass('active');
                }
             });
          }
@@ -3038,7 +3022,8 @@ const mainScript = () => {
             });
             if(viewport.w > 991) {
                let heightContent = $(this.el).find('.about-intro').outerHeight();
-               let heightHero = $(this.el).find('.about-hero').outerHeight() + heightContent;
+               let heightHero = $(this.el).find('.about-hero').height() + heightContent;
+               $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
                this.tlScrubContent = gsap.timeline({
                   scrollTrigger: {
                      trigger: this.el,
@@ -3047,8 +3032,7 @@ const mainScript = () => {
                      scrub: true,
                   }
                });
-               $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
-               this.tlScrubContent.to($(this.el).find('.about-intro-wrap'), {height: `${heightContent}px`, duration: 1, ease: 'power3'});  
+               this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});  
             }
          }
          updateGrind() {
