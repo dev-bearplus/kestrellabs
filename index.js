@@ -732,7 +732,6 @@ const mainScript = () => {
       }
    }
    const globalChange = new GlobalChange();
-
    class GlobalHooks {
       constructor() {
       }
@@ -768,6 +767,28 @@ const mainScript = () => {
          this.el = document.querySelector('.trans');
       }
       leaveAnim(data) {
+         // Store promise để chờ HubSpot load
+         this.hubspotLoadPromise = null;
+
+         if(data.next.namespace === 'schedule') {
+            if (window.HubSpotConversations) {
+               window.HubSpotConversations.widget.remove();
+            }
+            $('script[src*="MeetingsEmbedCode.js"]').remove();
+
+            this.hubspotLoadPromise = new Promise((resolve) => {
+               $.getScript('https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js')
+                  .done(() => {
+                     console.log('HubSpot script loaded');
+                     resolve();
+                  })
+                  .fail(() => {
+                     console.warn('HubSpot script failed to load');
+                     resolve();
+                  });
+            });
+         }
+
          this.tlLeave = gsap.timeline({
             onStart: () => {
                this.updateBeforeTrans.bind(this)(data);
@@ -802,7 +823,10 @@ const mainScript = () => {
          return this.tlEnter;
       }
       async play(data) {
-         await pageTrans.leaveAnim(data).then(() => {
+         await pageTrans.leaveAnim(data).then(async () => {
+            if (pageTrans.hubspotLoadPromise) {
+               await pageTrans.hubspotLoadPromise;
+            }
             pageTrans.enterAnim(data)
          })
       }
@@ -1771,12 +1795,10 @@ const mainScript = () => {
             new MasterTimeline({
                timeline:this.tlBody,
                tweenArr: [
-                  new ScaleLine({ el: $(this.el).find('.home-intro-body>.line'), type: 'top' }),
                   new FadeIn({ el: $(this.el).find('.home-intro-img').get(0), type: 'none' }),
                   new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), isDisableRevert: true }),
                   new FadeIn({ el: $(this.el).find('.home-intro-btn-txt .txt'), type: 'center', delay: 2 }),
                   new FadeIn({ el: $(this.el).find('.home-intro-btn-ic'), type: 'center', delay: 2 }),
-                  new ScaleLine({ el: $(this.el).find('.home-intro-partner-wrap>.line'), type: 'top', delay: 1.3}),
                ]
             });
             new MasterTimeline({
@@ -1784,16 +1806,13 @@ const mainScript = () => {
                tweenArr: [
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
                     return [
-                      new ScaleLine({ el: $(item).find('.line.top'), type: 'left', delay: index * 0.1, ease: 'none' }),
                       new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.1}),
-                      new ScaleLine({ el: $(item).find('.line.bot'), type: 'left', delay: index * 0.1, ease: 'none' }),
                     ] 
                   }),
                   ...Array.from($(this.el).find('.home-intro-partner-inner')).flatMap((item, index) => {
                     return [
                       new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.1 }),
-                      $(item).find('.line.bot').length > 0 ? new ScaleDash({ el: $(item).find('.line.bot').get(0), type: 'left', delay: index * 0.1, ease: 'none' }) : null,
-                    ].filter(Boolean)
+                    ]
                   })
                ]
             });
@@ -2760,7 +2779,7 @@ const mainScript = () => {
          }
          interact() {
             const $form = $(this.el).find("#contact-form");
-            $(this.el).find(".contact-hero-form-input").on("blur", function () {
+            $(this.el).find(".contact-hero-form-input").on("input", function () {
                if ($(this).val()) {
                   $(this).parent().addClass("active");
                } else {
@@ -3224,11 +3243,7 @@ const mainScript = () => {
             });
          }
          setupEnter(data) {
-            if (window.HubSpotConversations) {
-               window.HubSpotConversations.widget.remove();
-           }
-            $('script[src*="MeetingsEmbedCode.js"]').remove();
-            $.getScript('https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js');
+            
             this.tlEnter = gsap.timeline({
                paused: true,
                onStart: () =>
@@ -3842,7 +3857,7 @@ const mainScript = () => {
 
       initOnce(data) {
          const container = data.next.container;
-         gsap.set('.header', { yPercent: -100})
+         // gsap.set('.header', { yPercent: -100})
          container.addEventListener("onceSetup", (event) => {
             this.boundSetupHandler({ detail: event.detail, mode: 'once' });
          });
@@ -3860,7 +3875,7 @@ const mainScript = () => {
       oncePlayHandler(event) {
          this.sections.forEach(section => {
             if (section.playOnce) {
-               gsap.to('.header', { yPercent: 0, duration: 1, ease: 'power2.inOut' });
+               // gsap.to('.header', { yPercent: 0, duration: 1, ease: 'power2.inOut' });
                section.playOnce(event.detail);
             }
          });
