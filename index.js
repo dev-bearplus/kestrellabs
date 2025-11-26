@@ -1885,12 +1885,12 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  setTranslate: function(swiper) {
-                     smoothScroll.stop();
-                  },
-                  touchEnd: function(swiper) {
-                     smoothScroll.start();
-                  },
+                  // setTranslate: function(swiper) {
+                  //    smoothScroll.stop();
+                  // },
+                  // touchEnd: function(swiper) {
+                  //    smoothScroll.start();
+                  // },
                   slideChange: function(swiper) {
                      // check index active of swiper slide
                      const indexActive = swiper.activeIndex;
@@ -2208,12 +2208,12 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  setTranslate: (swiper) => {
-                     smoothScroll.stop();
-                  },
-                  touchEnd: (swiper) => {
-                     smoothScroll.start();
-                  }
+                  // setTranslate: (swiper) => {
+                  //    smoothScroll.stop();
+                  // },
+                  // touchEnd: (swiper) => {
+                  //    smoothScroll.start();
+                  // }
                }
             });
          }
@@ -2655,12 +2655,12 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  setTranslate: function(swiper) {
-                     smoothScroll.stop();
-                  },
-                  touchEnd: function(swiper) {
-                     smoothScroll.start();
-                  }
+                  // setTranslate: function(swiper) {
+                  //    smoothScroll.stop();
+                  // },
+                  // touchEnd: function(swiper) {
+                  //    smoothScroll.start();
+                  // }
                }
             });
          }
