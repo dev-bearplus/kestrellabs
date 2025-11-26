@@ -2164,7 +2164,7 @@ const mainScript = () => {
          }
          onTrigger() {
             this.animationReveal();
-            this.animationScrub();
+            viewport.w > 767 && this.animationScrub();
             this.interact();
          }
          animationScrub() {
