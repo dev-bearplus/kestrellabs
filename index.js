@@ -634,8 +634,8 @@ const mainScript = () => {
             .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
             .to('.loading .hexagon-animated', {'width':  currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
             .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
-            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
+            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .4}, '<=0')
+            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .4}, '<=0')
             .eventCallback('onUpdate', () => {
                const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
                $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
@@ -3545,13 +3545,9 @@ const mainScript = () => {
             header.registerDependent($(this.el).find('.policy-hero-table-inner'));
            }
            $(this.el).find('.policy-hero-content-richtext').on('click', 'a', (e) => {
-            //check if link is include in the current url
-            let currentUrl = window.location.href;
             let link = $(e.currentTarget).attr('href');
-            console.log('link', link);
             if(link && link.startsWith('#')) {
                e.preventDefault();
-               // get id in link
                let id = link.split('#')[1];
                console.log('id', id);
                console.log($(`#${id}`));
@@ -3601,7 +3597,8 @@ const mainScript = () => {
                 const data = await response.json();  
                 data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
                 $('.policy-hero-content-richtext').html(data.content);
-               //  $('.policy-hero-content-richtext *:not(table):not(table *)').removeAttr('style');
+                $('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
+                $('.policy-hero-content-richtext *').removeAttr('align');
                 this.initTableContent();
             } catch (error) {
                 console.error('Error loading policy:', error);
