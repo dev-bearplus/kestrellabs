@@ -606,14 +606,15 @@ const mainScript = () => {
          let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
          let widthHexagon = currentViewportHeight*200/231;
          let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
-         this.tlLoadMaster
+         if(viewport.w > 991){
+            this.tlLoadMaster
             .to('.loading .hexagon-animated', {duration: 0.3,'--loading-logo-dasharray': 200, ease: 'power1.out'})
             .to('.loading .hexagon-animated', {duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out'})
             .to('.loading .hexagon-animated', {duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none'})
             .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
-            .to('.loading .hexagon-animated', {'width': viewport.w > 991 ? widthHexagon : currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
+            .to('.loading .hexagon-animated', {'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
             .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-            .to('.loading .hexagon-animated',{ 'width': currentViewportWidth, duration: .6 }, viewport.w > 991 ? undefined : '+=0')
+            .to('.loading .hexagon-animated',{ 'width': currentViewportWidth, duration: .6 }, '<=0.3')
             .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
             .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
             .eventCallback('onUpdate', () => {
@@ -624,6 +625,26 @@ const mainScript = () => {
                   $('.hexagon-animated .embed-ic').addClass('hidden')
                }
             });
+         }
+         else {
+            this.tlLoadMaster
+            .to('.loading .hexagon-animated', {duration: 0.3,'--loading-logo-dasharray': 200, ease: 'power1.out'})
+            .to('.loading .hexagon-animated', {duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out'})
+            .to('.loading .hexagon-animated', {duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none'})
+            .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
+            .to('.loading .hexagon-animated', {'width':  currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
+            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
+            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
+            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
+            .eventCallback('onUpdate', () => {
+               const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
+               $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
+               if(currentDashProgress >= 1) {
+                  $('.hexagon-stroke').addClass('active');
+                  $('.hexagon-animated .embed-ic').addClass('hidden')
+               }
+            });
+         }
       }
       play(data) {
          this.tlLoadMaster.play();
@@ -3580,7 +3601,7 @@ const mainScript = () => {
                 const data = await response.json();  
                 data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
                 $('.policy-hero-content-richtext').html(data.content);
-                $('.policy-hero-content-richtext *:not(table):not(table *)').removeAttr('style');
+               //  $('.policy-hero-content-richtext *:not(table):not(table *)').removeAttr('style');
                 this.initTableContent();
             } catch (error) {
                 console.error('Error loading policy:', error);
