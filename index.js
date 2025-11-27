@@ -370,6 +370,9 @@ const mainScript = () => {
          if (header) {
             header.updateOnScroll(smoothScroll.lenis);
          };
+         if($('.header-menu').hasClass('active')) {
+            $('.header-menu').removeClass('active');
+         }
 		}
 
 		start() {
@@ -2422,6 +2425,7 @@ const mainScript = () => {
          }
          animationScrub() {
             const tabItems = $(this.el).find('.product-key-tab-item');
+            tabItems.eq(0).addClass('active');
             const items = $(this.el).find('.product-key-main-title-inner');
             header.registerDependent($(this.el).find('.product-key-tab-wrap'));
 
@@ -2430,12 +2434,13 @@ const mainScript = () => {
                let itemImgCurrent = $(this.el).find('.product-key-main-img-main').eq(index);
                let itemLabelPrev = $(this.el).find('.product-key-main-left-main').eq(index - 1);
                let itemLabelCurrent = $(this.el).find('.product-key-main-left-main').eq(index);
+               let limitProgress = viewport.w > 767 ? 0.5 : 0.45;
                let heightHeader = $(header.el).height();
                const tlItem = gsap.timeline({
                   scrollTrigger: {
                      trigger: item,
                      start: 'top bottom',
-                     end: 'bottom bottom',
+                     end: viewport.w > 767 ? 'bottom bottom' : 'top bottom',
                      scrub: true,
                      onUpdate: (self) => {
                         if(index > 0) {
@@ -2446,25 +2451,25 @@ const mainScript = () => {
                            gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
                            gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
                            gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
-                           if(progress > 0.65) {
-                              $(items).removeClass('active');
-                              $(item).addClass('active');
+                           if(progress > limitProgress) {
+                              tabItems.removeClass('active');
+                              tabItems.eq(index).addClass('active');
                            }
                         }
                      },
-                     onEnter: () => {
-                        console.log('start');
+                     // onEnter: () => {
+                     //    console.log('start');
+                     //    tabItems.removeClass('active');
+                     //    tabItems.eq(index).addClass('active');
+                     // },
+                     onEnterBack: (self) => {
                         tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
+                        viewport.w < 768 ? tabItems.eq(index-1).addClass('active') : tabItems.eq(index).addClass('active');
                      },
-                     onEnterBack: () => {
-                        tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
-                     },
-                     onLeaveEnter: () => {
-                        tabItems.removeClass('active');
-                        tabItems.eq(index).addClass('active');
-                     }
+                     // onLeaveEnter: () => {
+                     //    tabItems.removeClass('active');
+                     //    tabItems.eq(index).addClass('active');
+                     // }
                   }
                });
                tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
@@ -2646,7 +2651,6 @@ const mainScript = () => {
                }
             })
 
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
@@ -2784,7 +2788,6 @@ const mainScript = () => {
                },
             });
 
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
@@ -3274,8 +3277,6 @@ const mainScript = () => {
                   $("[data-init-hidden]").removeAttr("data-init-hidden"),
                },
             });
-
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
@@ -3517,54 +3518,66 @@ const mainScript = () => {
                },
             });
 
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
          }
          interact() {
-           $(this.el).find('.policy-hero-table-list').on('click', '.policy-hero-table-item', (e) => {
+           const $el = $(this.el);
+           const $tableList = $el.find('.policy-hero-table-list');
+           const $tableHead = $el.find('.policy-hero-table-head');
+           const $contentRichtext = $el.find('.policy-hero-content-richtext');
+           const $contentHeaders = $contentRichtext.find('h2');
+           const isMobile = viewport.w < 992;
+           const SCROLL_OFFSET = -100;
+
+           $tableList.on('click', '.policy-hero-table-item', (e) => {
             e.preventDefault();
-            if(viewport.w < 992) {
-               $('.policy-hero-table-list').slideUp();
+            const $currentTarget = $(e.currentTarget);
+
+            if(isMobile) {
+               $tableList.slideUp();
+               $tableHead.toggleClass('active');
             }
-            let dataTitle = $(e.currentTarget).attr('data-title');
-            let content = $(this.el).find(`.policy-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
-            let offset = -100;
+
+            const dataTitle = $currentTarget.attr('data-title');
+            const content = $contentRichtext.find(`h2[data-title="${dataTitle}"]`)[0];
+
             smoothScroll.scrollTo(content, {
-               offset: offset,
+               offset: SCROLL_OFFSET,
                duration: 1,
             });
-            $('.policy-hero-table-item').removeClass('active');
-            $(e.currentTarget).addClass('active');
+
+            $tableList.find('.policy-hero-table-item').removeClass('active');
+            $currentTarget.addClass('active');
            });
+
            smoothScroll.lenis.on('scroll', () => {
-            this.itemContentActiveCheck($(this.el).find('.policy-hero-content-richtext h2'));
+            this.itemContentActiveCheck($contentHeaders);
            });
-           if(viewport.w < 992){
-            header.registerDependent($(this.el).find('.policy-hero-table'));
-            $(this.el).find('.policy-hero-table-head').on('click', (e) => {
-               $(e.currentTarget).closest('.policy-hero-table-head').toggleClass('active');
-               $('.policy-hero-table-list').slideToggle();
+
+           if(isMobile){
+            header.registerDependent($el.find('.policy-hero-table'));
+            $tableHead.on('click', (e) => {
+               console.log(e.currentTarget);
+               $(e.currentTarget).toggleClass('active');
+               $tableList.slideToggle();
             });
+           } else {
+            header.registerDependent($el.find('.policy-hero-table-inner'));
            }
-           else {
-            header.registerDependent($(this.el).find('.policy-hero-table-inner'));
-           }
-           $(this.el).find('.policy-hero-content-richtext').on('click', 'a', (e) => {
-            let link = $(e.currentTarget).attr('href');
+
+           $contentRichtext.on('click', 'a', (e) => {
+            const link = $(e.currentTarget).attr('href');
             if(link && link.startsWith('#')) {
                e.preventDefault();
-               let id = link.split('#')[1];
-               console.log('id', id);
-               console.log($(`#${id}`));
+               const id = link.substring(1);
                smoothScroll.scrollTo(`#${id}`, {
-                  offset: -100,
+                  offset: SCROLL_OFFSET,
                   duration: 1,
                });
             }
-
-           })
+           });
          }
          itemContentActiveCheck(el) {
             for (let i = 0; i < $(el).length; i++) {
@@ -3683,8 +3696,6 @@ const mainScript = () => {
                   $("[data-init-hidden]").removeAttr("data-init-hidden"),
                },
             });
-
-            this.interact();
          }
          playOnce() {
             this.tlOnce.play();
@@ -3699,7 +3710,7 @@ const mainScript = () => {
                offset: offset,
                duration: 1,
             });
-            $('.tp-resource-hero-table-item').removeClass('active');
+            $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
             $(e.currentTarget).closest('.tp-resource-hero-table-item').addClass('active');
            });
            smoothScroll.lenis.on('scroll', () => {
@@ -3709,7 +3720,7 @@ const mainScript = () => {
             header.registerDependent($(this.el).find('.tp-resource-hero-table'));
             $(this.el).find('.tp-resource-hero-table-head').on('click', (e) => {
                $(e.currentTarget).closest('.tp-resource-hero-table-head').toggleClass('active');
-               $('.tp-resource-hero-table-list').slideToggle();
+               $(this.el).find('.tp-resource-hero-table-list').slideToggle();
             });
            }
            else {
@@ -3725,8 +3736,8 @@ const mainScript = () => {
             for (let i = 0; i < $(el).length; i++) {
                 let top = $(el).eq(i).get(0).getBoundingClientRect().top;
                 if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
-                    $('.tp-resource-hero-table-item').removeClass('active');
-                    $('.tp-resource-hero-table-item').eq(i).addClass('active');
+                    $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
+                    $(this.el).find('.tp-resource-hero-table-item').eq(i).addClass('active');
                 }
                 }
           }
@@ -3749,7 +3760,7 @@ const mainScript = () => {
             })
           }
          actionShare() {
-            $('.tp-resource-hero-share-item').on('click', function(e) {
+            $(this.el).find('.tp-resource-hero-share-item').on('click', function(e) {
                 e.preventDefault();
                 const shareType = $(this).data('share');
                 const currentURL = window.location.href;
@@ -3822,10 +3833,10 @@ const mainScript = () => {
                showNotification('Failed to copy link.', 'error');
             }
             function showNotification(message, type) {
-               $('.tp-resource-hero-share-item-tooltip .txt').text(message)
-               $('.tp-resource-hero-share-item-tooltip').addClass('active');
+               $(this.el).find('.tp-resource-hero-share-item-tooltip .txt').text(message)
+               $(this.el).find('.tp-resource-hero-share-item-tooltip').addClass('active');
                setTimeout(function() {
-               $('.tp-resource-hero-share-item-tooltip').removeClass('active')
+               $(this.el).find('.tp-resource-hero-share-item-tooltip').removeClass('active')
                }, 1000);
             }
          }
