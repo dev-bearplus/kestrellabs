@@ -2003,7 +2003,7 @@ const mainScript = () => {
                scrollTrigger: {
                   trigger: this.el,
                   start: 'top 50%',
-                  end: `bottom-=${cvUnit(30, 'vh')} bottom`,
+                  end: viewport.w > 767 ? `bottom-=${cvUnit(30, 'vh')} bottom` : `bottom-=${cvUnit(180, 'vh')} top`,
                   scrub: true,
                   onUpdate: (self) => {
                      if (self.isActive) {
