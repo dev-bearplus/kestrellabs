@@ -269,9 +269,25 @@ const mainScript = () => {
          this.direction = direction || 'left';
       }
       setup() {
-         const cloneAmount = Math.ceil($(window).width() / this.item.width()) + 1;
-         let itemClone = this.item.clone();
          let itemWidth = this.item.width();
+         console.log('item', this.item)
+         const windowWidth = $(window).width();
+
+         // Validate to prevent invalid array length
+         if (!itemWidth || itemWidth <= 0 || !windowWidth || windowWidth <= 0) {
+            console.warn('Marquee: Invalid dimensions', { itemWidth, windowWidth });
+            return;
+         }
+
+         const cloneAmount = Math.ceil(windowWidth / itemWidth) + 1;
+
+         // Extra safety check
+         if (!Number.isFinite(cloneAmount) || cloneAmount <= 0 || cloneAmount > 1000) {
+            console.warn('Marquee: Invalid cloneAmount', cloneAmount);
+            return;
+         }
+
+         let itemClone = this.item.clone();
          this.list.html('');
          new Array(cloneAmount).fill().forEach(() => {
             let html = itemClone.clone()
@@ -1792,17 +1808,15 @@ const mainScript = () => {
          animationReveal() {
             new MasterTimeline({
                timeline:this.tlBody,
-               allowMobile: false,
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-intro-img').get(0), type: 'none' }),
-                  new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), isDisableRevert: true }),
+                  new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), duration: .4, stagger: .01, isDisableRevert: true }),
                   new FadeIn({ el: $(this.el).find('.home-intro-btn-txt .txt'), type: 'center', delay: 2 }),
                   new FadeIn({ el: $(this.el).find('.home-intro-btn-ic'), type: 'center', delay: 2 }),
                ]
             });
             new MasterTimeline({
                timeline:this.tlPartner,
-               allowMobile: false,
                tweenArr: [
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
                     return [
@@ -1925,6 +1939,8 @@ const mainScript = () => {
             super();
             this.el = null;
             this.tl = null;
+            this.tlContent = null;
+            this.tlStickFade = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-map-wrap');
@@ -1932,6 +1948,7 @@ const mainScript = () => {
          }
          onTrigger() {
             this.setup();
+            this.animationReveal();
             this.interact();
             this.animationScrub()
          }
@@ -1986,6 +2003,25 @@ const mainScript = () => {
                }
             });
          }
+         animationReveal() {
+            this.tlContent = gsap.timeline({
+               paused: true,
+            });
+            new MasterTimeline({
+               timeline:this.tlContent,
+               tweenArr: [
+                  new FadeSplitText({ el: $(this.el).find('.home-map-content-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.home-map-content-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.home-map-content-sub .txt').get(0) }),
+                  ...Array.from($(this.el).find('.home-map-content-item')).flatMap((item, index) => {
+                    return [
+                      new ScaleInset({ el: $(item).find('.home-map-content-item-ic').get(0), elInner: $(item).find('.home-map-content-item-ic-inner').get(0) }),
+                      new FadeSplitText({ el: $(item).find('.home-map-content-item-title .txt').get(0)}),
+                    ]
+                  })
+               ]
+            });
+         }
          animationScrub() {
             this.tlStickFade = gsap.timeline({
                scrollTrigger: {
@@ -2011,6 +2047,9 @@ const mainScript = () => {
                      }
                      else {
                         if (self.progress === 1) {
+                           setTimeout(() => {
+                              this.tlContent.play();
+                           }, 410);
                            $(this.el).find('.home-map').addClass('expanded');
                         }
                      }
@@ -2108,6 +2147,15 @@ const mainScript = () => {
                });
          }
          destroy() {
+            if (this.tlStickFade) {
+               this.tlStickFade.kill();
+            }
+            if(this.tl) {
+               this.tl.kill();
+            }
+            if(this.tlContent) {
+               this.tlContent.kill();
+            }
          }
       },
       Platform: class extends TriggerSetup {
