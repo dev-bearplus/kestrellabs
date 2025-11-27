@@ -1896,13 +1896,11 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  // setTranslate: function(swiper) {
-                  //    smoothScroll.stop();
-                  // },
-                  // touchEnd: function(swiper) {
-                  //    smoothScroll.start();
-                  // },
+                  touchEnd: (swiper) => {
+                     smoothScroll.start();                     
+                   },
                   slideChange: function(swiper) {
+                     smoothScroll.stop();
                      // check index active of swiper slide
                      const indexActive = swiper.activeIndex;
                      $('.home-problem-pagi-item').removeClass('active');
@@ -2219,9 +2217,27 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  // setTranslate: (swiper) => {
-                  //    smoothScroll.stop();
-                  // },
+                   touchStart: (swiper) => {
+                     $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
+
+                   },
+                   touchMove: (swiper) => {
+                      $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
+
+                   },
+                   touchEnd: (swiper) => {
+                     smoothScroll.start();
+                     console.log('End:', swiper.getTranslate());
+                     $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
+                     setTimeout(() => {
+                        gsap.to($(this.el).find('.home-why-main-line'), { transform: `translateX(${swiper.getTranslate() * -1}px)`, duration: 0.3 });
+                     }, 300);
+                     
+                   },
+                   
+                   slideChange: (swiper) => {
+                     smoothScroll.stop();
+                  },
                   // touchEnd: (swiper) => {
                   //    smoothScroll.start();
                   // }
@@ -2666,12 +2682,13 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                  // setTranslate: function(swiper) {
-                  //    smoothScroll.stop();
-                  // },
-                  // touchEnd: function(swiper) {
-                  //    smoothScroll.start();
-                  // }
+                  touchEnd: (swiper) => {
+                     smoothScroll.start();                     
+                   },
+                   
+                   slideChange: (swiper) => {
+                     smoothScroll.stop();
+                  },
                }
             });
          }
