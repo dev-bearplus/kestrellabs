@@ -713,10 +713,14 @@ const mainScript = () => {
          $('a').on('click', function (e) {
             if ($(this).attr('data-sub-link')) {
                barba.history.add(`${window.location.pathname + `#${$(this).attr('data-sub-link')}`}`, 'barba', 'replace');
-
+               
                requestAnimationFrame(() => {
-                     setTimeout(() => {
-                        $(`#${$(this).attr('data-sub-link')}`).trigger('click');
+                  setTimeout(() => {
+                        console.log('click data sub link:',$(`#${$(this).attr('data-sub-link')}`));
+                        // $(`#${$(this).attr('data-sub-link')}`).trigger('click');
+                        smoothScroll.scrollTo(`#${$(this).attr('data-sub-link')}`, {
+                           offset: 0
+                        });
                      }, $(this).hasClass('w--current') ? 0 : 1000);
 
                      $("a").each(function (index, link) {
@@ -2220,21 +2224,8 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                   touchStart: (swiper) => {
-                     $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
-
-                   },
-                   touchMove: (swiper) => {
-                      $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
-
-                   },
                    touchEnd: (swiper) => {
                      smoothScroll.start();
-                     console.log('End:', swiper.getTranslate());
-                     $(this.el).find('.home-why-main-line').css('transform', `translateX(${swiper.getTranslate() * -1}px)`);
-                     setTimeout(() => {
-                        gsap.to($(this.el).find('.home-why-main-line'), { transform: `translateX(${swiper.getTranslate() * -1}px)`, duration: 0.3 });
-                     }, 300);
                      
                    },
                    
