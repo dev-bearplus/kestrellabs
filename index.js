@@ -1291,16 +1291,11 @@ const mainScript = () => {
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'center' }),
                   new FadeIn({ el: $(this.el).find('.home-hero .bg-border'), type: 'none' }),
-                  new ScaleLine({ el: $(this.el).find('.home-hero-content>.line.line-horizital.top'), type: 'left' }),
-                  new ScaleLine({ el: $(this.el).find('.home-hero-sub-wrap>.line.line-vertical.left'), type: 'top' }),
-                  new ScaleLine({ el: $(this.el).find('.home-hero-sub-inner>.line.line-horizital.bot'), type: 'left' }),
-                  new ScaleLine({ el: $(this.el).find('.home-hero-btn>.line.line-vertical'), type: 'top' }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-sub .txt:first-child').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-btn .txt').get(0) }),
                   new FadeIn({ el: $(this.el).find('.home-hero-btn .btn-bg-ic:first-child'), type: 'bottom' }),
                   new FadeIn({ el: $(this.el).find('.home-hero-work'), type: 'bottom' }),
-                  new ScaleLine({ el: $(this.el).find('.home-hero-content>.line.line-horizital.bot'), type: 'left' }),
                ]
             });
             
@@ -1752,7 +1747,7 @@ const mainScript = () => {
          }
          onTrigger() {
             this.setup();
-            this.animationReveal();
+            viewport.w > 767 && this.animationReveal();
             this.animationScrub();
             this.interact();
          }
@@ -1770,33 +1765,27 @@ const mainScript = () => {
                scrollTrigger: {
                   trigger: $(this.el).find('.home-intro-body').get(0),
                   start: 'top+=45% bottom',
-               },
-               onComplete: () => {
-                  
                }
             });
             this.tlPartner = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-intro-partner-wrap').get(0),
                   start: 'top+=55% bottom',
-               },
-               onComplete: () => {
-                  
                }
             });
             let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars, lines'});
             this.tlStickFade.fromTo(title.chars, {color: '#b3b3af'}, { color: '#282828', stagger: 0.03 })
-            
-         }
-         animationReveal() {
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
                let direction = $(item).attr('data-direction');
                let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
             });
+         }
+         animationReveal() {
             new MasterTimeline({
                timeline:this.tlBody,
+               allowMobile: false,
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-intro-img').get(0), type: 'none' }),
                   new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), isDisableRevert: true }),
@@ -1806,6 +1795,7 @@ const mainScript = () => {
             });
             new MasterTimeline({
                timeline:this.tlPartner,
+               allowMobile: false,
                tweenArr: [
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
                     return [
