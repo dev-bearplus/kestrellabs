@@ -447,19 +447,19 @@ class ScaleLine {
     }
 }
 class ScaleInset {
-    constructor({el, elInner, delay, duration, isDisableRevert }) {
+    constructor({el, delay, duration, isDisableRevert }) {
         this.DOM = {
-            el: el, elInner: elInner || el?.querySelector('img')
+            el: el
     };
         this.delay = delay;
         this.animation = gsap
             .timeline()
-            .to(this.DOM.elInner,
+            .to(this.DOM.el,
                 { scale: 1, duration: 1.6, autoAlpha: 1, ease: 'expo.out', clearProps: isDisableRevert ? '' : 'all', overwrite: true })
     }
     init() {
         if (!this.DOM.el) return;
-        gsap.set(this.DOM.elInner, { scale: 1.25, autoAlpha: 0 });
+        gsap.set(this.DOM.el, { scale: 1.25, autoAlpha: 0 });
     }
     destroy() {
         this.animation.kill();

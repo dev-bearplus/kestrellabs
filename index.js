@@ -2211,7 +2211,7 @@ const mainScript = () => {
                new MasterTimeline({
                   timeline:this.tlImage,
                   tweenArr: [
-                     new ScaleInset({el: $(item).find('.home-platform-img-item-main').get(0), elInner: $(item).find('.home-platform-img-item-inner').get(0)}),
+                     new ScaleInset({el: $(item).find('.home-platform-img-item-inner').get(0)}),
                   ]
                });
             });
