@@ -455,11 +455,11 @@ class ScaleInset {
         this.animation = gsap
             .timeline()
             .to(this.DOM.elInner,
-                { scale: 1, duration: 2, autoAlpha: 1, ease: 'expo.out', clearProps: isDisableRevert ? '' : 'all', overwrite: true }, "<=0")
+                { scale: 1, duration: 1.6, autoAlpha: 1, ease: 'expo.out', clearProps: isDisableRevert ? '' : 'all', overwrite: true })
     }
     init() {
         if (!this.DOM.el) return;
-        gsap.set(this.DOM.elInner, { scale: 1.2, autoAlpha: 0 });
+        gsap.set(this.DOM.elInner, { scale: 1.25, autoAlpha: 0 });
     }
     destroy() {
         this.animation.kill();
