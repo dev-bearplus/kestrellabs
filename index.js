@@ -270,20 +270,12 @@ const mainScript = () => {
       }
       setup() {
          let itemWidth = this.item.width();
-         console.log('item', this.item)
          const windowWidth = $(window).width();
-
-         // Validate to prevent invalid array length
          if (!itemWidth || itemWidth <= 0 || !windowWidth || windowWidth <= 0) {
-            console.warn('Marquee: Invalid dimensions', { itemWidth, windowWidth });
             return;
          }
-
          const cloneAmount = Math.ceil(windowWidth / itemWidth) + 1;
-
-         // Extra safety check
          if (!Number.isFinite(cloneAmount) || cloneAmount <= 0 || cloneAmount > 1000) {
-            console.warn('Marquee: Invalid cloneAmount', cloneAmount);
             return;
          }
 
@@ -1437,6 +1429,81 @@ const mainScript = () => {
       }
    }
    const cta = new Cta();
+   class Faq {
+      constructor() {
+         this.el = null;
+         this.tlHead = null;
+         this.tlList = null;
+      }
+      init(data) {
+         this.el = data.next.container.querySelector('.product-faq-wrap');
+         this.onTrigger();
+      }
+      onTrigger() {
+         this.animationReveal();
+         this.interact();
+      }
+      animationReveal() {
+         this.tlHead = gsap.timeline({
+            scrollTrigger: {
+               trigger: $(this.el).find('.product-faq-title-wrap').get(0),
+               start: 'top+=45% bottom',
+               once: true
+            }
+         });
+         new MasterTimeline({
+            timeline: this.tlHead,
+            triggerInit: this.el,
+            tweenArr: [
+               new FadeSplitText({ el: $(this.el).find('.product-faq-label .txt').get(0) }),
+               new FadeSplitText({ el: $(this.el).find('.product-faq-title .heading').get(0) }),
+            ]
+         });
+         this.tlList = gsap.timeline({
+            scrollTrigger: {
+               trigger: $(this.el).find('.product-faq-list').get(0),
+               start: 'top+=45% bottom',
+               once: true
+            }
+         });
+         new MasterTimeline({
+            timeline: this.tlList,
+            triggerInit: this.el,
+            stagger: 0.05,
+            tweenArr: [
+               ...Array.from($(this.el).find('.product-faq-item')).flatMap((item, index) => [
+                  new FadeSplitText({ el: $(item).find('.product-faq-item-title .heading').get(0) }),
+                  new FadeIn({ el: $(item).find('.product-faq-item-ic') }),
+                  new ScaleDash({ el: $(item).find('.line-dash').get(0), type: 'left' }),
+               ]),
+            ]
+         });
+      }
+      interact() {
+         const activeAccordion = (idx) => {
+            $(this.el).find('.product-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
+            $(this.el).find('.product-faq-item').eq(idx).siblings().find('.product-faq-item-sub').slideUp();
+            $(this.el).find('.product-faq-item').eq(idx).find('.product-faq-item-sub').slideToggle();
+         }
+         $(this.el).find('.product-faq-item-sub').hide();
+
+         $(this.el).find('.product-faq-item').on('click', function() {
+            activeAccordion($(this).index());
+         });
+      }
+      destroy() {
+         if (this.tl) {
+            this.tl.kill();
+         }
+         if (this.tlHead) {
+            this.tlHead.kill();
+         }
+         if (this.tlList) {
+            this.tlList.kill();
+         }
+      }
+   }
+   let faq = new Faq();
    const HomePage = {
       Hero: class {
          constructor() {
@@ -2771,14 +2838,14 @@ const mainScript = () => {
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
                }
             })
-
+            this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden'),
             })
-
+            this.animationReveal(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -2795,12 +2862,32 @@ const mainScript = () => {
          playOnce() {
             this.tlOnce.play();
          }
+         playEnter() {
+            this.tlEnter.play();
+         }
+         animationReveal(timeline) {
+            new MasterTimeline({
+               timeline: timeline,
+               triggerInit: this.el,
+               stagger: 0.05,
+               tweenArr: [
+                  new ScaleInset({ el: $(this.el).find('.product-hero-img-inner').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-hero-label .txt').get(0), delay: 0 }),
+                  new FadeSplitText({ el: $(this.el).find('.product-hero-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-hero-sub .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-hero-btn .txt:first-child').get(0), delay: .1 }),
+                  new ScaleInset({ el: $(this.el).find('.product-hero-btn .btn-bg-ic:first-child').get(0), delay: .3 }),
+                  new FadeIn({ el: $(this.el).find('.about-inves-logo-cms').get(0), delay: .5, onStart: () => {
+                     this.partnerMarquee.play();
+                  } }),
+               ]
+            });
+         }
          animMarquee() {
-            let partnerMarquee = new Marquee(
+            this.partnerMarquee = new Marquee(
                $(this.el).find('.about-inves-logo-cms'),
                $(this.el).find('.about-inves-logo-list'), 40);
-            partnerMarquee.setup();
-            partnerMarquee.play();
+            this.partnerMarquee.setup();
          }
          destroy() {
             if (this.tlOnce) {
@@ -2818,14 +2905,16 @@ const mainScript = () => {
          constructor() {
             super();
             this.el = null;
+            this.tlHead = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-key-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationScrub();
             this.setup();
+            this.animationReveal();
+            this.animationScrub();
             this.interact();
          }
          setup() {
@@ -2835,6 +2924,42 @@ const mainScript = () => {
             initNumberIndex($(this.el).find('.product-key-main-title-inner'));
             initNumberIndex($(this.el).find('.product-key-main-left-main'));
             initNumberIndex($(this.el).find('.product-key-tab-item'));
+         }
+         animationReveal() {
+            this.tlHead = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.product-key-title-wrap').get(0),
+                  start: 'top+=65% bottom',
+                  once: true,
+               }
+            });   
+            new MasterTimeline({
+               timeline: this.tlHead,
+               triggerInit: this.el,
+               stagger: 0.05,
+               tweenArr: [
+                  new FadeSplitText({ el: $(this.el).find('.product-key-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-key-title .heading').get(0) }),
+               ]
+            });
+            this.tlTab = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.product-key-tab-wrap').get(0),
+                  start: 'top+=65% bottom',
+                  once: true,
+               }
+            });   
+            new MasterTimeline({
+               timeline: this.tlTab,
+               triggerInit: this.el,
+               stagger: 0.05,
+               tweenArr: [
+                  ...Array.from($(this.el).find('.product-key-tab-item')).flatMap((item, index) => [
+                     new FadeSplitText({ el: $(item).find('.product-key-tab-item-label .txt').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.product-key-tab-item-title .txt').get(0) }),
+                  ]),
+               ]
+            });
          }
          animationScrub() {
             const tabItems = $(this.el).find('.product-key-tab-item');
@@ -2944,16 +3069,54 @@ const mainScript = () => {
             super();
             this.el = null;
             this.tl = null;
+            this.tlHead = null;
+            this.tlImage = null;
+            this.tlItems = []
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-how-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
+            this.animationReveal();
             if(viewport.w > 767) {
                this.animationScrub();
             }
             this.interact();
+         }
+         animationReveal() {
+            this.tlHead = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.product-how-head').get(0),
+                  start: 'top+=65% bottom',
+                  once: true
+               },
+            });
+            new MasterTimeline({
+               timeline: this.tlHead,
+               triggerInit: this.el,
+               tweenArr: [
+                  new FadeSplitText({ el: $(this.el).find('.product-how-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-how-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-how-sub .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.product-how-scroll .txt').get(0) }),
+               ]
+            });
+            this.tlImage = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.product-how-img-wrap').get(0),
+                  start: 'top+=65% bottom',
+                  once: true
+               },
+            });
+            new MasterTimeline({
+               timeline: this.tlImage,
+               triggerInit: this.el,
+               tweenArr: [
+                  new ScaleInset({ el: $(this.el).find('.product-how-img').get(0) }),
+               ]
+            });
+            new ParallaxImage({ el: $(this.el).find('.product-how-img img').get(0) });
          }
          animationScrub() {
             this.tl = gsap.timeline({
@@ -2968,7 +3131,25 @@ const mainScript = () => {
             const items = $(this.el).find('.product-how-item');
             gsap.set(items, { yPercent: 100 });
             items.each((index, item) => {
-               this.tl.to(item, { yPercent: 0, stagger: 1, onComplete: () => {
+               let tlItem = gsap.timeline({
+                  paused: true,
+               });
+               this.tlItems.push(tlItem);
+               new MasterTimeline({
+                  timeline: tlItem,
+                  triggerInit: item,
+                  tweenArr: [
+                     new FadeIn({ el: $(item).find('.product-how-item-label') }),
+                     new FadeIn({ el: $(item).find('.product-how-item-ic-wrap') }),
+                     new FadeSplitText({ el: $(item).find('.product-how-item-title .heading').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.product-how-item-sub .txt').get(0), delay: .3 }),
+                  ]
+               });
+               const tween = this.tl.to(item, { yPercent: 0, stagger: 1, onUpdate: (self) => {
+                  if(tween.progress() > 0.1) {
+                     tlItem.play();
+                  }
+               }, onComplete: () => {
                   $(item).addClass('active');
                }, onReverseComplete: () => {
                   $(item).removeClass('active');
@@ -2981,33 +3162,29 @@ const mainScript = () => {
             if (this.tl) {
                this.tl.kill();
             }
+            if (this.tlHead) {
+               this.tlHead.kill();
+            }
+            if (this.tlImage) {
+               this.tlImage.kill();
+            }
+            if (this.tlItems.length > 0) {
+               this.tlItems.forEach(tl => tl.kill());
+            }
          }
       },
-      Faq: class extends TriggerSetup {
+      faq: class {
          constructor() {
-            super();
-            this.el = null;
          }
-         trigger(data) {
-            this.el = data.next.container.querySelector('.product-faq-wrap');
-            super.setTrigger(this.el, this.onTrigger.bind(this));
+         setup(data) {
+            faq.init(data);
          }
-         onTrigger() {
-            this.interact();
+      },
+      cta: class {
+         constructor() {
          }
-         interact() {
-            const activeAccordion = (idx) => {
-               $(this.el).find('.product-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
-               $(this.el).find('.product-faq-item').eq(idx).siblings().find('.product-faq-item-sub').slideUp();
-               $(this.el).find('.product-faq-item').eq(idx).find('.product-faq-item-sub').slideToggle();
-            }
-            $(this.el).find('.product-faq-item-sub').hide();
-
-            $(this.el).find('.product-faq-item').on('click', function() {
-               activeAccordion($(this).index());
-            });
-         }
-         destroy() {
+         setup(data) {
+            cta.init(data);
          }
       },
       footer: class {
@@ -3048,7 +3225,7 @@ const mainScript = () => {
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
                }
             })
-
+            this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
@@ -3067,10 +3244,41 @@ const mainScript = () => {
                   onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
                }
             })
-
+            this.animationReveal(this.tlEnter);
          }
          playOnce() {
             this.tlOnce.play();
+         }
+         playEnter() {
+            this.tlEnter.play();
+         }
+         animationReveal(timeline) {
+            new MasterTimeline({
+               timeline: timeline,
+               triggerInit: this.el,
+               stagger: 0.01,
+               tweenArr: [
+                  new FadeSplitText({ el: $(this.el).find('.pricing-hero-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.pricing-hero-label .txt').get(0) }),
+                  ...Array.from($(this.el).find('.pricing-hero-tab-item')).flatMap((item, index) => [
+                     (index != 0) ? new FadeIn({ el: $(item).find('.pricing-hero-tab-item-ic') }) : null,
+                     new FadeSplitText({ el: $(item).find('.pricing-hero-tab-item-txt .txt').get(0) }),
+                  ]).filter(Boolean),
+                  ...Array.from($(this.el).find('.pricing-hero-package-item')).flatMap((item, index) => [
+                     new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-type .txt').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-label .txt').get(0) }),
+                     new ScaleDash({ el: $(item).find('.line-dash').get(0), type: 'left' }),
+                     new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-title .heading').get(0) }),
+                     new FadeIn({ el: $(item).find('.pricing-hero-package-btn') }),
+                  ]),
+                  ...Array.from($(this.el).find('.pricing-hero-table-row')).flatMap((item, index) => [
+                     ...Array.from($(item).find('.pricing-hero-table-col')).flatMap((cell, index) => [
+                       (!$(cell).find('.pricing-hero-table-col-sub').hasClass('w-condition-invisible')) ? new FadeSplitText({ el: $(cell).find('.txt').get(0) }) : null,
+                        (!$(cell).find('.pricing-hero-table-col-check').hasClass('w-condition-invisible')) ? new FadeIn({ el: $(cell).find('.pricing-hero-table-col-check').get(0) }) : null,
+                     ]).filter(Boolean),
+                  ]),
+               ]
+            });
          }
          interact() {
             $(this.el).find('.pricing-hero-tab-item').on('click', (e) => {
@@ -3128,31 +3336,18 @@ const mainScript = () => {
             }
          }
       },
-      Faq: class extends TriggerSetup {
+      faq: class{
          constructor() {
-            super();
-            this.el = null;
          }
-         trigger(data) {
-            this.el = data.next.container.querySelector('.product-faq-wrap');
-            super.setTrigger(this.el, this.onTrigger.bind(this));
+         setup(data) {
+            faq.init(data);
          }
-         onTrigger() {
-            this.interact();
+      },
+      cta: class{
+         constructor() {
          }
-         interact() {
-            const activeAccordion = (idx) => {
-               $(this.el).find('.product-faq-item').eq(idx).toggleClass('active').siblings().removeClass('active');
-               $(this.el).find('.product-faq-item').eq(idx).siblings().find('.product-faq-item-sub').slideUp();
-               $(this.el).find('.product-faq-item').eq(idx).find('.product-faq-item-sub').slideToggle();
-            }
-            $(this.el).find('.product-faq-item-sub').hide();
-
-            $(this.el).find('.product-faq-item').on('click', function() {
-               activeAccordion($(this).index());
-            });
-         }
-         destroy() {
+         setup(data) {
+            cta.init(data);
          }
       },
       footer: class {
@@ -3188,6 +3383,7 @@ const mainScript = () => {
                   $("[data-init-hidden]").removeAttr("data-init-hidden");
                },
             });
+            this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
@@ -3212,6 +3408,30 @@ const mainScript = () => {
          }
          playOnce() {
             this.tlOnce.play();
+         }
+         playEnter() {
+            this.tlEnter.play();
+         }
+         animationReveal(timeline) {
+            new MasterTimeline({
+               timeline: timeline,
+               triggerInit: this.el,
+               stagger: 0.03,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.contact-hero-title .heading').get(0)}),
+                  ...Array.from($(this.el).find('.contact-hero-info-item')).flatMap((item, index) => [
+                     new FadeSplitText({el: $(item).find('.contact-hero-info-item-label .txt').get(0)}),
+                     new FadeSplitText({el: $(item).find('.contact-hero-info-item-title .txt').get(0)}),
+                  ]),
+                  new FadeSplitText({el: $(this.el).find('.contact-hero-sub .txt').get(0)}),
+                  new ScaleInset({el: $(this.el).find('.contact-hero-image-inner').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.contact-hero-form-title .heading').get(0)}),
+                  ...Array.from($(this.el).find('.contact-hero-form-input')).flatMap((item, index) => [
+                     new FadeIn({el: item}),
+                  ]),
+               ]
+            });
+            new ParallaxImage({el: $(this.el).find('.contact-hero-image-inner img').get(0)});
          }
          interact() {
             const $form = $(this.el).find("#contact-form");
@@ -3789,8 +4009,12 @@ const mainScript = () => {
             this.tlEnter.play();
          }
          interact() {
-            $(this.el).find('.resource-hero-search-ic').on('click', () => {
-               this.searchItem($(this.el).find('.resource-hero-search-input').val());
+            let searchTimeout;
+            $(this.el).find('.resource-hero-search-input').on('input', () => {
+               clearTimeout(searchTimeout);
+               searchTimeout = setTimeout(() => {
+                  this.searchItem($(this.el).find('.resource-hero-search-input').val());
+               }, 300);
             });
             $(this.el).find('.resource-hero-search-form').on('keypress', (e) => {
                if(e.which === 13 ) {
@@ -3803,8 +4027,17 @@ const mainScript = () => {
             });
          }
          initContent(timeline) {
+            new MasterTimeline({
+               timeline: timeline,
+               triggerInit: this.el,
+               stagger: 0.02,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.resource-hero-title').get(0)}),
+                  new FadeIn({el: $(this.el).find('.resource-hero-search-input-group input'), type: 'bottom'}),
+               ]
+            });
             $(this.el).find('.resource-hero-item').each((index, item) => {
-               this.masterTimeline = new MasterTimeline({
+               new MasterTimeline({
                   triggerInit: item,
                   timeline: timeline,
                   stagger: 0.02,  
