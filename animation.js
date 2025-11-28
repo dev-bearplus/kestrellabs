@@ -462,7 +462,7 @@ class ScaleInset {
     }
     init() {
         if (!this.DOM.el) return;
-        gsap.set(this.DOM.el, { clipPath: `inset(20% round ${this.borderRad}px)` });
+        gsap.set(this.DOM.el, { clipPath: `inset(0% round ${this.borderRad}px)` });
         gsap.set(this.DOM.elInner, { scale: 1.4, autoAlpha: 0 });
     }
     destroy() {

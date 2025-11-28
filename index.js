@@ -2049,7 +2049,7 @@ const mainScript = () => {
                         if (self.progress === 1) {
                            setTimeout(() => {
                               this.tlContent.play();
-                           }, 410);
+                           }, 200);
                            $(this.el).find('.home-map').addClass('expanded');
                         }
                      }
@@ -2163,6 +2163,8 @@ const mainScript = () => {
             super();
             this.el = null;
             this.tl = null;
+            this.tlContent = null;
+            this.tlImage = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.home-platform-wrap');
@@ -2170,6 +2172,7 @@ const mainScript = () => {
          }
          onTrigger() {
             this.setup();
+            this.animationReveal();
             this.animationScrub()
             this.interact();
          }
@@ -2180,6 +2183,39 @@ const mainScript = () => {
             }
          }
          interact() {}
+         animationReveal() {
+            this.tlContent = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.home-platform-content').get(0),
+                  start: 'top+=30% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline:this.tlContent,
+               tweenArr: [
+                  new FadeIn({el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-number').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-sub .txt').get(0) }),
+                  new FadeIn({el: $(this.el).find('.home-platform-content-inner.active .home-intro-btn-inner'), type: "bottom"}),
+               ]
+            });
+            $('.home-platform-img-item').each((index, item) => {
+               this.tlImage = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: item,
+                     start: 'top+=45% bottom',
+                     once: true
+                  }                  
+               });
+               new MasterTimeline({
+                  timeline:this.tlImage,
+                  tweenArr: [
+                     new ScaleInset({el: item, elInner: $(item).find('.home-platform-img-item-inner').get(0)}),
+                  ]
+               });
+            });
+         }
          animationScrub() {
             $(this.el).find('.home-platform-img-item-inner img').each((_, item) => new ParallaxImage({ el: item }));
 
