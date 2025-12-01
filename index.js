@@ -234,7 +234,7 @@ const mainScript = () => {
          this.el = el;
          this.elWrap = null;
          this.scaleOffset = scaleOffset;
-         this.init();
+         viewport.w > 991 ? this.init() : null;
       }
       init() {
          this.elWrap = this.el.parentElement;
@@ -259,11 +259,11 @@ const mainScript = () => {
          });
       }
       updateOnScroll(dist, total) {
-            if (this.el) {
-               if (isInViewport(this.elWrap)) {
-                  let percent = this.elWrap.getBoundingClientRect().top / total;
-                  gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
-                  gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
+         if (this.el) {
+            if (isInViewport(this.elWrap) ) {
+               let percent = this.elWrap.getBoundingClientRect().top / total;
+               gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
+               gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
                }
             }
       }
