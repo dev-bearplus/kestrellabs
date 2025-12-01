@@ -701,7 +701,7 @@ const mainScript = () => {
       }
       updateLink(data) {
          $("a").each(function (index, link) {
-            let href = $(this).attr("href").replace(/\/$/, "") || "/";
+            let href = $(this).attr("href")?$(this).attr("href").replace(/\/$/, "") : "/";
 
             if ($(this).attr('data-sub-link') && (!href.includes('#')) && (!href.includes('?sc='))) {
                $(this).attr('href', `${href}#${$(this).attr('data-sub-link')}`);
