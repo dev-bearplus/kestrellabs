@@ -3378,18 +3378,13 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: 0.3,
-               onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden");
-               },
+               delay: 0.3,    
             });
             this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3400,8 +3395,6 @@ const mainScript = () => {
                   once: true,
                   onEnter: () => this.tlEnter.play(),
                   onEnterBack: () => this.tlEnter.play(),
-                  onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
                },
             });
 
@@ -3898,18 +3891,13 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: 0.3,
-               onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden");
-               },
+               delay: 0.3
             });
          }
          setupEnter(data) {
             
             this.tlEnter = gsap.timeline({
-               paused: true,
-               onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               paused: true
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3919,9 +3907,7 @@ const mainScript = () => {
                   end: "bottom top-=50%",
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),
-                  onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+                  onEnterBack: () => this.tlEnter.play()
                },
             });
          }
@@ -3974,19 +3960,13 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: 0.3,
-               onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden");
-               },
+               delay: 0.3
             });
             this.initContent(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true,
-               onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden")
-               }
+               paused: true
             });
             this.initContent(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
@@ -3996,9 +3976,7 @@ const mainScript = () => {
                   end: "bottom top-=50%",
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),
-                  onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+                  onEnterBack: () => this.tlEnter.play(),                  
                },
             });
          }
@@ -4042,12 +4020,13 @@ const mainScript = () => {
                   timeline: timeline,
                   stagger: 0.02,  
                   tweenArr: [
-                     new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
                      new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
                      new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
                      new FadeIn({el: $(item).find('.resource-hero-item-img-inner').get(0), type: 'bottom'}),
                      new ScaleDash({el: $(item).find('.resource-hero-item-img .line').get(0), type: 'top'}),
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true}),
+                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true, onComplete: () => {
+                        multiLineText($(item).find('.resource-hero-item-title '));
+                     }}),
                      new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt ')}),
                      new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
                   ]
@@ -4152,15 +4131,13 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+                 
                },
             });
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true,
-               onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               paused: true
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -4170,9 +4147,7 @@ const mainScript = () => {
                   end: "bottom top-=50%",
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),
-                  onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+                  onEnterBack: () => this.tlEnter.play()
                },
             });
 
@@ -4333,15 +4308,13 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onStart: () => {
-                  $("[data-init-hidden]").removeAttr("data-init-hidden");
+                 
                },
             });
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true,
-               onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+               paused: true
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -4351,9 +4324,7 @@ const mainScript = () => {
                   end: "bottom top-=50%",
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),
-                  onStart: () =>
-                  $("[data-init-hidden]").removeAttr("data-init-hidden"),
+                  onEnterBack: () => this.tlEnter.play()
                },
             });
          }
