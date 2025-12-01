@@ -17,6 +17,11 @@ const mainScript = () => {
 			return window.innerHeight;
 		},
    };
+   function replaceHyphenWithSpan(el) {
+      $(el).html(function (index, oldHtml) {
+        return oldHtml.replaceAll("-", "<span>-</span>");
+      });
+    }
    function multiLineText(el){
       let line = $(el).find('.line-anim');
       let textMapLine = $(el).find('.bp-line');
@@ -902,7 +907,7 @@ const mainScript = () => {
                onEnterBack: () => {
                      if (this.once) {
                         this.once = false;
-                        onTrigger();
+                        this.onTrigger();
                      }
                },
             }
@@ -1213,7 +1218,7 @@ const mainScript = () => {
             timeline:this.tlImg,
             triggerInit: this.el,
             tweenArr: [
-               new ScaleInset({ el: $(this.el).find('.footer-img-item').eq(0).get(0) }),
+               new ScaleInset({ el: $(this.el).find('.footer-img-inner').eq(0).get(0) }),
                ...Array.from($(this.el).find('.footer-img-plus')).flatMap((item) => [
                   new ScaleInset({ el: $(item).get(0) }),
                ]),
@@ -2047,13 +2052,11 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             viewport.w > 767 && this.animationReveal();
             this.animationScrub();
             this.interact();
          }
          setup() {
-            
             this.tlStickFade = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-intro-content-title').get(0),
@@ -2098,12 +2101,12 @@ const mainScript = () => {
                tweenArr: [
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
                     return [
-                      new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.1}),
+                      new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.3}),
                     ] 
                   }),
                   ...Array.from($(this.el).find('.home-intro-partner-inner')).flatMap((item, index) => {
                     return [
-                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.1 }),
+                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
                     ]
                   })
                ]
@@ -2138,7 +2141,6 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.animationReveal();
          }
          setup() {
@@ -2231,7 +2233,6 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.animationReveal();
             this.interact();
             this.animationScrub()
@@ -2457,8 +2458,6 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
-            this.animationReveal();
             this.animationScrub()
             this.interact();
          }
@@ -2467,9 +2466,6 @@ const mainScript = () => {
                let centerStick = (viewport.h - $(this.el).find('.home-platform-content-inner').height()) / 2;
                $(this.el).find('.home-platform-content-inner').css('top', `${centerStick}px`);
             }
-         }
-         interact() {}
-         animationReveal() {
             this.tlContent = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-platform-content').get(0),
@@ -2502,6 +2498,7 @@ const mainScript = () => {
                });
             });
          }
+         interact() {}
          animationScrub() {
             $(this.el).find('.home-platform-img-item-inner img').each((_, item) => new ParallaxImage({ el: item }));
 
@@ -2551,18 +2548,17 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationReveal();
             viewport.w > 767 && this.animationScrub();
             this.interact();
          }
          animationScrub() {
             $(this.el).find('.home-why-item-img img').each((_, item) => new ParallaxImage({ el: item }));
          }
-         animationReveal() {
+         setup(data) {
             this.tlContent = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-why-head').get(0),
-                  start: 'top+=50% bottom',
+                  start: 'top+=65% bottom',
                   once: true,
                }
             });
@@ -2711,7 +2707,6 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.animationReveal(); 
             this.animationScrub();
             this.interact();
@@ -2740,7 +2735,7 @@ const mainScript = () => {
             this.tlContent = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.home-usecase-title-wrap').get(0),
-                  start: 'top+=30% bottom',
+                  start: 'top+=40% bottom',
                   once: true,
                }
             });
@@ -2917,7 +2912,6 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.animationReveal();
             this.animationScrub();
             this.interact();
@@ -3083,13 +3077,12 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationReveal();
             if(viewport.w > 767) {
                this.animationScrub();
             }
             this.interact();
          }
-         animationReveal() {
+         setup(data) {
             this.tlHead = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.product-how-head').get(0),
@@ -3674,6 +3667,19 @@ const mainScript = () => {
             if(viewport.w > 991) {
                header.registerDependent($(this.el).find('.about-hero-main'));
             }
+            else {
+               new MasterTimeline({
+                  timeline: timeline,
+                  tweenArr: [
+                     new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
+                     new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),
+                     new FadeSplitText({el: $(this.el).find('.about-intro-title .heading').get(0)}),
+                     new FadeSplitText({el: $(this.el).find('.about-intro-label .txt').get(0)}),
+                     new ScaleDash({el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left'}),
+                     new FadeIn({el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none'}),
+                  ]
+               });
+            }
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
                if(index == 0) return;
@@ -3691,6 +3697,7 @@ const mainScript = () => {
                      .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
+            
             if(viewport.w > 991) {
                let heightContent = $(this.el).find('.about-intro').outerHeight();
                let heightHero = $(this.el).find('.about-hero').height() + heightContent;
@@ -3727,6 +3734,8 @@ const mainScript = () => {
                });
                this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});  
             }
+            
+
          }
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
@@ -3773,7 +3782,6 @@ const mainScript = () => {
             this.el = data.next.container.querySelector('.about-story-wrap');
          }
          onTrigger() {
-            this.setup();
             this.interact();
          }
          setup() {
@@ -3795,7 +3803,7 @@ const mainScript = () => {
             this.tlHeader = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.about-story-title-wrap'),
-                  start: 'top+=40% bottom',
+                  start: 'top+=50% bottom',
                   once: true,
                }
             });
@@ -3879,6 +3887,7 @@ const mainScript = () => {
             this.interact();
          }
          setup () {
+            console.log('setup team');
             $(this.el).find('.about-team-popup').remove();
             $('.body-inner').append(this.popup);
             this.tlHead = gsap.timeline({
@@ -3913,7 +3922,6 @@ const mainScript = () => {
                   tweenArr: [
                      new ScaleInset({el: $(item).find('.about-team-item-img-item:first-child').get(0), onComplete: () => {
                         $(item).find('.about-team-item-img-wrap').addClass('hover');
-                        console.log('hover');
                      }}),
                      new FadeSplitText({el: $(item).find('.about-team-item-info-title .heading').get(0), delay: 0.6}),
                      new FadeSplitText({el: $(item).find('.about-team-item-info-sub .txt').get(0), delay: 0.8}),
@@ -3969,19 +3977,26 @@ const mainScript = () => {
          destroy() {
             $('.about-team-popup').remove();
             $(this.el).find('.about-team').append(this.popup);
+            if (this.tlHead) {
+               this.tlHead.kill();
+            }
+            if(this.tlItems.length > 0) {
+               this.tlItems.forEach(tl => tl.kill());
+            }
          }
       },
       Inves: class extends TriggerSetup {
          constructor() {
             super();
             this.el = null;
+            this.tlContent = null;
+            this.tlPartner = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.about-inves-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.interact();
          }
          setup() {
@@ -3991,21 +4006,68 @@ const mainScript = () => {
                marqueeLogo.setup();
                marqueeLogo.play();
             });
+            this.tlContent = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-inves-content'),
+                  start: 'top+=60% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlContent,
+               triggerInit: this.el,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.about-inves-label .txt').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.about-inves-title .heading').get(0)}),
+                  new ScaleInset({el: $(this.el).find('.about-inves-img-inner').get(0)})
+               ]
+            });
+            this.tlPartner = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-inves-partner-wrap'),
+                  start: 'top+=55% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline:this.tlPartner,
+               triggerInit: this.el,
+               tweenArr: [
+                  ...Array.from($(this.el).find('.about-inves-logo-label')).flatMap((item, index) => {
+                    return [
+                      new FadeSplitText({ el: $(item).find('.txt').get(0), delay: index * .3}),
+                    ] 
+                  }),
+                  ...Array.from($(this.el).find('.about-inves-logo-inner')).flatMap((item, index) => {
+                    return [
+                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
+                    ]
+                  })
+               ]
+            });
          }
          interact() {
          }
          destroy() {
-
+            if (this.tlContent) {
+               this.tlContent.kill();
+            }
+            if (this.tlPartner) {
+               this.tlPartner.kill();
+            }
          }
       },
       Job: class extends TriggerSetup {
-         constructor() { super(); }
+         constructor() { 
+            super(); 
+            this.el = null;
+            this.tlHead = null;
+         }
          trigger(data) {
             this.el = data.next.container.querySelector('.about-job-wrap');
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.setup();
             this.interact();
          }
          setup() {
@@ -4028,6 +4090,63 @@ const mainScript = () => {
                   el: '.about-job-pagi',
                   type: "fraction",
                 },
+            });
+            this.tlHead = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-job-title-wrap'),
+                  start: 'top+=65% bottom',
+                  once: true,
+               }
+            });
+            replaceHyphenWithSpan($(this.el).find('.about-job-sub .txt').get(0));
+            new MasterTimeline({
+               timeline: this.tlHead,
+               triggerInit: this.el,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.about-job-label .txt').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.about-job-title .heading').get(0), delay: 0.2}),
+                  new FadeSplitText({el: $(this.el).find('.about-job-sub .txt').get(0), delay: 0.4}),
+               ]
+            });
+            this.tlList = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-job-main'),
+                  start: 'top+=90% bottom',
+                  once: true,
+                  markers: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlList,
+               triggerInit: this.el,
+               tweenArr: [
+                  new FadeIn({el: $(this.el).find('.about-job-pagi').get(0), type: 'bottom'}),
+                  ...Array.from($(this.el).find('.about-job-navi-item')).flatMap((item, index) => {
+                    return [
+                      new ScaleInset({el: $(item).find('svg').get(0)}),
+                    ]
+                  }),
+               ]
+            });
+            $(this.el).find('.about-job-item').each((index, item) => {
+               if(index <= 1) {
+                  new MasterTimeline({
+                     timeline: this.tlList,
+                     tweenArr: [
+                        new FadeIn({el: $(item).find('.about-job-item-title .heading').get(0), type: 'bottom', delay: index * 0.2}),
+                        ...Array.from($(item).find('.about-job-item-info-item')).flatMap((item, index) => {
+                           return [
+                              ...Array.from($(item).find('.txt')).flatMap((item, index) => {
+                                 return [
+                                    new FadeIn({el: $(item).get(0), type: 'bottom', delay: index * 0.1}),
+                                 ]
+                              }),
+                           ]
+                        }),
+                        new FadeIn({el: $(item).find('.about-job-item-link').get(0), type: 'bottom', delay: index * 0.2}),
+                     ]
+                  });
+               }
             });
          }
          interact() {
