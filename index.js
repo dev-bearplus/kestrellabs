@@ -233,19 +233,21 @@ const mainScript = () => {
       }
       init() {
          this.elWrap = this.el.parentElement;
+         this.elWrapHeight = this.elWrap.offsetHeight;
          this.setup();
       }
       setup() {
          const scalePercent = 100 + 5 + ((this.scaleOffset - 0.1) * 100);
          gsap.set(this.el, {
             width: scalePercent + '%',
-            height: $(this.el).hasClass('img-abs') ? scalePercent + '%' : 'auto'
+            xPercent: (scalePercent - 100) / 2 * -1,
+            height: $(this.el).hasClass('img-abs') || $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
          });
          this.scrub();
       }
       scrub() {
-         let dist = this.el.offsetHeight - this.elWrap.offsetHeight;
-         let total = this.elWrap.getBoundingClientRect().height + window.innerHeight;
+         let dist = this.el.offsetHeight - this.elWrapHeight;
+         let total = this.elWrapHeight + window.innerHeight;
          this.updateOnScroll(dist, total);
          smoothScroll.lenis.on('scroll', () => {
             this.updateOnScroll(dist, total);
@@ -827,7 +829,7 @@ const mainScript = () => {
       }
       enterAnim(data) {
          this.tlEnter = gsap.timeline({
-            delay: .5,
+            delay: 0.4,
             onStart: () => {
                this.enterSetup(data);
                setTimeout(() => {
@@ -1234,6 +1236,7 @@ const mainScript = () => {
                ]),
             ]
          });
+         new ParallaxImage({el: $(this.el).find('.footer-logo-inner .ic-embed').get(0), speed: 0.2});
       }
       interact() {
          this.hoverLogo();
@@ -1382,6 +1385,7 @@ const mainScript = () => {
          this.interact();
       }
       animationReveal() {
+         new ParallaxImage({el: $(this.el).find('.home-cta-deco-item-img img').get(0), speed: 0.2});
          this.tlContent = gsap.timeline({
             scrollTrigger: {
                trigger: $(this.el).find('.home-cta-main'),
@@ -1548,6 +1552,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
+               delay: 0.3,
                onComplete: () => {
                   this.rotateText();
                   this.taglineMarquee.play();
@@ -2843,7 +2848,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden'),
+               delay: 0.3
             })
             this.animationReveal(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
@@ -3230,7 +3235,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+               delay: 0.3
             })
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3365,6 +3370,7 @@ const mainScript = () => {
             this.tlOnce = null;
             this.tlEnter = null;
             this.tlTriggerEnter = null;
+            this.tlContentFade = null;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".contact-hero-wrap");
@@ -3385,6 +3391,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
+               delay: 0.3
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3397,7 +3404,7 @@ const mainScript = () => {
                   onEnterBack: () => this.tlEnter.play(),
                },
             });
-
+            this.animationReveal(this.tlEnter);
          }
          playOnce() {
             this.tlOnce.play();
@@ -3409,19 +3416,25 @@ const mainScript = () => {
             new MasterTimeline({
                timeline: timeline,
                triggerInit: this.el,
-               stagger: 0.03,
+               stagger: 0.05,
                tweenArr: [
                   new FadeSplitText({el: $(this.el).find('.contact-hero-title .heading').get(0)}),
-                  ...Array.from($(this.el).find('.contact-hero-info-item')).flatMap((item, index) => [
-                     new FadeSplitText({el: $(item).find('.contact-hero-info-item-label .txt').get(0)}),
-                     new FadeSplitText({el: $(item).find('.contact-hero-info-item-title .txt').get(0)}),
-                  ]),
                   new FadeSplitText({el: $(this.el).find('.contact-hero-sub .txt').get(0)}),
+                  ...Array.from($(this.el).find('.contact-hero-info-item')).flatMap((item, index) => {
+                     return [
+                        new FadeSplitText({el: $(item).find('.contact-hero-info-item-label .txt').get(0)}),
+                        new FadeSplitText({el: $(item).find('.contact-hero-info-item-title .txt').get(0)}),
+                     ]
+                  }),
                   new ScaleInset({el: $(this.el).find('.contact-hero-image-inner').get(0)}),
                   new FadeSplitText({el: $(this.el).find('.contact-hero-form-title .heading').get(0)}),
-                  ...Array.from($(this.el).find('.contact-hero-form-input')).flatMap((item, index) => [
-                     new FadeIn({el: item}),
-                  ]),
+                  ...Array.from($(this.el).find('.contact-hero-form-label .heading')).flatMap((item, index) => {
+                     return [
+                        new FadeSplitText({el: $(item).get(0)}),
+                     ]
+                  }),
+                  new FadeSplitText({el: $(this.el).find('.contact-hero-form-input-submit .heading:first-child').get(0)}),
+                  new ScaleInset({el: $(this.el).find('.contact-hero-form-input-submit .btn-bg-ic:first-child').get(0)}),
                ]
             });
             new ParallaxImage({el: $(this.el).find('.contact-hero-image-inner img').get(0)});
@@ -3591,6 +3604,7 @@ const mainScript = () => {
             this.tlImage = null;
             this.animationFrameGrind = null;
             this.tlScrubContent = null;
+            this.isContentFade = false;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.about-hero-wrap');
@@ -3604,24 +3618,16 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: 0.4,
-               onStart: () => {
-                  console.log(';lllllsetupOnce');
-                  this.interact();
-                  $('[data-init-hidden]').removeAttr('data-init-hidden');
-               }
+               delay: 0.3
             })
-            this.tlOnce.to({}, { duration: 0.01 });
+            this.animateImage(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               onStart: () => {
-                  $('[data-init-hidden]').removeAttr('data-init-hidden');
-                  this.interact();
-               }
+               delay: 0.3
             })
-
+            this.animateImage(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -3629,20 +3635,20 @@ const mainScript = () => {
                   end: 'bottom top-=50%',
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),
-                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+                  onEnterBack: () => this.tlEnter.play()
                }
             })
-            this.tlEnter.to({}, { duration: 0.01 });
          }
          playOnce() {
             this.tlOnce.play();
          }
-         interact() {
-            this.animateImage();
+         playEnter() {
+            this.tlEnter.play();
          }
-         animateImage() {
-            const $img = $('.about-hero-item:nth-child(2) img');
+         interact() {
+         }
+         animateImage(timeline) {
+            const $img = $(this.el).find('.about-hero-item:nth-child(2) img');
             const $container = $img.parent();
             const containerWidth = $container.width();
             const containerHeight = $container.height();
@@ -3661,35 +3667,49 @@ const mainScript = () => {
                displayedHeight = containerHeight;
                displayedWidth = containerHeight * imgRatio;
             }
-            $('.about-hero-item-deco').css({
+            $(this.el).find('.about-hero-item-deco').css({
                width: `${displayedWidth}px`,
                height: `${displayedHeight}px`,
             });
             if(viewport.w > 991) {
                header.registerDependent($(this.el).find('.about-hero-main'));
             }
-            this.tlImage = gsap.timeline({
-            });
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
                if(index == 0) return;
                if(index == imageItems.length - 1) {
-                  this.tlImage.to(imageItems.not(imageItems.last()), {opacity: 0, duration: 1});
-                  this.tlImage.fromTo($(item).find('svg path').eq(0), {opacity: 0}, {opacity: 1, duration: 1.2, onStart: () => {
+                  timeline.to(imageItems.not(imageItems.last()), {autoAlpha: 0, duration: 1});
+                  timeline.fromTo($(item).find('svg path').eq(0), {autoAlpha: 0}, {autoAlpha: 1, duration: 1.2, onStart: () => {
                      $(this.el).find('.about-hero-bg').addClass('active');
                      this.updateGrind();
                   }}, '<=.3');
-                  this.tlImage.fromTo($(item).find('svg path').eq(1), {opacity: 0}, {opacity: 1, duration: 1}, '<=.5');
+                  timeline.fromTo($(item).find('svg path').eq(1), {autoAlpha: 0}, {autoAlpha: 1, duration: 1}, '<=.4');
                } else {
-                  this.tlImage
-                     .fromTo(item, {opacity: 0}, {opacity: 1, duration: .8})
-                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-brand'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.05})
-                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {opacity: 0}, {opacity: 1, duration: .6, stagger: 0.1}, '<=.4');
+                  timeline
+                     .fromTo(item, {autoAlpha: 0}, {autoAlpha: 1, duration: .8})
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-brand'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.05})
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
             if(viewport.w > 991) {
                let heightContent = $(this.el).find('.about-intro').outerHeight();
                let heightHero = $(this.el).find('.about-hero').height() + heightContent;
+               this.tlContentFade = gsap.timeline({
+                  paused: true,
+               });
+               new MasterTimeline({
+                  timeline: this.tlContentFade,
+                  triggerInit: this.el,
+                  stagger: 0.02,
+                  tweenArr: [
+                     new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
+                     new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),
+                     new FadeSplitText({el: $(this.el).find('.about-intro-title .heading').get(0)}),
+                     new FadeSplitText({el: $(this.el).find('.about-intro-label .txt').get(0), delay: 0.3}),
+                     new ScaleDash({el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left'}),
+                     new FadeIn({el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none', delay: 1}),
+                  ]
+               });
                $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
                this.tlScrubContent = gsap.timeline({
                   scrollTrigger: {
@@ -3697,6 +3717,12 @@ const mainScript = () => {
                      start: 'top-=1px top',
                      end: `bottom bottom`,
                      scrub: true,
+                  },
+                  onUpdate: ()=>{
+                     if(this.tlScrubContent.progress() > 0.55 && this.isContentFade == false) {
+                        this.isContentFade = true;
+                        this.tlContentFade.play();
+                     }
                   }
                });
                this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});  
@@ -3722,11 +3748,118 @@ const mainScript = () => {
             if (this.tlScrubContent) {
                this.tlScrubContent.kill();
             }
+            if (this.tlContentFade) {
+               this.tlContentFade.kill();
+            }
             if(viewport.w > 991) {
                header.unregisterDependent($(this.el).find('.about-hero-main'));
             }
             if(this.animationFrameGrind) {
                cancelAnimationFrame(this.animationFrameGrind);
+            }
+            this.isContentFade = false;
+         }
+      },
+      Story : class extends TriggerSetup {
+         constructor() {
+            super();
+            this.el = null;
+            this.tlHeader = null;
+            this.tlSub = null;
+            this.tlMission = null;
+            this.tlImage = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.about-story-wrap');
+         }
+         onTrigger() {
+            this.setup();
+            this.interact();
+         }
+         setup() {
+            this.tlImage = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-story-img-wrap'),
+                  start: 'top+=40% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlImage,
+               triggerInit: this.el,
+               tweenArr: [
+                  new ScaleInset({el: $(this.el).find('.about-story-img').get(0)}),
+               ]
+            });
+            new ParallaxImage({el: $(this.el).find('.about-story-img img').get(0), speed: 0.2});
+            this.tlHeader = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-story-title-wrap'),
+                  start: 'top+=40% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlHeader,
+               triggerInit: this.el,
+               stagger: 0.02,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.about-story-label .txt').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.about-story-title .heading').get(0)}),
+               ]
+            });
+            this.tlSub = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-story-sub-wrap'),
+                  start: 'top+=40% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlSub,
+               triggerInit: this.el,
+               stagger: 0.02,
+               tweenArr: [
+                  ...Array.from($(this.el).find('.about-story-sub-item')).flatMap((item, index) => {
+                     return [
+                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                     ]
+                  }),
+               ]
+            });
+            this.tlMission = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-story-mission'),
+                  start: 'top+=55% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlMission,
+               triggerInit: this.el,
+               stagger: 0.06,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.about-story-mission-title .heading').get(0)}),
+                  ...Array.from($(this.el).find('.about-story-mission-item')).flatMap((item, index) => {
+                     return [
+                        new ScaleInset({el: $(item).find('.about-story-mission-item-ic').get(0)}),
+                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                     ]
+                  }),
+               ]
+            });
+         }
+         interact() {
+         }
+         destroy() {
+            if (this.tlHeader) {
+               this.tlHeader.kill();
+            }
+            if (this.tlSub) {
+               this.tlSub.kill();
+            }
+            if (this.tlMission) {
+               this.tlMission.kill();
             }
          }
       },
@@ -3734,6 +3867,8 @@ const mainScript = () => {
          constructor() {
             super();
             this.el = null;
+            this.tlHead = null;
+            this.tlItems = []
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.about-team-wrap');
@@ -3746,7 +3881,46 @@ const mainScript = () => {
          setup () {
             $(this.el).find('.about-team-popup').remove();
             $('.body-inner').append(this.popup);
+            this.tlHead = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.about-team-head'),
+                  start: 'top+=55% bottom',
+                  once: true,
+               }
+            });
+            new MasterTimeline({
+               timeline: this.tlHead,
+               triggerInit: this.el,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.about-team-label .txt').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.about-team-title .heading').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.about-team-sub .txt').get(0)}),
+               ]
+            });
 
+            $(this.el).find('.about-team-item').each((index, item) => {
+               let tlItem = gsap.timeline({
+                  scrollTrigger: {
+                     trigger: item,
+                     start: 'top+=50% bottom',
+                     once: true,
+                  }
+               });
+               this.tlItems.push(tlItem);
+               new MasterTimeline({
+                  timeline: tlItem,
+                  triggerInit: this.el,
+                  tweenArr: [
+                     new ScaleInset({el: $(item).find('.about-team-item-img-item:first-child').get(0), onComplete: () => {
+                        $(item).find('.about-team-item-img-wrap').addClass('hover');
+                        console.log('hover');
+                     }}),
+                     new FadeSplitText({el: $(item).find('.about-team-item-info-title .heading').get(0), delay: 0.6}),
+                     new FadeSplitText({el: $(item).find('.about-team-item-info-sub .txt').get(0), delay: 0.8}),
+                     new ScaleInset({el: $(item).find('.about-team-item-info-ic svg').get(0)}),
+                  ]
+               });
+            });
          }
          interact() {
             $(this.el).find('.about-team-item').each((index, item) => {
@@ -3863,7 +4037,14 @@ const mainScript = () => {
 
          }
       },
-      footer: class {
+      Cta: class {
+         constructor(data) {
+         }
+         setup(data) {
+            cta.init(data);
+         }
+      },
+      Footer: class {
          constructor(data) {
          }
          setup(data) {
@@ -3893,13 +4074,14 @@ const mainScript = () => {
                paused: true,
                delay: 0.3
             });
+            this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
-            
             this.tlEnter = gsap.timeline({
-               paused: true
+               paused: true,
+               delay: 0.3
             });
-
+            this.animationReveal(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
                scrollTrigger: {
                   trigger: this.el,
@@ -3913,6 +4095,29 @@ const mainScript = () => {
          }
          playOnce() {
             this.tlOnce.play();
+         }
+         playEnter() {
+            this.tlEnter.play();
+         }
+         animationReveal(timeline) {
+            new MasterTimeline({
+               timeline: timeline,
+               triggerInit: this.el,
+               stagger: 0.02,
+               tweenArr: [
+                  new FadeSplitText({el: $(this.el).find('.schedule-hero-title').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.schedule-hero-sub .txt').get(0)}),
+                  ...Array.from($(this.el).find('.schedule-hero-desc')).flatMap((item, index) => {
+                     return [
+                        new FadeIn({el: $(item).find('.schedule-hero-desc-ic')}),
+                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                     ]
+                  }),
+                  new FadeSplitText({el: $(this.el).find('.schedule-hero-email-label .txt').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.schedule-hero-email-title .heading').get(0)}),
+                  new FadeIn({el: $(this.el).find('.meetings-iframe-container'), type: 'bottom'}),
+               ]
+            });
          }
          interact() {
            
@@ -3934,6 +4139,9 @@ const mainScript = () => {
       Footer: class extends Footer {
          constructor() {
             super();
+         }
+         setup(data) {
+            footer.init(data);
          }
       },
    };
@@ -3966,7 +4174,8 @@ const mainScript = () => {
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true
+               paused: true,
+               delay: 0.3
             });
             this.initContent(this.tlEnter);
             this.tlTriggerEnter = gsap.timeline({
@@ -4031,6 +4240,21 @@ const mainScript = () => {
                      new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
                   ]
                });
+            });
+            let timelineLoadMore = gsap.timeline({
+               scrollTrigger: {
+                  trigger: $(this.el).find('.resource-hero-load-wrap').get(0),
+                  start: "top+=35% bottom",
+                  once: true,
+
+               }, 
+            });
+            new MasterTimeline({
+               triggerInit: this.el,
+               timeline: timelineLoadMore,
+               tweenArr: [
+                  new FadeIn({el: $(this.el).find('.resource-hero-load'), type: 'bottom'}),
+               ]
             });
          }
          searchItem(val){
@@ -4137,7 +4361,8 @@ const mainScript = () => {
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true
+               paused: true,
+               delay: 0.3
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -4314,7 +4539,8 @@ const mainScript = () => {
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
-               paused: true
+               paused: true,
+               delay: 0.3
             });
 
             this.tlTriggerEnter = gsap.timeline({

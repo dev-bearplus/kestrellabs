@@ -447,15 +447,25 @@ class ScaleLine {
     }
 }
 class ScaleInset {
-    constructor({el, delay, duration, isDisableRevert }) {
+    constructor({el, delay, duration, isDisableRevert, onComplete }) {
         this.DOM = {
             el: el
     };
         this.delay = delay;
+        const animationProps = {
+            scale: 1,
+            duration: 1.6,
+            autoAlpha: 1,
+            ease: 'expo.out',
+            clearProps: isDisableRevert ? '' : 'all',
+            overwrite: true
+        };
+        if (onComplete) {
+            animationProps.onComplete = onComplete;
+        }
         this.animation = gsap
             .timeline()
-            .to(this.DOM.el,
-                { scale: 1, duration: 1.6, autoAlpha: 1, ease: 'expo.out', clearProps: isDisableRevert ? '' : 'all', overwrite: true })
+            .to(this.DOM.el, animationProps)
     }
     init() {
         if (!this.DOM.el) return;
