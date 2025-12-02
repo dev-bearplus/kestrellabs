@@ -261,9 +261,9 @@ const mainScript = () => {
       updateOnScroll(dist, total) {
          if (this.el) {
             if (isInViewport(this.elWrap) ) {
-               let percent = this.elWrap.getBoundingClientRect().top / total;
-               gsap.quickSetter(this.el, 'y', 'px')(-dist * percent * 1.2);
-               gsap.set(this.el, { scale: 1 + (percent * this.scaleOffset) });
+               let percent = (this.elWrap.getBoundingClientRect().top + window.innerHeight) / total;
+               gsap.quickSetter(this.el, 'y', 'px')(-dist * (1 - percent) * 1.2);
+               gsap.set(this.el, { scale: 1 + this.scaleOffset - (percent * this.scaleOffset) });
                }
             }
       }
@@ -2880,7 +2880,7 @@ const mainScript = () => {
                   new FadeIn({ el: $(this.el).find('.about-inves-logo-cms').get(0), delay: .5, onStart: () => {
                      this.partnerMarquee.play();
                   } }),
-               ]
+               ].filter(Boolean)
             });
          }
          animMarquee() {
