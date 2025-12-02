@@ -243,11 +243,11 @@ const mainScript = () => {
       }
       setup() {
          const scalePercent = 100 + 5 + ((this.scaleOffset - 0.1) * 100);
-         gsap.set(this.el, {
-            width: scalePercent + '%',
-            xPercent: (scalePercent - 100) / 2 * -1,
-            height: $(this.el).hasClass('img-abs') || $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
-         });
+         // gsap.set(this.el, {
+         //    width: scalePercent + '%',
+         //    xPercent: (scalePercent - 100) / 2 * -1,
+         //    height: $(this.el).hasClass('img-abs') || $(this.el).hasClass('img-fill') ? scalePercent + '%' : 'auto'
+         // });
          this.scrub();
       }
       scrub() {
@@ -786,7 +786,6 @@ const mainScript = () => {
       }
    }
    const globalHooks = new GlobalHooks();
-
    class PageTrans {
       constructor() {
          this.tlLeave = null;
@@ -795,7 +794,15 @@ const mainScript = () => {
          this.widthLineVertical = this.el.querySelector('.line-vertical').offsetWidth;
       }
       leaveAnim(data) {
-         // Store promise để chờ HubSpot load
+         this.hubspotLoadPromise = null;
+         this.tlLeave = gsap.timeline({
+            onStart: () => {
+               this.updateBeforeTrans.bind(this)(data);
+            },
+            onComplete: () => {
+               this.updateAfterTrans.bind(this)(data);
+            }
+         })
          this.hubspotLoadPromise = null;
 
          if(data.next.namespace === 'schedule') {
@@ -816,17 +823,6 @@ const mainScript = () => {
                   });
             });
          }
-
-         this.tlLeave = gsap.timeline({
-            onStart: () => {
-               this.updateBeforeTrans.bind(this)(data);
-            },
-            onComplete: () => {
-               this.updateAfterTrans.bind(this)(data);
-            }
-         })
-         // this.tlLeave
-         //    .fromTo(data.current.container, {opacity: 1}, {duration: .6, opacity: 0})
          this.tlLeave
                .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
                .fromTo('html', {'--size--line': '0'}, {'--size--line': this.widthLineVertical, duration: .6, ease: 'power1.inOut'}, '<=0')
@@ -2866,6 +2862,7 @@ const mainScript = () => {
             this.tlEnter.play();
          }
          animationReveal(timeline) {
+            new ParallaxImage({ el: $(this.el).find('.product-hero-img-inner img').get(0) });
             new MasterTimeline({
                timeline: timeline,
                triggerInit: this.el,
@@ -4224,7 +4221,8 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.schedule-hero-title').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.schedule-hero-title .heading').get(0)}),
+                  new ScaleDash({el: $(this.el).find('.schedule-hero-title .line').get(0), type: 'left'}),
                   new FadeSplitText({el: $(this.el).find('.schedule-hero-sub .txt').get(0)}),
                   ...Array.from($(this.el).find('.schedule-hero-desc')).flatMap((item, index) => {
                      return [
@@ -4232,6 +4230,7 @@ const mainScript = () => {
                         new FadeSplitText({el: $(item).find('.txt').get(0)}),
                      ]
                   }),
+                  new ScaleDash({el: $(this.el).find('.schedule-hero-email .line').get(0), type: 'left'}),
                   new FadeSplitText({el: $(this.el).find('.schedule-hero-email-label .txt').get(0)}),
                   new FadeSplitText({el: $(this.el).find('.schedule-hero-email-title .heading').get(0)}),
                   new FadeIn({el: $(this.el).find('.meetings-iframe-container'), type: 'bottom'}),
@@ -4584,22 +4583,23 @@ const mainScript = () => {
             })
           }
           async loadTermlyPolicy() {
-            const id = $('[policyUUID]').attr('policyUUID');
+            const id = $(this.el).find('[policyUUID]').attr('policyUUID');
+            console.log(id);
             const fullUrl = `https://kestrellabs-bp.netlify.app/.netlify/functions/fetchPolicy?policyUUID=${id}`;
             
             try {
-                $('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
+                $(this.el).find('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
                 
                 const response = await fetch(fullUrl);      // ✅ Thêm await
                 const data = await response.json();  
                 data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-                $('.policy-hero-content-richtext').html(data.content);
-                $('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
-                $('.policy-hero-content-richtext *').removeAttr('align');
+                $(this.el).find('.policy-hero-content-richtext').html(data.content);
+                $(this.el).find('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
+                $(this.el).find('.policy-hero-content-richtext *').removeAttr('align');
                 this.initTableContent();
             } catch (error) {
                 console.error('Error loading policy:', error);
-                $('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
+                $(this.el).find('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
             }
         }
          destroy() {
