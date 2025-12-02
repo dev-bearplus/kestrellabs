@@ -852,7 +852,6 @@ const mainScript = () => {
          })
       }
       enterSetup(data) {
-         reinitializeWebflow(data);
          globalHooks.triggerEnterSetup(data);
       }
       enterPlay(data) {
@@ -873,6 +872,7 @@ const mainScript = () => {
          scrollTop();
          resetScroll();
          smoothScroll.start();
+         reinitializeWebflow(data);
          globalChange.update(data);
 
          documentHeightObserver('init', data);
@@ -3361,9 +3361,12 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.tlContentFade = null;
+            this.form = null;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".contact-hero-wrap");
+            this.form = $(this.el).find("#contact-form");
+
             if (mode === "once") {
                this.setupOnce(data);
             } else if (mode === "enter") {
@@ -3375,13 +3378,19 @@ const mainScript = () => {
             this.tlOnce = gsap.timeline({
                paused: true,
                delay: 0.3,    
+               onComplete: () => {
+                  $(this.el).find('.contact-hero-form-label').addClass('item-transition');
+               }
             });
             this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               delay: 0.3
+               delay: 0.3,
+               onComplete: () => {
+                  $(this.el).find('.contact-hero-form-label').addClass('item-transition');
+               }
             });
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3430,7 +3439,6 @@ const mainScript = () => {
             new ParallaxImage({el: $(this.el).find('.contact-hero-image-inner img').get(0)});
          }
          interact() {
-            const $form = $(this.el).find("#contact-form");
             $(this.el).find(".contact-hero-form-input").on("input", function () {
                if ($(this).val()) {
                   $(this).parent().addClass("active");
@@ -3455,10 +3463,11 @@ const mainScript = () => {
                   $(this).prop("disabled", false);
                }
             });
-            $form.find('[type="submit"]').on("click", function (e) {
-               const data = mapFormToObject($form.get(0));
+            const requiredNames = ["First-Name", "Last-Name", "Phone-Number", "Email"];
+            $(this.form).find('[type="submit"]').on("click", function (e) {
+               const data = mapFormToObject($(this.form).get(0));
                let isValid = true;
-               requiredNames.forEach(function (name) {
+               requiredNames.forEach( (name) => {
                   if (!Object.prototype.hasOwnProperty.call(data, name)) return;
                   const v = String(data[name] ?? "").trim();
                   let hasError = false;
@@ -3467,7 +3476,7 @@ const mainScript = () => {
                   } else if (name === "Email") {
                      hasError = v !== "" && !emailRegex.test(v);
                   }
-                  const $input = $form.find('[name="' + name + '"]');
+                  const $input = $(this.form).find('[name="' + name + '"]');
                   const $parent = $input.parent();
                   if (hasError) {
                      $parent.addClass("error");
@@ -3480,26 +3489,25 @@ const mainScript = () => {
                   e.preventDefault();
                }
             });
-            const requiredNames = ["First-Name", "Last-Name", "Phone-Number", "Email"];
-            const updateSubmitState = function ($f) {
+            const updateSubmitState =  ($f) => {
                let allFilled = true;
-               requiredNames.forEach(function (name) {
-                  const $input = $f.find('[name="' + name + '"]');
+               requiredNames.forEach( (name) => {
+                  const $input = $(this.form).find('[name="' + name + '"]');
                   if ($input.length) {
                   const v = String($input.val() ?? "").trim();
                   if (v.length === 0) allFilled = false;
                   }
                });
-               const $btn = $f.find('[type="submit"]');
+               const $btn = $($f).find('[type="submit"]');
                if (allFilled) $btn.removeClass("disable");
                else $btn.addClass("disable");
             };
-            updateSubmitState($form);
-            $form.on(
+            updateSubmitState($(this.form));
+            $(this.form).on(
             "input change",
             '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]',
             function () {
-               updateSubmitState($form);
+               updateSubmitState(this.form);
             }
             );
          }
@@ -3517,7 +3525,7 @@ const mainScript = () => {
             };
             const { portalId, formId, fields } = hubspot;
             let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
-            const data = mapFormToObject($form.get(0));
+            const data = mapFormToObject($(this.form).get(0));
             const mapField = (data) => {
                if (!fields.length) return [];
 
