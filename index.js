@@ -191,7 +191,6 @@ const mainScript = () => {
          $(document).on('ajaxSend', function (event, xhr, settings) {
             if (settings.url.includes("https://webflow.com/api/v1/form/")) {
                   inputSubmit?.text('Please wait...');
-                  console.log("please wait...")
             }
          });
          $(document).on('ajaxComplete', function (event, xhr, settings) {
@@ -203,14 +202,14 @@ const mainScript = () => {
                   if (isWorkOnAllForm) {
                      if (isSuccessful) {
                         onSuccess?.()
-                        inputSubmit?.text('Sent');
+                        inputSubmit?.text('Submit');
                      } else {
                         onFail?.()
                      }
                   } else if (isCorrectForm) {
                      if (isSuccessful) {
                         onSuccess?.()
-                        inputSubmit?.text('Sent');
+                        inputSubmit?.text('Submit');
                      } else {
                         onFail?.()
                      }
@@ -3443,7 +3442,9 @@ const mainScript = () => {
             const onSuccessForm = (formID) => {
                setTimeout(() => {
                   $(this.el).find(formID).trigger("reset");
-                  $(this.el).find(".input-field-grp").removeClass("filled");
+                  $(this.el).find(".contact-hero-form-input-group").removeClass("active");
+                  $(this.el).find('.contact-hero-form-inner').addClass('hidden')
+                  $(this.el).find('.contact-hero-form-success').addClass('active')
                   this.submitHubspot();
                }, 1000);
             };
@@ -4338,7 +4339,7 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.resource-hero-title').get(0)}),
+                  new FadeSplitText({el: $(this.el).find('.resource-hero-title .heading').get(0)}),
                   new FadeIn({el: $(this.el).find('.resource-hero-search-input-group input'), type: 'bottom'}),
                ]
             });
