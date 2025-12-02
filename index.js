@@ -4110,7 +4110,6 @@ const mainScript = () => {
                   trigger: $(this.el).find('.about-job-main'),
                   start: 'top+=90% bottom',
                   once: true,
-                  markers: true,
                }
             });
             new MasterTimeline({
