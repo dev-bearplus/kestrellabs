@@ -3377,20 +3377,14 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: 0.3,    
-               onComplete: () => {
-                  $(this.el).find('.contact-hero-form-label').addClass('item-transition');
-               }
+               delay: 0.3
             });
             this.animationReveal(this.tlOnce);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               delay: 0.3,
-               onComplete: () => {
-                  $(this.el).find('.contact-hero-form-label').addClass('item-transition');
-               }
+               delay: 0.3
             });
 
             this.tlTriggerEnter = gsap.timeline({
