@@ -231,10 +231,11 @@ class RevealTextReset  {
     }
 }
 class FadeSplitText {
-    constructor({ el, delay, headingType, splitType, duration, stagger, isDisableRevert, ...props }) {
+    constructor({ el, delay, headingType, splitType,timeline=null, duration, stagger, isDisableRevert, ...props }) {
         if (!el || el.textContent === '') return;
         this.DOM = { el: el };
         this.delay = delay;
+        this.timeline = timeline;
         this.textSplit = null;
         this.splitType = splitType || 'words';
         this.headingType = headingType || 'false';
@@ -249,7 +250,21 @@ class FadeSplitText {
                 autoSplit: true,
                 onSplit: (self) => {
                     gsap.set(self[this.splitType], { autoAlpha: 0, yPercent: 100 });
-                    animation = gsap.to(self[this.splitType], {
+                    animation = this.timeline ? this.timeline.to(self[this.splitType], {
+                        autoAlpha: 1,
+                        yPercent: 0,
+                        stagger: this.stagger,
+                        duration: this.duration,
+                        ease: 'power2.out',
+                        onComplete: () => {
+                            if (!isDisableRevert) {
+                                self.revert();
+                                convertHyphen(self.elements[0]);
+                            }
+                        },
+                        ...props
+                    })
+                    : gsap.to(self[this.splitType], {
                         autoAlpha: 1,
                         yPercent: 0,
                         stagger: this.stagger,
@@ -361,10 +376,11 @@ class FadeIn {
     }
 }
 class ScaleDash {
-    constructor({ el, type, isCenter, delay, isDisableRevert, ...props }) {
+    constructor({ el, type, isCenter, delay, isDisableRevert,timeline=null, ...props }) {
         this.DOM = { el: el };
         this.type = type || 'default';
         this.delay = delay;
+        this.timeline = timeline;
         this.widthItem = this.DOM.el.offsetWidth || 0;
         this.heightItem = this.DOM.el.offsetHeight || 0;
         this.options = {
@@ -389,9 +405,16 @@ class ScaleDash {
                 to: { height: this.heightItem }
             }
         };
-        this.animation = gsap.fromTo(this.DOM.el,
+        this.animation = this.timeline ? this.timeline.fromTo(this.DOM.el,
             { ...this.options[this.type]?.set || this.options.default.set },
             { ...this.options[this.type]?.to || this.options.default.to,
+                duration: 1.2,
+                ease: 'power1.out',
+                clearProps: isDisableRevert ? '' : 'all',
+                ...props
+            }) : gsap.fromTo(this.DOM.el,
+                { ...this.options[this.type]?.set || this.options.default.set },
+                { ...this.options[this.type]?.to || this.options.default.to,
                 duration: 1.2,
                 ease: 'power1.out',
                 clearProps: isDisableRevert ? '' : 'all',
@@ -408,12 +431,13 @@ class ScaleDash {
     }
 }
 class ScaleLine {
-    constructor({ el, type, isCenter, delay, isDisableRevert, ...props }) {
+    constructor({ el, type, isCenter, delay, isDisableRevert,timeline=null, ...props }) {
         if (!el) return;
 
         this.DOM = { el: el };
         this.type = type || 'default';
         this.delay = delay;
+        this.timeline = timeline;
         this.options = {
             top: {
                 set: { scaleY: 0, transformOrigin: isCenter ? 'center center' : 'top left' },
@@ -436,9 +460,16 @@ class ScaleLine {
                 to: { scaleX: 1 }
             }
         };
-        this.animation = gsap.fromTo(this.DOM.el,
+        this.animation = this.timeline ? this.timeline.fromTo(this.DOM.el,
             { ...this.options[this.type]?.set || this.options.default.set },
             { ...this.options[this.type]?.to || this.options.default.to,
+                duration: 1.2,
+                ease: 'none',
+                clearProps: isDisableRevert ? '' : 'all',
+                ...props
+            }) : gsap.fromTo(this.DOM.el,
+                { ...this.options[this.type]?.set || this.options.default.set },
+                { ...this.options[this.type]?.to || this.options.default.to,
                 duration: 1.2,
                 ease: 'none',
                 clearProps: isDisableRevert ? '' : 'all',
@@ -455,11 +486,12 @@ class ScaleLine {
     }
 }
 class ScaleInset {
-    constructor({el, delay, duration, isDisableRevert, onComplete }) {
+    constructor({el, delay, duration, isDisableRevert, onComplete,timeline=null }) {
         this.DOM = {
             el: el
     };
         this.delay = delay;
+        this.timeline = timeline;
         const animationProps = {
             scale: 1,
             duration: 1.6,
@@ -471,7 +503,7 @@ class ScaleInset {
         if (onComplete) {
             animationProps.onComplete = onComplete;
         }
-        this.animation = gsap
+        this.animation = this.timeline?this.timeline.to(this.DOM.el, animationProps) : gsap
             .timeline()
             .to(this.DOM.el, animationProps)
     }
