@@ -1270,6 +1270,23 @@ const mainScript = () => {
                $(e.currentTarget).parent().find('button[type="submit"]').removeClass('active');
             }
          }, 300));
+         const onSuccessForm = (formID) => {
+            setTimeout(() => {
+               $(this.el).find(formID).trigger("reset");
+               $(this.el).find('button[type="submit"]').removeClass("active");
+               $(this.el).find('.footer-form-main').addClass('hidden')
+               $(this.el).find('.footer-form-success').addClass('active')
+               this.submitHubspot();
+            }, 1000);
+         };
+
+         formSubmitEvent.init({
+            onlyWorkOnThisFormName: "Footer Form",
+            onSuccess: () => onSuccessForm("#footer-form"),
+         });
+      }
+      submitHubspot() {
+         console.log('submitHubspot');
       }
       render() {
          if (isMouseInArea(this.footerLogoWrap, mouse.mousePos)) {
@@ -3470,7 +3487,7 @@ const mainScript = () => {
                   const v = String(data[name] ?? "").trim();
                   let hasError = false;
                   if (name === "Phone-Number") {
-                     hasError = v !== "" && !/^\d+$/.test(v);
+                     hasError = v !== "" && !/^[\d+\-() ]+$/.test(v);
                   } else if (name === "Email") {
                      hasError = v !== "" && !emailRegex.test(v);
                   }
