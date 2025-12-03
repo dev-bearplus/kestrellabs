@@ -12,7 +12,7 @@ export async function handler(event, context) {
             statusCode: 200,
             headers: {
                 'Content-Type': 'text/html',
-                'Access-Control-Allow-Origin': 'https://kestrel-labs.webflow.io',
+                'Access-Control-Allow-Origin': 'https://kestrel-labs.webflow.io, https://kestrellabs.webflow.io/',
                 'Access-Control-Allow-Methods': 'GET, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
             },
