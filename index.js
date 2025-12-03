@@ -2686,7 +2686,6 @@ const mainScript = () => {
                this.tlImages.forEach(tl => {
                   tl.kill();
                });
-               this.tlImages = null;
             }
          }
       },
