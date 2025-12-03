@@ -3674,6 +3674,7 @@ const mainScript = () => {
                new MasterTimeline({
                   timeline: timeline,
                   allowMobile: true,
+                  triggerInit: this.el,
                   tweenArr: [
                      new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
                      new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),

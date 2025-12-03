@@ -303,10 +303,11 @@ class TextTypewriter {
     }
 }
 class FadeIn {
-    constructor({ el, type, delay, isDisableRevert, from, to, ...props }) {
+    constructor({ el, type, delay, isDisableRevert, from, timeline=null, to, ...props }) {
         this.DOM = { el: el };
         this.type = type || 'default';
         this.delay = delay;
+        this.timeline = timeline;
         this.options = {
             bottom: {
                 set: { opacity: 0, y: parseRem(32), ...from },
@@ -335,7 +336,14 @@ class FadeIn {
         };
 
         if(!this.DOM.el) return;
-        this.animation = gsap.fromTo(this.DOM.el,
+        this.animation = this.timeline ? this.timeline.fromTo(this.DOM.el,
+            { ...this.options[this.type]?.set || this.options.default.set },
+            { ...this.options[this.type]?.to || this.options.default.to,
+            duration: 1,
+            ease: 'power3',
+            clearProps: isDisableRevert ? '' : 'all',
+            ...props
+        }) : gsap.fromTo(this.DOM.el,
             { ...this.options[this.type]?.set || this.options.default.set },
             { ...this.options[this.type]?.to || this.options.default.to,
             duration: 1,
