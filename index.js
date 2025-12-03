@@ -1714,7 +1714,7 @@ const mainScript = () => {
                ? defaultCoordiX
                : normalizedX + coordiHalfWidth;
 
-            const defaultCoordiY =normalizedY + coordiHalfHeight;
+            const defaultCoordiY = isAtChangeCoordiX ? normalizedY - coordiHalfHeight : normalizedY + coordiHalfHeight;
             const coordiY = normalizedY >= 0
                ? normalizedY - coordiHalfHeight
                : defaultCoordiY;
