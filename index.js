@@ -1925,10 +1925,10 @@ const mainScript = () => {
             const calcVerticalClip = (imgY) => {
                return ((containerHeight - displayedHeight) / 2 + displayedHeight * (1 - imgY / IMG_HEIGHT)) / containerHeight * 100;
             };
-            const verticalLineStartY = 117;
-            const verticalLineStartX = 348;
-            const verticalLineHeight = 611;
-            const verticalLineWidth = 926;
+            const verticalLineStartY = 104;
+            const verticalLineStartX = 332;
+            const verticalLineHeight = 632;
+            const verticalLineWidth = 986;
 
             // Left vertical line
             $('.home-hero-ruler-item.left .home-hero-ruler-item-line-vertical')
@@ -1951,54 +1951,53 @@ const mainScript = () => {
             .css('left', `${calcHorizitalPos(verticalLineStartX)}px`);
 
             const horizontalLinesLeft = [
-               { y: 116, x: 464 },
-               { y: 319, x: 792 },
-               { y: 502, x: 343 },
-               { y: 671, x: 487 },
-               { y: 728, x: 577 }
+               { y: 103, x: 1203 },
+               { y: 318, x: 857 },
+               { y: 509, x: 1308 },
+               { y: 607, x: 1184 },
+               { y: 738, x: 1091 }
             ];
             const horizontalLinesRight = [
-               { y: 116, x: 1146 },
-               { y: 319, x: 767 },
-               { y: 361, x: 635 },
-               { y: 512, x: 481 },
-               { y: 672, x: 606 },
-               { y: 727, x: 606 }
+               { y: 103, x: 487 },
+               { y: 361, x: 1031 },
+               { y: 521, x: 1200 },
+               { y: 631, x: 1310 },
+               { y: 735, x: 1033 },
             ];
             const verticalLinesTop = [
-               { y: 303, x: 348 },
-               { y: 713, x: 462 },
-               { y: 715, x: 505 },
-               { y: 510, x: 792 },
-               { y: 510, x: 882 },
-               { y: 468, x: 1014 },
-               { y: 317, x: 1168 },
-               { y: 207, x: 1274 }
+               { y: 317, x: 332 },
+               { y: 726, x: 446 },
+               { y: 726, x: 488 },
+               { y: 456, x: 724 },
+               { y: 511, x: 780 },
+               { y: 511, x: 881 },
+               { y: 468, x: 1033 },
+               { y: 313, x: 1201 },
+               { y: 198, x: 1318 }
             ];
             const verticalLinesBot = [
-               { y: 505, x: 348 },
-               { y: 604, x: 462 },
-               { y: 729, x: 567 },
-               { y: 604, x: 817 },
-               { y: 671, x: 1043 },
-               { y: 560, x: 1168 },
-               { y: 618, x: 1274 },
+               { y: 510, x: 332 },
+               { y: 682, x: 446 },
+               { y: 739, x: 552 },
+               { y: 735, x: 852 },
+               { y: 735, x: 1033 },
+               { y: 641, x: 1217 },
+               { y: 632, x: 1318 },
             ];
             horizontalLinesLeft.forEach((line, index) => {
-               // lọc qua từng .home-hero-ruler-item.left
+               let invertedClip = 100 - calcHorizontalClip(line.x);
                $('.home-hero-ruler-item.left').each((itemIndex, item) => {
                   const lineItem = $(item).find('.home-hero-ruler-item-line-horizital').eq(index);
                   lineItem.css('top', `${calcVerticalPos(line.y)}px`)
-                     .css('--clip-half', `${calcHorizontalClip(line.x)}%`);
+                     .css('--clip-half', `${invertedClip}%`);
                });
 
             });
             horizontalLinesRight.forEach((line, index) => {
-               const invertedClip = 100 - calcHorizontalClip(line.x);
                $('.home-hero-ruler-item.right').each((itemIndex, item) => {
                   const lineItem = $(item).find('.home-hero-ruler-item-line-horizital').eq(index);
                   lineItem.css('top', `${calcVerticalPos(line.y)}px`)
-                     .css('--clip-half', `${invertedClip}%`);
+                     .css('--clip-half', `${ calcHorizontalClip(line.x)}%`);
                });
             });
             verticalLinesTop.forEach((line, index) => {
