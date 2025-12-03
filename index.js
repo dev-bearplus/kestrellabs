@@ -1647,7 +1647,6 @@ const mainScript = () => {
          }
          animateRuler() {
             if (!this.rulerWrap) return;
-
             // Lerp and clamp current positions
             this.currentX = Math.max(this.minX, Math.min(lerp(this.currentX, this.targetX, 0.3), this.maxX));
             this.currentY = Math.max(this.minY, Math.min(lerp(this.currentY, this.targetY, 0.3), this.maxY));
@@ -2020,7 +2019,7 @@ const mainScript = () => {
          }
          destroy() {
             if (this.raf) {
-               this.raf = null;
+               cancelAnimationFrame(this.raf);
             }
             cancelAnimationFrame(this.raf);
             if (this.tlOnce) {
