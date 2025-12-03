@@ -2084,6 +2084,7 @@ const mainScript = () => {
          animationReveal() {
             new MasterTimeline({
                timeline:this.tlBody,
+               triggerInit: this.el,
                tweenArr: [
                   new ScaleInset({ el: $(this.el).find('.home-intro-img-inner').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-intro-content-title .heading').get(0), duration: .6, stagger: .004, isDisableRevert: true, splitType: 'words' }),
@@ -3266,13 +3267,16 @@ const mainScript = () => {
                      new ScaleDash({ el: $(item).find('.line-dash').get(0), type: 'left' }),
                      new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-title .heading').get(0) }),
                      new FadeIn({ el: $(item).find('.pricing-hero-package-btn') }),
+                     ...(viewport.w < 768 ? Array.from($(item).find('.pricing-hero-table.only-mob')).flatMap((table, index) => [
+                        new FadeIn({ el: $(table).get(0) }),
+                     ]) :[]),
                   ]),
-                  ...Array.from($(this.el).find('.pricing-hero-table-row')).flatMap((item, index) => [
+                  ...(viewport.w > 767 ? Array.from($(this.el).find('.pricing-hero-table:not(.only-mob) .pricing-hero-table-row')).flatMap((item, index) => [
                      ...Array.from($(item).find('.pricing-hero-table-col')).flatMap((cell, index) => [
                        (!$(cell).find('.pricing-hero-table-col-sub').hasClass('w-condition-invisible')) ? new FadeSplitText({ el: $(cell).find('.txt').get(0) }) : null,
                         (!$(cell).find('.pricing-hero-table-col-check').hasClass('w-condition-invisible')) ? new FadeIn({ el: $(cell).find('.pricing-hero-table-col-check').get(0) }) : null,
                      ]).filter(Boolean),
-                  ]),
+                  ]) :[]),
                ]
             });
          }
