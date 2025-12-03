@@ -3671,19 +3671,12 @@ const mainScript = () => {
                header.registerDependent($(this.el).find('.about-hero-main'));
             }
             else {
-               new MasterTimeline({
-                  timeline: timeline,
-                  allowMobile: true,
-                  triggerInit: this.el,
-                  tweenArr: [
-                     new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
-                     new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),
-                     new FadeSplitText({el: $(this.el).find('.about-intro-title .heading').get(0)}),
-                     new FadeSplitText({el: $(this.el).find('.about-intro-label .txt').get(0)}),
-                     new ScaleDash({el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left'}),
-                     new FadeIn({el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none'}),
-                  ]
-               });
+               new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left', timeline: timeline});
+               new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none', timeline: timeline},'<=.02');
+               new FadeSplitText({el: $(this.el).find('.about-intro-title .heading').get(0), timeline: timeline},'<=.02');
+               new FadeSplitText({el: $(this.el).find('.about-intro-label .txt').get(0), timeline: timeline},'<=.02');
+               new ScaleDash({el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left', timeline: timeline},'<=.02');
+               new FadeIn({el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none', timeline: timeline},'<=.02');
             }
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {

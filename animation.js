@@ -263,7 +263,7 @@ class FadeSplitText {
                             }
                         },
                         ...props
-                    })
+                    },`<=${this.delay}`)
                     : gsap.to(self[this.splitType], {
                         autoAlpha: 1,
                         yPercent: 0,
