@@ -2864,6 +2864,7 @@ const mainScript = () => {
             new ParallaxImage({ el: $(this.el).find('.product-hero-img-inner img').get(0) });
             new MasterTimeline({
                timeline: timeline,
+               allowMobile: true,
                triggerInit: this.el,
                stagger: 0.05,
                tweenArr: [
@@ -3214,7 +3215,7 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: .3,
+               delay: .4,
                onStart: () => {
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
                }
@@ -3224,7 +3225,7 @@ const mainScript = () => {
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
                paused: true,
-               delay: 0.3
+               delay: 0.4
             })
 
             this.tlTriggerEnter = gsap.timeline({
@@ -3249,6 +3250,7 @@ const mainScript = () => {
          animationReveal(timeline) {
             new MasterTimeline({
                timeline: timeline,
+               allowMobile: true,
                triggerInit: this.el,
                stagger: 0.01,
                tweenArr: [
@@ -3407,6 +3409,7 @@ const mainScript = () => {
          animationReveal(timeline) {
             new MasterTimeline({
                timeline: timeline,
+               allowMobile: true,
                triggerInit: this.el,
                stagger: 0.05,
                tweenArr: [
@@ -3670,6 +3673,7 @@ const mainScript = () => {
             else {
                new MasterTimeline({
                   timeline: timeline,
+                  allowMobile: true,
                   tweenArr: [
                      new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
                      new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),
@@ -4220,6 +4224,7 @@ const mainScript = () => {
          animationReveal(timeline) {
             new MasterTimeline({
                timeline: timeline,
+               allowMobile: true,
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
@@ -4336,6 +4341,7 @@ const mainScript = () => {
          initContent(timeline) {
             new MasterTimeline({
                timeline: timeline,
+               allowMobile: true,
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
@@ -4345,6 +4351,7 @@ const mainScript = () => {
             });
             $(this.el).find('.resource-hero-item').each((index, item) => {
                new MasterTimeline({
+                  allowMobile: true,
                   triggerInit: item,
                   timeline: timeline,
                   stagger: 0.02,  
