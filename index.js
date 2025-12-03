@@ -1552,14 +1552,6 @@ const mainScript = () => {
                delay: .3,  
                onComplete: () => {
                   gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
-                  gsap.to($(this.el).find(' .home-hero-img-plus'), {
-                     autoAlpha: 1,
-                     duration: 0.5
-                  });
-                  gsap.to($(this.el).find('.home-hero-curor-line'), {
-                     autoAlpha: .16,
-                     duration: 0.5
-                  });
                   this.rotateText()
                   this.taglineMarquee.play();
                }
@@ -1573,14 +1565,6 @@ const mainScript = () => {
                delay: 0.3,
                onComplete: () => {
                   gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
-                  gsap.to($(this.el).find(' .home-hero-img-plus'), {
-                     autoAlpha: 1,
-                     duration: 0.5
-                  });
-                  gsap.to($(this.el).find('.home-hero-curor-line'), {
-                     autoAlpha: .16,
-                     duration: 0.5
-                  });
                   this.rotateText();
                   this.taglineMarquee.play();
                }
