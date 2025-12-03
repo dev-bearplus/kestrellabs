@@ -1551,6 +1551,7 @@ const mainScript = () => {
                paused: true,
                delay: .3,  
                onComplete: () => {
+                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
                   gsap.to($(this.el).find(' .home-hero-img-plus'), {
                      autoAlpha: 1,
                      duration: 0.5
@@ -1571,6 +1572,15 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onComplete: () => {
+                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
+                  gsap.to($(this.el).find(' .home-hero-img-plus'), {
+                     autoAlpha: 1,
+                     duration: 0.5
+                  });
+                  gsap.to($(this.el).find('.home-hero-curor-line'), {
+                     autoAlpha: .16,
+                     duration: 0.5
+                  });
                   this.rotateText();
                   this.taglineMarquee.play();
                }
@@ -1593,9 +1603,7 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          playEnter() {
-            // if (isInViewport(this.el)) {
-            //     this.tlEnter.play();
-            // }
+            this.tlEnter.play();
          }
          rotateText() {
             let headingFlipping = new FlipText($(this.el).find('.home-hero-title-wrap').get(0), {});
