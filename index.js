@@ -1679,7 +1679,8 @@ const mainScript = () => {
             const isAtChangeCoordiY = this.currentY >= this.maxY - coordiHeight - edgeThreshold;
             const isAtChangeInteractX = this.currentX <= this.maxX - interactWidth - edgeThreshold;
             const isAtChangeInteractY = this.currentY >= this.maxY - interactHeight - edgeThreshold;
-
+            console.log(isAtChangeInteractY);
+            
             // Calculate lerped values
             const currentScale = gsap.getProperty($plus.get(0), 'scale') || 1;
             const scale = lerp(currentScale, (isAtEdgeX || isAtEdgeY) ? 1.2 : 1, 0.08);
@@ -1713,9 +1714,7 @@ const mainScript = () => {
                ? defaultCoordiX
                : normalizedX + coordiHalfWidth;
 
-            const defaultCoordiY = !isAtChangeCoordiX
-               ? normalizedY + coordiHalfHeight
-               : normalizedY - coordiHalfHeight;
+            const defaultCoordiY =normalizedY + coordiHalfHeight;
             const coordiY = normalizedY >= 0
                ? normalizedY - coordiHalfHeight
                : defaultCoordiY;
@@ -1732,7 +1731,7 @@ const mainScript = () => {
             gsap.set($interact, {
                x: interactX,
                y: isAtChangeInteractX ? interactY : normalizedY - interactHalfHeight,
-               autoAlpha: 1 - lerpedColorAlpha
+               autoAlpha: (isAtChangeInteractX && !isAtChangeInteractY) ? 1 - lerpedColorAlpha : 0
             });
             gsap.set($coordi, {
                x: isAtChangeCoordiX ? coordiX : defaultCoordiX,
