@@ -3681,7 +3681,7 @@ const mainScript = () => {
                      $(this.el).find('.about-hero-bg').addClass('active');
                      this.updateGrind();
                   }}, '<=.3');
-                  timeline.fromTo($(item).find('svg path').eq(1), {autoAlpha: 0}, {autoAlpha: 1, duration: 1}, '<=.4');
+                  timeline.fromTo($(item).find('svg path').eq(1), {'fill': 'transparent'}, {'fill': '#282828', duration: 1}, '<=.4');
                } else {
                   timeline
                      .fromTo(item, {autoAlpha: 0}, {autoAlpha: 1, duration: .8})
