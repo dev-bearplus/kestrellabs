@@ -1209,11 +1209,20 @@ const mainScript = () => {
                once: true,
             }
          });
+         let tlImg = gsap.timeline({
+            scrollTrigger: {
+               trigger: $(this.el).find('.footer-img-wrap'),
+               start: 'bottom bottom',
+               end: 'bottom top',
+               scrub: true,
+            }
+         });
+         tlImg
+            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: .8, scale: .97}, {yPercent: 0, opacity: 1, scale: 1.03})
          new MasterTimeline({
             timeline:this.tlImg,
             triggerInit: this.el,
             tweenArr: [
-               new ScaleInset({ el: $(this.el).find('.footer-img-inner').eq(0).get(0) }),
                ...Array.from($(this.el).find('.footer-img-plus')).flatMap((item) => [
                   new ScaleInset({ el: $(item).get(0) }),
                ]),
