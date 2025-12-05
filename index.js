@@ -1212,13 +1212,13 @@ const mainScript = () => {
          let tlImg = gsap.timeline({
             scrollTrigger: {
                trigger: $(this.el).find('.footer-img-wrap'),
-               start: 'bottom bottom',
-               end: 'bottom top',
-               scrub: true,
+               start: 'top bottom',
+               end: 'bottom bottom',
+               scrub: 1,
             }
          });
          tlImg
-            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: .8, scale: .94}, {yPercent: 0, opacity: 1, scale: 1})
+            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: 0, scale: .94}, {yPercent: 0, opacity: 1, scale: 1})
          new MasterTimeline({
             timeline:this.tlImg,
             triggerInit: this.el,
