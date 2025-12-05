@@ -1218,7 +1218,7 @@ const mainScript = () => {
             }
          });
          tlImg
-            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: .8, scale: .97}, {yPercent: 0, opacity: 1, scale: 1.03})
+            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: .8, scale: .94}, {yPercent: 0, opacity: 1, scale: 1})
          new MasterTimeline({
             timeline:this.tlImg,
             triggerInit: this.el,
