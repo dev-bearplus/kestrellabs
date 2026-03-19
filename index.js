@@ -727,7 +727,7 @@ const mainScript = () => {
          $('a').on('click', function (e) {
             if ($(this).attr('data-sub-link')) {
                barba.history.add(`${window.location.pathname + `#${$(this).attr('data-sub-link')}`}`, 'barba', 'replace');
-               
+
                requestAnimationFrame(() => {
                   setTimeout(() => {
                         console.log('click data sub link:',$(`#${$(this).attr('data-sub-link')}`));
@@ -1273,7 +1273,7 @@ const mainScript = () => {
          };
          $(this.el).find('.footer-form input').on('input', debounce((e) => {
             const value = $(e.currentTarget).val();
-            if (emailRegex.test(value)) { 
+            if (emailRegex.test(value)) {
                $(e.currentTarget).parent().find('button[type="submit"]').addClass('active');
             } else {
                $(e.currentTarget).parent().find('button[type="submit"]').removeClass('active');
@@ -1396,6 +1396,68 @@ const mainScript = () => {
       }
    }
    const footer = new Footer();
+   class InkTransition {
+      DOM = {
+         el: null,
+         svg: null,
+         mask: null,
+         image: null,
+      };
+
+      constructor(DOM_el) {
+         this.DOM.el = DOM_el;
+         this.DOM.svg = this.DOM.el.querySelector('.layer');
+         this.DOM.mask = this.DOM.svg.querySelector('.mask');
+         this.DOM.image = this.DOM.svg.querySelector('image');
+
+         this.DOM.svg.setAttribute('viewBox', `0 0 1000 ${(this.DOM.el.offsetHeight / this.DOM.el.offsetWidth) * 1000}`);
+
+         this.isCircle = this.DOM.mask.tagName.toLowerCase() === 'circle';
+
+         // Store start & end values
+         if (this.isCircle) {
+            this.startVal = parseFloat(this.DOM.mask.getAttribute('r')) || 0;
+            this.endVal = parseFloat(this.DOM.mask.dataset.valueFinal) || 0;
+         } else {
+            this.startVal = this.DOM.mask.getAttribute('d') || '';
+            this.endVal = this.DOM.mask.dataset.valueFinal || '';
+         }
+
+         this.scrub();
+      }
+
+      scrub() {
+         this.updateOnScroll();
+         smoothScroll.lenis.on('scroll', () => {
+            this.updateOnScroll();
+         });
+      }
+
+      updateOnScroll() {
+         if (!this.DOM.el) return;
+         if (!isInViewport(this.DOM.el)) return;
+
+         const rect = this.DOM.el.getBoundingClientRect();
+         // start: top of element hits bottom-10% of viewport
+         const start = window.innerHeight * 0.95;
+         // end: bottom of element hits 10% from top of viewport
+         const end = window.innerHeight * 0.05;
+
+         // Progress: 0 when rect.top = start, 1 when rect.bottom = end
+         const totalTravel = (start - end) + rect.height;
+         const currentPos = start - rect.top;
+         const progress = Math.max(0, Math.min(1, currentPos / totalTravel));
+
+         if (this.isCircle) {
+            const currentR = this.startVal + (this.endVal - this.startVal) * progress;
+            this.DOM.mask.setAttribute('r', currentR);
+         } else {
+            // For path 'd' attribute, interpolate at 0 or 1 thresholds
+            // since path strings can't be numerically interpolated simply
+            this.DOM.mask.setAttribute('d', progress >= 1 ? this.endVal : this.startVal);
+         }
+      }
+   }
    class Cta  {
       constructor() {
          this.el = null;
@@ -1411,7 +1473,8 @@ const mainScript = () => {
          this.interact();
       }
       animationReveal() {
-         new ParallaxImage({el: $(this.el).find('.home-cta-deco-item-img img').get(0), speed: 0.2});
+         new InkTransition($(this.el).find('.home-cta-deco-item-img').get(0));
+         // new ParallaxImage({el: $(this.el).find('.home-cta-deco-item-img img').get(0), speed: 0.2});
          this.tlContent = gsap.timeline({
             scrollTrigger: {
                trigger: $(this.el).find('.home-cta-main'),
@@ -1558,7 +1621,7 @@ const mainScript = () => {
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
                paused: true,
-               delay: .3,  
+               delay: .3,
                onComplete: () => {
                   gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
                   this.rotateText()
@@ -1617,7 +1680,7 @@ const mainScript = () => {
                   new FadeIn({ el: $(this.el).find('.home-hero-work'), type: 'bottom' }),
                ]
             });
-            
+
          }
          interact() {
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
@@ -1697,8 +1760,7 @@ const mainScript = () => {
             const isAtChangeCoordiY = this.currentY >= this.maxY - coordiHeight - edgeThreshold;
             const isAtChangeInteractX = this.currentX <= this.maxX - interactWidth - edgeThreshold;
             const isAtChangeInteractY = this.currentY >= this.maxY - interactHeight - edgeThreshold;
-            console.log(isAtChangeInteractY);
-            
+
             // Calculate lerped values
             const currentScale = gsap.getProperty($plus.get(0), 'scale') || 1;
             const scale = lerp(currentScale, (isAtEdgeX || isAtEdgeY) ? 1.2 : 1, 0.08);
@@ -2113,7 +2175,7 @@ const mainScript = () => {
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
                     return [
                       new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.3}),
-                    ] 
+                    ]
                   }),
                   ...Array.from($(this.el).find('.home-intro-partner-inner')).flatMap((item, index) => {
                     return [
@@ -2210,7 +2272,7 @@ const mainScript = () => {
                },
                on: {
                   touchEnd: (swiper) => {
-                     smoothScroll.start();                     
+                     smoothScroll.start();
                    },
                   slideChange: function(swiper) {
                      smoothScroll.stop();
@@ -2499,7 +2561,7 @@ const mainScript = () => {
                      trigger: item,
                      start: 'top+=45% bottom',
                      once: true
-                  }                  
+                  }
                });
                new MasterTimeline({
                   timeline:this.tlImage,
@@ -2588,7 +2650,7 @@ const mainScript = () => {
                      trigger: item,
                      start: 'top+=45% bottom',
                      once: true
-                  }                  
+                  }
                });
                this.tlImages.push(tlImage);
                new MasterTimeline({
@@ -2636,9 +2698,9 @@ const mainScript = () => {
                on: {
                    touchEnd: (swiper) => {
                      smoothScroll.start();
-                     
+
                    },
-                   
+
                    slideChange: (swiper) => {
                      smoothScroll.stop();
                   },
@@ -2705,8 +2767,8 @@ const mainScript = () => {
          }
       },
       UseCase: class extends TriggerSetup {
-         constructor() { 
-            super(); 
+         constructor() {
+            super();
             this.el = null;
             this.tlContent = null;
             this.tlImage = null;
@@ -2717,7 +2779,7 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            this.animationReveal(); 
+            this.animationReveal();
             this.animationScrub();
             this.interact();
          }
@@ -2943,7 +3005,7 @@ const mainScript = () => {
                   start: 'top+=65% bottom',
                   once: true,
                }
-            });   
+            });
             new MasterTimeline({
                timeline: this.tlHead,
                triggerInit: this.el,
@@ -2959,7 +3021,7 @@ const mainScript = () => {
                   start: 'top+=65% bottom',
                   once: true,
                }
-            });   
+            });
             new MasterTimeline({
                timeline: this.tlTab,
                triggerInit: this.el,
@@ -3326,9 +3388,9 @@ const mainScript = () => {
                },
                on: {
                   touchEnd: (swiper) => {
-                     smoothScroll.start();                     
+                     smoothScroll.start();
                    },
-                   
+
                    slideChange: (swiper) => {
                      smoothScroll.stop();
                   },
@@ -3705,7 +3767,7 @@ const mainScript = () => {
                      .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.1}, '<=.4');
                }
             });
-            
+
             if(viewport.w > 991) {
                let heightContent = $(this.el).find('.about-intro').outerHeight();
                let heightHero = $(this.el).find('.about-hero').height() + heightContent;
@@ -3740,9 +3802,9 @@ const mainScript = () => {
                      }
                   }
                });
-               this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});  
+               this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});
             }
-            
+
 
          }
          updateGrind() {
@@ -4044,7 +4106,7 @@ const mainScript = () => {
                   ...Array.from($(this.el).find('.about-inves-logo-label')).flatMap((item, index) => {
                     return [
                       new FadeSplitText({ el: $(item).find('.txt').get(0), delay: index * .3}),
-                    ] 
+                    ]
                   }),
                   ...Array.from($(this.el).find('.about-inves-logo-inner')).flatMap((item, index) => {
                     return [
@@ -4066,8 +4128,8 @@ const mainScript = () => {
          }
       },
       Job: class extends TriggerSetup {
-         constructor() { 
-            super(); 
+         constructor() {
+            super();
             this.el = null;
             this.tlHead = null;
          }
@@ -4249,9 +4311,9 @@ const mainScript = () => {
             });
          }
          interact() {
-           
+
          }
-         
+
          destroy() {
             if (this.tlOnce) {
                this.tlOnce.kill();
@@ -4314,7 +4376,7 @@ const mainScript = () => {
                   end: "bottom top-=50%",
                   once: true,
                   onEnter: () => this.tlEnter.play(),
-                  onEnterBack: () => this.tlEnter.play(),                  
+                  onEnterBack: () => this.tlEnter.play(),
                },
             });
          }
@@ -4358,7 +4420,7 @@ const mainScript = () => {
                   allowMobile: true,
                   triggerInit: item,
                   timeline: timeline,
-                  stagger: 0.02,  
+                  stagger: 0.02,
                   tweenArr: [
                      new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
                      new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
@@ -4378,7 +4440,7 @@ const mainScript = () => {
                   start: "top+=35% bottom",
                   once: true,
 
-               }, 
+               },
             });
             new MasterTimeline({
                triggerInit: this.el,
@@ -4486,7 +4548,7 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onStart: () => {
-                 
+
                },
             });
          }
@@ -4599,12 +4661,12 @@ const mainScript = () => {
             const id = $(this.el).find('[policyUUID]').attr('policyUUID');
             console.log(id);
             const fullUrl = `https://kestrellabs-bp.netlify.app/.netlify/functions/fetchPolicy?policyUUID=${id}`;
-            
+
             try {
                 $(this.el).find('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
-                
+
                 const response = await fetch(fullUrl);      // ✅ Thêm await
-                const data = await response.json();  
+                const data = await response.json();
                 data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
                 $(this.el).find('.policy-hero-content-richtext').html(data.content);
                 $(this.el).find('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
@@ -4665,7 +4727,7 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onStart: () => {
-                 
+
                },
             });
          }
@@ -4789,7 +4851,7 @@ const mainScript = () => {
                         console.warn('Unknown share type:', shareType);
                 }
             });
-       
+
            function fallbackCopyTextToClipboard(text) {
                const textArea = document.createElement("textarea");
                textArea.value = text;
@@ -4799,7 +4861,7 @@ const mainScript = () => {
                document.body.appendChild(textArea);
                textArea.focus();
                textArea.select();
-               
+
                try {
                    const successful = document.execCommand('copy');
                    if (successful) {
@@ -4811,10 +4873,10 @@ const mainScript = () => {
                    console.error('Fallback: Unable to copy', err);
                    showCopyError();
                }
-               
+
                document.body.removeChild(textArea);
            }
-       
+
             function showCopySuccess() {
                showNotification('Copied to clipboard', 'success');
             }
@@ -4874,7 +4936,7 @@ const mainScript = () => {
          });
          container.addEventListener("oncePlay", this.boundOncePlayHandler);
       }
-      
+
       initEnter(data) {
          const container = data.next.container;
          container.addEventListener("enterSetup", (event) => {
@@ -4882,7 +4944,7 @@ const mainScript = () => {
          });
          container.addEventListener("enterPlay", this.boundEnterPlayHandler);
       }
-      
+
       oncePlayHandler(event) {
          this.sections.forEach(section => {
             if (section.playOnce) {
@@ -5070,7 +5132,7 @@ const mainScript = () => {
                smoothScroll.init(data);
                globalChange.init(data);
                documentHeightObserver("init", data)
-            },            
+            },
             once(data) {
                loader.init(data);
                loader.play(data);
