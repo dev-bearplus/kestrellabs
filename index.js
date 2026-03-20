@@ -1406,21 +1406,27 @@ const mainScript = () => {
 
       constructor(DOM_el) {
          this.DOM.el = DOM_el;
+         this.DOM.backdrop = this.DOM.el.querySelector('.ink-mask-img.main');
          this.DOM.svg = this.DOM.el.querySelector('.layer');
          this.DOM.mask = this.DOM.svg.querySelector('.mask');
          this.DOM.image = this.DOM.svg.querySelector('image');
 
-         this.DOM.svg.setAttribute('viewBox', `0 0 1000 ${(this.DOM.el.offsetHeight / this.DOM.el.offsetWidth) * 1000}`);
+         this.DOM.backdrop.style.opacity = 0.5;
+         this.DOM.backdrop.style.filter = 'grayscale(1)';
+
+         const vbWidth = 1000;
+         const vbHeight = (this.DOM.el.offsetHeight / this.DOM.el.offsetWidth) * 1000;
+         this.DOM.svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
 
          this.isCircle = this.DOM.mask.tagName.toLowerCase() === 'circle';
 
          // Store start & end values
          if (this.isCircle) {
             this.startVal = parseFloat(this.DOM.mask.getAttribute('r')) || 0;
-            this.endVal = parseFloat(this.DOM.mask.dataset.valueFinal) || 0;
+            this.endVal = Math.sqrt(vbWidth * vbWidth + vbHeight * vbHeight) / 2;
          } else {
             this.startVal = this.DOM.mask.getAttribute('d') || '';
-            this.endVal = this.DOM.mask.dataset.valueFinal || '';
+            this.endVal = 1 || '';
          }
 
          this.scrub();
@@ -1456,6 +1462,10 @@ const mainScript = () => {
             // since path strings can't be numerically interpolated simply
             this.DOM.mask.setAttribute('d', progress >= 1 ? this.endVal : this.startVal);
          }
+
+         // Scale image from 1 → 1.1 as progress goes 0 → 1
+         const scaleVal = 1 + 0.01 * progress;
+         this.DOM.image.setAttribute('transform', `scale(${scaleVal})`);
       }
    }
    class Cta  {
@@ -2186,7 +2196,8 @@ const mainScript = () => {
             });
          }
          animationScrub() {
-            new ParallaxImage({ el: $(this.el).find('.home-intro-img-inner img').get(0) });
+            // new ParallaxImage({ el: $(this.el).find('.home-intro-img-inner img').get(0) });
+            new InkTransition($(this.el).find('.home-intro-img').get(0));
          }
          interact() {
          }
