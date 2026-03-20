@@ -9,34 +9,34 @@ const mainScript = () => {
    const xGetter = (el) => gsap.getProperty(el, 'x');
    const yGetter = (el) => gsap.getProperty(el, 'y');
    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	const viewport = {
-		get w() {
-			return window.innerWidth;
-		},
-		get h() {
-			return window.innerHeight;
-		},
+   const viewport = {
+      get w() {
+         return window.innerWidth;
+      },
+      get h() {
+         return window.innerHeight;
+      },
    };
    function replaceHyphenWithSpan(el) {
       $(el).html(function (index, oldHtml) {
-        return oldHtml.replaceAll("-", "<span>-</span>");
+         return oldHtml.replaceAll("-", "<span>-</span>");
       });
-    }
-   function multiLineText(el){
+   }
+   function multiLineText(el) {
       let line = $(el).find('.line-anim');
       let textMapLine = $(el).find('.bp-line');
       let lineClone = line.clone();
-      if(textMapLine.length >1){
-          line.remove();
-          textMapLine.each((idx, item) => {
+      if (textMapLine.length > 1) {
+         line.remove();
+         textMapLine.each((idx, item) => {
             $(item).css({
                position: 'relative',
                width: 'max-content'
-               });
+            });
             $(item).append(lineClone.clone());
-          })
+         })
       }
-  }
+   }
    const cvUnit = (val, unit) => {
       let result;
       switch (true) {
@@ -57,15 +57,15 @@ const mainScript = () => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       if (orientation == 'horizontal') {
-            return (
-               rect.left <= (window.innerWidth) &&
-               rect.right >= 0
-            );
+         return (
+            rect.left <= (window.innerWidth) &&
+            rect.right >= 0
+         );
       } else {
-            return (
-               rect.top <= (window.innerHeight) &&
-               rect.bottom >= 0
-            );
+         return (
+            rect.top <= (window.innerHeight) &&
+            rect.bottom >= 0
+         );
       }
    }
 
@@ -73,15 +73,15 @@ const mainScript = () => {
       if (!el) return false;
       const rect = el.getBoundingClientRect();
       return mousePos.x >= rect.left && mousePos.x <= rect.right &&
-            mousePos.y >= rect.top && mousePos.y <= rect.bottom;
+         mousePos.y >= rect.top && mousePos.y <= rect.bottom;
    };
    const debounce = (func, timeout = 300) => {
-         let timer
+      let timer
 
-         return (...args) => {
-            clearTimeout(timer)
-            timer = setTimeout(() => { func.apply(this, args) }, timeout)
-         }
+      return (...args) => {
+         clearTimeout(timer)
+         timer = setTimeout(() => { func.apply(this, args) }, timeout)
+      }
    }
    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
    const lerp = (a, b, t) => (1 - t) * a + t * b;
@@ -111,14 +111,14 @@ const mainScript = () => {
             const currentHeight = observerEl.scrollHeight;
 
             if (currentHeight !== previousHeight) {
-                  if (smoothScroll.lenis) {
-                     smoothScroll.lenis.resize();
-                     getAllScrollTrigger("refresh");
-                  }
-                  if (callback) {
-                     callback();
-                  }
-                  previousHeight = currentHeight;
+               if (smoothScroll.lenis) {
+                  smoothScroll.lenis.resize();
+                  getAllScrollTrigger("refresh");
+               }
+               if (callback) {
+                  callback();
+               }
+               previousHeight = currentHeight;
             }
          }, 200);
       }
@@ -139,7 +139,7 @@ const mainScript = () => {
             $("html").animate({ scrollTop: $(window.location.hash).offset().top - 100 }, 1200);
 
             setTimeout(() => {
-                  $("html").animate({ scrollTop: $(window.location.hash).offset().top - 100 }, 1200);
+               $("html").animate({ scrollTop: $(window.location.hash).offset().top - 100 }, 1200);
             }, 300);
          } else {
             scrollTop()
@@ -148,15 +148,15 @@ const mainScript = () => {
          let searchObj = JSON.parse('{"' + decodeURI(location.search.substring(1)).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
          if (searchObj.sc) {
             if ($(`#${searchObj.sc}`).length >= 1) {
-                  let target = `#${searchObj.sc}`;
-                  setTimeout(() => {
-                     smoothScroll.scrollTo(`#${searchObj.sc}`, {
-                        offset: -100
-                     })
-                  }, 500);
-                  barba.history.add(`${window.location.pathname + target}`, 'barba', 'replace');
+               let target = `#${searchObj.sc}`;
+               setTimeout(() => {
+                  smoothScroll.scrollTo(`#${searchObj.sc}`, {
+                     offset: -100
+                  })
+               }, 500);
+               barba.history.add(`${window.location.pathname + target}`, 'barba', 'replace');
             } else {
-                  scrollTop()
+               scrollTop()
             }
          }
       } else {
@@ -165,12 +165,12 @@ const mainScript = () => {
    };
    function initNumberIndex(el) {
       $(el).each((index, item) => {
-         $(item).find('.number-index').text(index<=9 ? `0${index + 1}` : index + 1);
+         $(item).find('.number-index').text(index <= 9 ? `0${index + 1}` : index + 1);
       });
    }
    function scrollTop(onComplete) {
       if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
+         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
       smoothScroll.scrollToTop({
@@ -190,30 +190,30 @@ const mainScript = () => {
 
          $(document).on('ajaxSend', function (event, xhr, settings) {
             if (settings.url.includes("https://webflow.com/api/v1/form/")) {
-                  inputSubmit?.text('Please wait...');
+               inputSubmit?.text('Please wait...');
             }
          });
          $(document).on('ajaxComplete', function (event, xhr, settings) {
             if (settings.url.includes("https://webflow.com/api/v1/form/")) {
-                  const isSuccessful = xhr.status === 200
-                  const isWorkOnAllForm = onlyWorkOnThisFormName == undefined
-                  const isCorrectForm = !isWorkOnAllForm && settings.data.includes(getSanitizedFormName(onlyWorkOnThisFormName));
+               const isSuccessful = xhr.status === 200
+               const isWorkOnAllForm = onlyWorkOnThisFormName == undefined
+               const isCorrectForm = !isWorkOnAllForm && settings.data.includes(getSanitizedFormName(onlyWorkOnThisFormName));
 
-                  if (isWorkOnAllForm) {
-                     if (isSuccessful) {
-                        onSuccess?.()
-                        inputSubmit?.text('Submit');
-                     } else {
-                        onFail?.()
-                     }
-                  } else if (isCorrectForm) {
-                     if (isSuccessful) {
-                        onSuccess?.()
-                        inputSubmit?.text('Submit');
-                     } else {
-                        onFail?.()
-                     }
+               if (isWorkOnAllForm) {
+                  if (isSuccessful) {
+                     onSuccess?.()
+                     inputSubmit?.text('Submit');
+                  } else {
+                     onFail?.()
                   }
+               } else if (isCorrectForm) {
+                  if (isSuccessful) {
+                     onSuccess?.()
+                     inputSubmit?.text('Submit');
+                  } else {
+                     onFail?.()
+                  }
+               }
             }
          });
       }
@@ -259,12 +259,12 @@ const mainScript = () => {
       }
       updateOnScroll(dist, total) {
          if (this.el) {
-            if (isInViewport(this.elWrap) ) {
+            if (isInViewport(this.elWrap)) {
                let percent = (this.elWrap.getBoundingClientRect().top + window.innerHeight) / total;
                gsap.quickSetter(this.el, 'y', 'px')(-dist * (1 - percent) * 1.2);
                gsap.set(this.el, { scale: 1 + this.scaleOffset - (percent * this.scaleOffset) });
-               }
             }
+         }
       }
    }
    class Marquee {
@@ -290,7 +290,7 @@ const mainScript = () => {
          new Array(cloneAmount).fill().forEach(() => {
             let html = itemClone.clone()
             html.css('animation-duration', `${Math.ceil(itemWidth / this.duration)}s`);
-            if(this.direction == 'left') {
+            if (this.direction == 'left') {
                html.addClass('marquee-left');
             } else {
                html.addClass('marquee-right');
@@ -299,60 +299,60 @@ const mainScript = () => {
          });
       }
       play() {
-         if(this.direction == 'left') {
+         if (this.direction == 'left') {
             $(this.list).find('.marquee-left').addClass('anim');
          } else {
             $(this.list).find('.marquee-right').addClass('anim');
          }
       }
    }
-	class SmoothScroll {
-		constructor() {
-			this.lenis = null;
-			this.scroller = {
-				scrollX: window.scrollX,
-				scrollY: window.scrollY,
-				velocity: 0,
-				direction: 0,
-			};
-			this.lastScroller = {
-				scrollX: window.scrollX,
-				scrollY: window.scrollY,
-				velocity: 0,
-				direction: 0,
-			};
-		}
+   class SmoothScroll {
+      constructor() {
+         this.lenis = null;
+         this.scroller = {
+            scrollX: window.scrollX,
+            scrollY: window.scrollY,
+            velocity: 0,
+            direction: 0,
+         };
+         this.lastScroller = {
+            scrollX: window.scrollX,
+            scrollY: window.scrollY,
+            velocity: 0,
+            direction: 0,
+         };
+      }
 
-		init(data) {
-			this.reInit(data);
+      init(data) {
+         this.reInit(data);
 
-			$.easing.lenisEase = function (t) {
-				return Math.min(1, 1.001 - Math.pow(2, -10 * t));
-			};
+         $.easing.lenisEase = function (t) {
+            return Math.min(1, 1.001 - Math.pow(2, -10 * t));
+         };
 
-			gsap.ticker.add((time) => {
-				if (this.lenis) {
-					this.lenis.raf(time * 1000);
-				}
-			});
-			gsap.ticker.lagSmoothing(0);
-		}
+         gsap.ticker.add((time) => {
+            if (this.lenis) {
+               this.lenis.raf(time * 1000);
+            }
+         });
+         gsap.ticker.lagSmoothing(0);
+      }
 
       reInit(data) {
-			if (this.lenis) {
-				this.lenis.destroy();
-			}
+         if (this.lenis) {
+            this.lenis.destroy();
+         }
          this.lenis = new Lenis({
-               wrapper: data?.next?.container || document.querySelector('.main-inner'),
-               content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
-               syncTouch: true,
-               smoothWheel: true,
-               smoothTouch: false,
-               infinite: false,
+            wrapper: data?.next?.container || document.querySelector('.main-inner'),
+            content: data?.next?.container?.querySelector('.main-content') || document.querySelector('.main-content'),
+            syncTouch: true,
+            smoothWheel: true,
+            smoothTouch: false,
+            infinite: false,
          })
          let scrollTimeout = null;
-			this.lenis.on("scroll", (e) => {
-				this.updateOnScroll(e);
+         this.lenis.on("scroll", (e) => {
+            this.updateOnScroll(e);
             ScrollTrigger.update();
 
             clearTimeout(scrollTimeout);
@@ -370,88 +370,88 @@ const mainScript = () => {
          const dist = distance(this.scroller.scrollX, this.scroller.scrollY, this.lastScroller.scrollX, this.lastScroller.scrollY);
 
          if (dist > threshold) {
-            this.lastScroller = {...this.scroller };
+            this.lastScroller = { ...this.scroller };
             return true;
          }
          return false;
       }
 
-		updateOnScroll(e) {
-			this.scroller.scrollX = e.scroll;
-			this.scroller.scrollY = e.scroll;
-			this.scroller.velocity = e.velocity;
+      updateOnScroll(e) {
+         this.scroller.scrollX = e.scroll;
+         this.scroller.scrollY = e.scroll;
+         this.scroller.velocity = e.velocity;
          this.scroller.direction = e.direction;
          if (header) {
             header.updateOnScroll(smoothScroll.lenis);
          };
-         if($('.header-menu').hasClass('active')) {
+         if ($('.header-menu').hasClass('active')) {
             $('.header-menu').removeClass('active');
          }
-		}
+      }
 
-		start() {
-			if (this.lenis) {
+      start() {
+         if (this.lenis) {
             this.lenis.start();
-			}
+         }
          console.log('start');
          $('.body').css('overflow', 'initial');
-		}
+      }
 
-		stop() {
-			if (this.lenis) {
-				this.lenis.stop();
+      stop() {
+         if (this.lenis) {
+            this.lenis.stop();
          }
          console.log('stop');
          $('.body').css('overflow', 'hidden');
-		}
+      }
 
-		scrollTo(target, options = {}) {
-			if (this.lenis) {
-				this.lenis.scrollTo(target, options);
-			}
-		}
+      scrollTo(target, options = {}) {
+         if (this.lenis) {
+            this.lenis.scrollTo(target, options);
+         }
+      }
 
       scrollToTop(options = {}) {
          if (this.lenis) {
             this.lenis.scrollTo("top", { duration: .0001, immediate: true, lock: true, ...options });
          }
-		}
+      }
 
-		destroy() {
-			if (this.lenis) {
-				gsap.ticker.remove((time) => {
-					this.lenis.raf(time * 1000);
-				});
-				this.lenis.destroy();
-				this.lenis = null;
-			}
-		}
-	}
-	const smoothScroll = new SmoothScroll();
-	const reinitializeWebflow = (data) => {
-		if (!window.Webflow) return;
+      destroy() {
+         if (this.lenis) {
+            gsap.ticker.remove((time) => {
+               this.lenis.raf(time * 1000);
+            });
+            this.lenis.destroy();
+            this.lenis = null;
+         }
+      }
+   }
+   const smoothScroll = new SmoothScroll();
+   const reinitializeWebflow = (data) => {
+      if (!window.Webflow) return;
 
-		try {
-			window.Webflow.destroy();
-			window.Webflow.ready();
-			const ix2 = window.Webflow.require("ix2");
-			if (ix2 && typeof ix2.init === "function") {
-				ix2.init();
-			}
-			const forms = window.Webflow.require("forms");
-			if (forms && typeof forms.ready === "function") {
-				forms.ready();
-			}
-			["slider", "tabs", "dropdown", "navbar"].forEach((module) => {
-				try {
-					const mod = window.Webflow.require(module);
-					if (mod && typeof mod.ready === "function") {
-						mod.ready();
-					}
-				} catch (e) {}
-			});
-			if (window.Webflow.redraw) {
-				window.Webflow.redraw.up();
+      try {
+         window.Webflow.destroy();
+         window.Webflow.ready();
+         const ix2 = window.Webflow.require("ix2");
+         if (ix2 && typeof ix2.init === "function") {
+            ix2.init();
+         }
+         const forms = window.Webflow.require("forms");
+         if (forms && typeof forms.ready === "function") {
+            forms.ready();
+         }
+         ["slider", "tabs", "dropdown", "navbar"].forEach((module) => {
+            try {
+               const mod = window.Webflow.require(module);
+               if (mod && typeof mod.ready === "function") {
+                  mod.ready();
+               }
+            } catch (e) { }
+         });
+         if (window.Webflow.redraw) {
+            window.Webflow.redraw.up();
          }
 
          if (data) {
@@ -460,9 +460,9 @@ const mainScript = () => {
             let webflowPageId = $(dom).find("html").attr("data-wf-page");
             $("html").attr("data-wf-page", webflowPageId);
          }
-		} catch (e) {
-			console.warn("Webflow reinit failed:", e);
-		}
+      } catch (e) {
+         console.warn("Webflow reinit failed:", e);
+      }
    };
    function mapFormToObject(ele) {
       return ([...new FormData(ele).entries()].reduce(
@@ -476,12 +476,12 @@ const mainScript = () => {
    }
    class Mouse {
       constructor() {
-         this.mousePos = {x: 0, y: 0};
-         this.cacheMousePos = {...this.mousePos};
-         this.lastMousePos = {...this.mousePos};
+         this.mousePos = { x: 0, y: 0 };
+         this.cacheMousePos = { ...this.mousePos };
+         this.lastMousePos = { ...this.mousePos };
          this.normalizeMousePos = {
-            current: {x: 0.5, y: 0.5},
-            target: {x: 0.5, y: 0.5}
+            current: { x: 0.5, y: 0.5 },
+            target: { x: 0.5, y: 0.5 }
          };
          this.cursorRaf = null;
          this.init();
@@ -573,18 +573,18 @@ const mainScript = () => {
             const type = $(hoverElements[hoverElements.length - 1]).attr('data-cursor');
             switch (type) {
                case 'drag':
-                     // Add drag cursor styling
-                     cursor.removeClass('hidden');
-                     $('.cursor-drag').addClass('active');
-                     break;
+                  // Add drag cursor styling
+                  cursor.removeClass('hidden');
+                  $('.cursor-drag').addClass('active');
+                  break;
                case 'hidden':
-                     cursor.addClass('hidden');
-                     break;
+                  cursor.addClass('hidden');
+                  break;
                default:
-                     // Reset cursor to default
-                     cursor.removeClass('hidden');
-                     $('.cursor-drag').removeClass('active');
-                     break;
+                  // Reset cursor to default
+                  cursor.removeClass('hidden');
+                  $('.cursor-drag').removeClass('active');
+                  break;
             }
          }
          else {
@@ -598,7 +598,7 @@ const mainScript = () => {
       }
    }
    const mouse = new Mouse();
-	class Loader {
+   class Loader {
       constructor() {
          this.isLoaded = sessionStorage.getItem('isLoaded') === 'true' ? true : false;
          this.tlLoadDone = null;
@@ -611,56 +611,56 @@ const mainScript = () => {
          this.tlLoadMaster = gsap.timeline({
             paused: true,
             delay: this.isLoaded ? 0 : 1,
-            duration:1,
+            duration: 1,
             onStart: () => {
-                  this.onceSetup(data);
+               this.onceSetup(data);
             },
             onComplete: () => {
-                  this.oncePlay(data);
+               this.oncePlay(data);
             }
          })
          let currentViewportWidth = viewport.w - cvUnit(16, 'rem');
          let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
-         let widthHexagon = currentViewportHeight*200/231;
+         let widthHexagon = currentViewportHeight * 200 / 231;
          let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
-         if(viewport.w > 991){
+         if (viewport.w > 991) {
             this.tlLoadMaster
-            .to('.loading .hexagon-animated', {duration: 0.3,'--loading-logo-dasharray': 200, ease: 'power1.out'})
-            .to('.loading .hexagon-animated', {duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out'})
-            .to('.loading .hexagon-animated', {duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none'})
-            .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
-            .to('.loading .hexagon-animated', {'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
-            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-            .to('.loading .hexagon-animated',{ 'width': currentViewportWidth, duration: .6 }, '<=0.3')
-            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6}, '<=0')
-            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6}, '<=0')
-            .eventCallback('onUpdate', () => {
-               const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
-               $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
-               if(currentDashProgress >= 1) {
-                  $('.hexagon-stroke').addClass('active');
-                  $('.hexagon-animated .embed-ic').addClass('hidden')
-               }
-            });
+               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 200, ease: 'power1.out' })
+               .to('.loading .hexagon-animated', { duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out' })
+               .to('.loading .hexagon-animated', { duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none' })
+               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in' })
+               .to('.loading .hexagon-animated', { 'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out' })
+               .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
+               .to('.loading .hexagon-animated', { 'width': currentViewportWidth, duration: .6 }, '<=0.3')
+               .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6 }, '<=0')
+               .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6 }, '<=0')
+               .eventCallback('onUpdate', () => {
+                  const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray') / 686;
+                  $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
+                  if (currentDashProgress >= 1) {
+                     $('.hexagon-stroke').addClass('active');
+                     $('.hexagon-animated .embed-ic').addClass('hidden')
+                  }
+               });
          }
          else {
             this.tlLoadMaster
-            .to('.loading .hexagon-animated', {duration: 0.3,'--loading-logo-dasharray': 200, ease: 'power1.out'})
-            .to('.loading .hexagon-animated', {duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out'})
-            .to('.loading .hexagon-animated', {duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none'})
-            .to('.loading .hexagon-animated', {duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in'})
-            .to('.loading .hexagon-animated', {'width':  currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out'})
-            .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-            .to('.loading .hexagon-stroke', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .4}, '<=0')
-            .to('.loading .hexagon-stroke-inner', {'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .4}, '<=0')
-            .eventCallback('onUpdate', () => {
-               const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray')/686;
-               $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
-               if(currentDashProgress >= 1) {
-                  $('.hexagon-stroke').addClass('active');
-                  $('.hexagon-animated .embed-ic').addClass('hidden')
-               }
-            });
+               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 200, ease: 'power1.out' })
+               .to('.loading .hexagon-animated', { duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out' })
+               .to('.loading .hexagon-animated', { duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none' })
+               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in' })
+               .to('.loading .hexagon-animated', { 'width': currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out' })
+               .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
+               .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .4 }, '<=0')
+               .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .4 }, '<=0')
+               .eventCallback('onUpdate', () => {
+                  const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray') / 686;
+                  $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
+                  if (currentDashProgress >= 1) {
+                     $('.hexagon-stroke').addClass('active');
+                     $('.hexagon-animated .embed-ic').addClass('hidden')
+                  }
+               });
          }
       }
       play(data) {
@@ -700,7 +700,7 @@ const mainScript = () => {
       }
       updateLink(data) {
          $("a").each(function (index, link) {
-            let href = $(this).attr("href")?$(this).attr("href").replace(/\/$/, "") : "/";
+            let href = $(this).attr("href") ? $(this).attr("href").replace(/\/$/, "") : "/";
 
             if ($(this).attr('data-sub-link') && (!href.includes('#')) && (!href.includes('?sc='))) {
                $(this).attr('href', `${href}#${$(this).attr('data-sub-link')}`);
@@ -730,16 +730,16 @@ const mainScript = () => {
 
                requestAnimationFrame(() => {
                   setTimeout(() => {
-                        console.log('click data sub link:',$(`#${$(this).attr('data-sub-link')}`));
-                        // $(`#${$(this).attr('data-sub-link')}`).trigger('click');
-                        smoothScroll.scrollTo(`#${$(this).attr('data-sub-link')}`, {
-                           offset: 0
-                        });
-                     }, $(this).hasClass('w--current') ? 0 : 1000);
-
-                     $("a").each(function (index, link) {
-                        $(link).toggleClass("w--current", $(link).attr('href') == `${window.location.pathname}${window.location.hash}`);
+                     console.log('click data sub link:', $(`#${$(this).attr('data-sub-link')}`));
+                     // $(`#${$(this).attr('data-sub-link')}`).trigger('click');
+                     smoothScroll.scrollTo(`#${$(this).attr('data-sub-link')}`, {
+                        offset: 0
                      });
+                  }, $(this).hasClass('w--current') ? 0 : 1000);
+
+                  $("a").each(function (index, link) {
+                     $(link).toggleClass("w--current", $(link).attr('href') == `${window.location.pathname}${window.location.hash}`);
+                  });
                })
             }
          })
@@ -762,26 +762,26 @@ const mainScript = () => {
       constructor() {
       }
       triggerEvent(eventName, data) {
-            const event = new CustomEvent(eventName, { detail: data });
-            data.next.container.dispatchEvent(event);
+         const event = new CustomEvent(eventName, { detail: data });
+         data.next.container.dispatchEvent(event);
       }
       triggerOnceSetup(data) {
-            console.log('Global Hooks: onceSetup');
-            this.triggerEvent("onceSetup", data);
+         console.log('Global Hooks: onceSetup');
+         this.triggerEvent("onceSetup", data);
       }
       triggerOncePlay(data) {
-            console.log('Global Hooks: oncePlay');
-            this.triggerEvent("oncePlay", data);
-            requestAnimationFrame(() => window.scrollY === 0 && window.scrollTo(0, 1))
+         console.log('Global Hooks: oncePlay');
+         this.triggerEvent("oncePlay", data);
+         requestAnimationFrame(() => window.scrollY === 0 && window.scrollTo(0, 1))
       }
       triggerEnterSetup(data) {
-            console.log('Global Hooks: enterSetup');
-            this.triggerEvent("enterSetup", data);
-            requestAnimationFrame(() => window.scrollY === 0 && window.scrollTo(0, 1))
+         console.log('Global Hooks: enterSetup');
+         this.triggerEvent("enterSetup", data);
+         requestAnimationFrame(() => window.scrollY === 0 && window.scrollTo(0, 1))
       }
       triggerEnterPlay(data) {
-            console.log('Global Hooks: enterPlay');
-            this.triggerEvent("enterPlay", data);
+         console.log('Global Hooks: enterPlay');
+         this.triggerEvent("enterPlay", data);
       }
    }
    const globalHooks = new GlobalHooks();
@@ -804,7 +804,7 @@ const mainScript = () => {
          })
          this.hubspotLoadPromise = null;
 
-         if(data.next.namespace === 'schedule') {
+         if (data.next.namespace === 'schedule') {
             if (window.HubSpotConversations) {
                window.HubSpotConversations.widget.remove();
             }
@@ -823,8 +823,8 @@ const mainScript = () => {
             });
          }
          this.tlLeave
-               .fromTo('html', {'--trans-percent': '0%'}, {'--trans-percent': '50%', duration: .6, ease: 'power1.inOut'})
-               .fromTo('html', {'--size--line': '0'}, {'--size--line': this.widthLineVertical, duration: .6, ease: 'power1.inOut'}, '<=0')
+            .fromTo('html', { '--trans-percent': '0%' }, { '--trans-percent': '50%', duration: .6, ease: 'power1.inOut' })
+            .fromTo('html', { '--size--line': '0' }, { '--size--line': this.widthLineVertical, duration: .6, ease: 'power1.inOut' }, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -833,14 +833,14 @@ const mainScript = () => {
             onStart: () => {
                this.enterSetup(data);
                setTimeout(() => {
-                     this.enterPlay(data);
+                  this.enterPlay(data);
                }, 100);
             },
          })
          this.tlEnter
-            .fromTo('html', {'--trans-percent': '50%'}, {'--trans-percent': '0%', duration: .6, ease: 'power1.out'})
-            .fromTo('html', {'--size-line': this.widthLineVertical}, {'--size-line': 0, duration: .6, ease: 'power1.inOut'}, '<=0')
-      return this.tlEnter;
+            .fromTo('html', { '--trans-percent': '50%' }, { '--trans-percent': '0%', duration: .6, ease: 'power1.out' })
+            .fromTo('html', { '--size-line': this.widthLineVertical }, { '--size-line': 0, duration: .6, ease: 'power1.inOut' }, '<=0')
+         return this.tlEnter;
       }
       async play(data) {
          await pageTrans.leaveAnim(data).then(async () => {
@@ -894,16 +894,16 @@ const mainScript = () => {
                start: 'clamp(top bottom+=50%)',
                end: 'bottom top-=50%',
                onEnter: () => {
-                     if (this.once) {
-                        this.once = false;
-                        this.onTrigger();
-                     }
+                  if (this.once) {
+                     this.once = false;
+                     this.onTrigger();
+                  }
                },
                onEnterBack: () => {
-                     if (this.once) {
-                        this.once = false;
-                        this.onTrigger();
-                     }
+                  if (this.once) {
+                     this.once = false;
+                     this.onTrigger();
+                  }
                },
             }
          })
@@ -915,74 +915,74 @@ const mainScript = () => {
          if (!this.once) {
             this.once = true;
          }
-            if (this.tlTrigger) {
-               this.tlTrigger.kill();
-               this.tlTrigger = null;
-            }
+         if (this.tlTrigger) {
+            this.tlTrigger.kill();
+            this.tlTrigger = null;
+         }
       }
    }
    class FlipText {
-      constructor(wrapEl, { onCycleComplete = () => {}, duration = 3 }) {
-          this.wrapEl = wrapEl;
-          this.tlMaster;
-          this.onCycleComplete = onCycleComplete;
-          this.duration = duration;
+      constructor(wrapEl, { onCycleComplete = () => { }, duration = 3 }) {
+         this.wrapEl = wrapEl;
+         this.tlMaster;
+         this.onCycleComplete = onCycleComplete;
+         this.duration = duration;
       }
       setup() {
-          let allSlideItems = $(this.wrapEl).find('.text-rotate');
-          this.tlMaster = gsap.timeline({
-              paused: true,
-              onComplete: () => {
-                  this.tlMaster.progress(0);
-              }
-          });
+         let allSlideItems = $(this.wrapEl).find('.text-rotate');
+         this.tlMaster = gsap.timeline({
+            paused: true,
+            onComplete: () => {
+               this.tlMaster.progress(0);
+            }
+         });
 
-          const DEFAULT = {
-              duration: this.duration,
-              ease: 'expo.inOut',
-              transform: {
-                  out: `translate3d(0px, ${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(-91deg)`,
-                  in: `translate3d(0px, -${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(91deg)`,
-              }
-          }
-          gsap.set(this.wrapEl, { perspective: cvUnit(82.5, 'rem') })
-          gsap.set(allSlideItems, {
-              transformOrigin: true
-                  ? 'center center -.1em !important'
-                  : 'center center -.26em !important',
-          });
+         const DEFAULT = {
+            duration: this.duration,
+            ease: 'expo.inOut',
+            transform: {
+               out: `translate3d(0px, ${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(-91deg)`,
+               in: `translate3d(0px, -${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(91deg)`,
+            }
+         }
+         gsap.set(this.wrapEl, { perspective: cvUnit(82.5, 'rem') })
+         gsap.set(allSlideItems, {
+            transformOrigin: true
+               ? 'center center -.1em !important'
+               : 'center center -.26em !important',
+         });
 
-          allSlideItems.each((idx, text) => {
-              if (idx == allSlideItems.length - 1) {
-                  gsap.set(text, { transform: 'none', autoAlpha: 1 });
-              } else {
-                  gsap.set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 });
-              }
-              let tlChild = gsap.timeline({});
+         allSlideItems.each((idx, text) => {
+            if (idx == allSlideItems.length - 1) {
+               gsap.set(text, { transform: 'none', autoAlpha: 1 });
+            } else {
+               gsap.set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 });
+            }
+            let tlChild = gsap.timeline({});
 
-              if (idx === allSlideItems.length - 1) {
-                  tlChild
-                      .set(text, { transform: 'none', autoAlpha: 1 })
-                      .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } }, '<=0')
-                      .to(text, { duration: DEFAULT.duration * idx - 1 * DEFAULT.duration })
-                      .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
-                      .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease });
-              } else {
-                  tlChild
-                      .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
-                      .to(text, { duration: DEFAULT.duration * idx }, '<=0')
-                      .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease })
-                      .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } })
-                      .to(text, { duration: (allSlideItems.length - 2 - idx) * DEFAULT.duration });
-              }
-              this.tlMaster.add(tlChild, 0);
-          });
-          this.tlMaster.progress((1 / allSlideItems.length).toFixed(2));
+            if (idx === allSlideItems.length - 1) {
+               tlChild
+                  .set(text, { transform: 'none', autoAlpha: 1 })
+                  .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } }, '<=0')
+                  .to(text, { duration: DEFAULT.duration * idx - 1 * DEFAULT.duration })
+                  .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
+                  .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease });
+            } else {
+               tlChild
+                  .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
+                  .to(text, { duration: DEFAULT.duration * idx }, '<=0')
+                  .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease })
+                  .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } })
+                  .to(text, { duration: (allSlideItems.length - 2 - idx) * DEFAULT.duration });
+            }
+            this.tlMaster.add(tlChild, 0);
+         });
+         this.tlMaster.progress((1 / allSlideItems.length).toFixed(2));
       }
       play() {
-          this.tlMaster.play();
+         this.tlMaster.play();
       }
-  }
+   }
    class Header {
       constructor() {
          this.el = null;
@@ -997,7 +997,7 @@ const mainScript = () => {
          }
       }
       update(data) {
-         if($(this.el).find('.header-menu').hasClass('active')) {
+         if ($(this.el).find('.header-menu').hasClass('active')) {
             $(this.el).find('.header-menu').removeClass('active');
          }
          if (this.hideTimeout) {
@@ -1056,7 +1056,7 @@ const mainScript = () => {
       }
       onHideDependent() {
          let heightHeader = $(this.el).height() - cvUnit(1, 'rem');
-         if(!$(this.el).hasClass('on-hide')) {
+         if (!$(this.el).hasClass('on-hide')) {
             this.listDependent.forEach((item) => {
                $(item).css('top', heightHeader);
             });
@@ -1070,8 +1070,8 @@ const mainScript = () => {
          $(this.el).find('.heading-menu-btn').on('click', () => {
             $(this.el).find('.header-menu').toggleClass('active');
          });
-         if(viewport.w < 991) {
-            $(this.el).find('.header-menu-item.has-submenu').on('click', function(e){
+         if (viewport.w < 991) {
+            $(this.el).find('.header-menu-item.has-submenu').on('click', function (e) {
                e.preventDefault();
                $(this).toggleClass('active');
                $(this).next('.header-menu-dropdown').slideToggle();
@@ -1094,7 +1094,7 @@ const mainScript = () => {
       }
    }
    const header = new Header();
-   class Footer  {
+   class Footer {
       constructor() {
          this.el = null;
          this.tlOverlap = null;
@@ -1125,7 +1125,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.tlTitle,
+            timeline: this.tlTitle,
             triggerInit: this.el,
             tweenArr: [
                new FadeSplitText({ el: $(this.el).find('.footer-title').get(0) }),
@@ -1139,7 +1139,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.tlForm,
+            timeline: this.tlForm,
             triggerInit: this.el,
             tweenArr: [
                new FadeSplitText({ el: $(this.el).find('.footer-form-label .txt').get(0) }),
@@ -1157,7 +1157,7 @@ const mainScript = () => {
          $(this.el).find('.footer-menu-item').each((index, item) => {
             new MasterTimeline({
                stagger: 0.05,
-               timeline:this.tlMenu,
+               timeline: this.tlMenu,
                triggerInit: this.el,
                tweenArr: [
                   new FadeSplitText({ el: $(item).find('.footer-menu-item-label .txt').get(0) }),
@@ -1176,7 +1176,7 @@ const mainScript = () => {
          });
          $(this.el).find('.footer-info-item').each((index, item) => {
             new MasterTimeline({
-               timeline:this.tlInfo,
+               timeline: this.tlInfo,
                triggerInit: this.el,
                tweenArr: [
                   ...Array.from($(item).find('.footer-info-item-label')).flatMap((el) => [
@@ -1196,7 +1196,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.tlLogo,
+            timeline: this.tlLogo,
             triggerInit: this.el,
             tweenArr: [
                new ScaleInset({ el: $(this.el).find('.footer-logo-inner').get(0) }),
@@ -1218,9 +1218,9 @@ const mainScript = () => {
             }
          });
          tlImg
-            .fromTo($(this.el).find('.footer-img-inner').get(0), {yPercent: 20, opacity: 0, scale: .94}, {yPercent: 0, opacity: 1, scale: 1})
+            .fromTo($(this.el).find('.footer-img-inner').get(0), { yPercent: 20, opacity: 0, scale: .94 }, { yPercent: 0, opacity: 1, scale: 1 })
          new MasterTimeline({
-            timeline:this.tlImg,
+            timeline: this.tlImg,
             triggerInit: this.el,
             tweenArr: [
                ...Array.from($(this.el).find('.footer-img-plus')).flatMap((item) => [
@@ -1236,7 +1236,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.copyright,
+            timeline: this.copyright,
             triggerInit: this.el,
             tweenArr: [
                new FadeSplitText({ el: $(this.el).find('.footer-copyright-txt .txt').get(0) }),
@@ -1245,7 +1245,7 @@ const mainScript = () => {
                ]),
             ]
          });
-         new ParallaxImage({el: $(this.el).find('.footer-logo-inner .ic-embed').get(0), speed: 0.2});
+         new ParallaxImage({ el: $(this.el).find('.footer-logo-inner .ic-embed').get(0), speed: 0.2 });
       }
       interact() {
          this.hoverLogo();
@@ -1396,6 +1396,17 @@ const mainScript = () => {
       }
    }
    const footer = new Footer();
+   function updateImageMask() {
+      $('.ink-mask').each(function (index) {
+         const $maskContainer = $(this);
+         const maskId = 'inkCircleMask-' + index;
+         const $mask = $maskContainer.find('mask');
+         $mask.attr('id', maskId);
+         const $image = $maskContainer.find('image');
+         $image.attr('mask', 'url(#' + maskId + ')');
+      });
+   }
+   updateImageMask();
    class InkTransition {
       DOM = {
          el: null,
@@ -1410,7 +1421,8 @@ const mainScript = () => {
          this.DOM.svg = this.DOM.el.querySelector('.layer');
          this.DOM.mask = this.DOM.svg.querySelector('.mask');
          this.DOM.image = this.DOM.svg.querySelector('image');
-
+         this.start = parseFloat($(this.DOM.backdrop).attr('data-start')) / 100 * window.innerHeight;
+         this.end = parseFloat($(this.DOM.backdrop).attr('data-end')) / 100 * window.innerHeight;
          this.DOM.backdrop.style.opacity = 0.5;
          this.DOM.backdrop.style.filter = 'grayscale(1)';
 
@@ -1425,8 +1437,11 @@ const mainScript = () => {
             this.startVal = parseFloat(this.DOM.mask.getAttribute('r')) || 0;
             this.endVal = Math.sqrt(vbWidth * vbWidth + vbHeight * vbHeight) / 2;
          } else {
-            this.startVal = this.DOM.mask.getAttribute('d') || '';
-            this.endVal = 1 || '';
+            this.startPath = this.DOM.mask.getAttribute('d');
+            this.endPath = this.DOM.mask.dataset.valueFinal;
+
+            this.startNums = this.parsePath(this.startPath);
+            this.endNums = this.parsePath(this.endPath);
          }
 
          this.scrub();
@@ -1438,18 +1453,23 @@ const mainScript = () => {
             this.updateOnScroll();
          });
       }
+      parsePath(d) {
+         return d.match(/-?\d+\.?\d*/g).map(Number);
+      }
 
+      buildPath(template, values) {
+         let i = 0;
+         return template.replace(/-?\d+\.?\d*/g, () => values[i++]);
+      }
       updateOnScroll() {
          if (!this.DOM.el) return;
          if (!isInViewport(this.DOM.el)) return;
 
          const rect = this.DOM.el.getBoundingClientRect();
-         // start: top of element hits bottom-10% of viewport
-         const start = window.innerHeight * 0.95;
-         // end: bottom of element hits 10% from top of viewport
-         const end = window.innerHeight * 0.05;
 
-         // Progress: 0 when rect.top = start, 1 when rect.bottom = end
+         const start = this.start;
+         const end = this.end;
+
          const totalTravel = (start - end) + rect.height;
          const currentPos = start - rect.top;
          const progress = Math.max(0, Math.min(1, currentPos / totalTravel));
@@ -1458,17 +1478,19 @@ const mainScript = () => {
             const currentR = this.startVal + (this.endVal - this.startVal) * progress;
             this.DOM.mask.setAttribute('r', currentR);
          } else {
-            // For path 'd' attribute, interpolate at 0 or 1 thresholds
-            // since path strings can't be numerically interpolated simply
-            this.DOM.mask.setAttribute('d', progress >= 1 ? this.endVal : this.startVal);
+            const currentNums = this.startNums.map((start, i) => {
+               return start + (this.endNums[i] - start) * progress;
+            });
+
+            const newD = this.buildPath(this.startPath, currentNums);
+            this.DOM.mask.setAttribute('d', newD);
          }
 
-         // Scale image from 1 → 1.1 as progress goes 0 → 1
          const scaleVal = 1 + 0.01 * progress;
-         this.DOM.image.setAttribute('transform', `scale(${scaleVal})`);
+         // this.DOM.image.setAttribute('transform', `scale(${scaleVal})`);
       }
    }
-   class Cta  {
+   class Cta {
       constructor() {
          this.el = null;
          this.tlContent = null;
@@ -1493,7 +1515,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.tlContent,
+            timeline: this.tlContent,
             triggerInit: this.el,
             stagger: 0.15,
             tweenArr: [
@@ -1513,7 +1535,7 @@ const mainScript = () => {
             }
          });
          new MasterTimeline({
-            timeline:this.tlImage,
+            timeline: this.tlImage,
             triggerInit: this.el,
             tweenArr: [
                new ScaleInset({ el: $(this.el).find('.home-cta-deco-item-img').get(0) }),
@@ -1590,7 +1612,7 @@ const mainScript = () => {
          }
          $(this.el).find('.product-faq-item-sub').hide();
 
-         $(this.el).find('.product-faq-item').on('click', function() {
+         $(this.el).find('.product-faq-item').on('click', function () {
             activeAccordion($(this).index());
          });
       }
@@ -1633,7 +1655,7 @@ const mainScript = () => {
                paused: true,
                delay: .3,
                onComplete: () => {
-                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
+                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), { autoAlpha: 1, duration: 0.5 });
                   this.rotateText()
                   this.taglineMarquee.play();
                }
@@ -1646,7 +1668,7 @@ const mainScript = () => {
                paused: true,
                delay: 0.3,
                onComplete: () => {
-                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), {autoAlpha: 1, duration: 0.5});
+                  gsap.to($(this.el).find('.home-hero-img-interact-wrap'), { autoAlpha: 1, duration: 0.5 });
                   this.rotateText();
                   this.taglineMarquee.play();
                }
@@ -1678,7 +1700,7 @@ const mainScript = () => {
          }
          animationReveal(timeline) {
             new MasterTimeline({
-               timeline:timeline,
+               timeline: timeline,
                allowMobile: true,
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'center' }),
@@ -1720,9 +1742,9 @@ const mainScript = () => {
                   mouse.cacheMousePos.y !== this.lastMousePos.y ||
                   mouse.cacheMousePos.x !== this.lastMousePos.x ||
                   smoothScroll.scroller.scrollY !== this.lastScrollY) {
-                     this.updateTargetPosition();
-                     this.animateRuler();
-                  }
+                  this.updateTargetPosition();
+                  this.animateRuler();
+               }
             } else { }
 
             this.lastScrollY = smoothScroll.scroller.scrollY;
@@ -1854,7 +1876,7 @@ const mainScript = () => {
             }
 
             const handleOnDown = (e) => {
-                // Prevent right-click from initiating box drawing
+               // Prevent right-click from initiating box drawing
                if ((e && e.button === 2) || (e && e.which === 3)) return;
                if (this.box) {
                   this.box.remove();
@@ -1881,7 +1903,7 @@ const mainScript = () => {
                const initX = parseFloat(track.dataset.initialX);
                const initY = parseFloat(track.dataset.initialY);
 
-              // persist as strings if other logic depends on dataset
+               // persist as strings if other logic depends on dataset
                track.dataset.currentX = String(currX);
                track.dataset.currentY = String(currY);
 
@@ -2036,8 +2058,8 @@ const mainScript = () => {
 
             // Bottom horizontal line
             $('.home-hero-ruler-item.bot .home-hero-ruler-item-line-horizital')
-            .css('width', `${displayedWidth * verticalLineWidth / IMG_WIDTH}px`)
-            .css('left', `${calcHorizitalPos(verticalLineStartX)}px`);
+               .css('width', `${displayedWidth * verticalLineWidth / IMG_WIDTH}px`)
+               .css('left', `${calcHorizitalPos(verticalLineStartX)}px`);
 
             const horizontalLinesLeft = [
                { y: 103, x: 1203 },
@@ -2086,7 +2108,7 @@ const mainScript = () => {
                $('.home-hero-ruler-item.right').each((itemIndex, item) => {
                   const lineItem = $(item).find('.home-hero-ruler-item-line-horizital').eq(index);
                   lineItem.css('top', `${calcVerticalPos(line.y)}px`)
-                     .css('--clip-half', `${ calcHorizontalClip(line.x)}%`);
+                     .css('--clip-half', `${calcHorizontalClip(line.x)}%`);
                });
             });
             verticalLinesTop.forEach((line, index) => {
@@ -2159,18 +2181,18 @@ const mainScript = () => {
                   start: 'top+=55% bottom',
                }
             });
-            let title = new SplitText( $(this.el).find('.home-intro-content-title .heading').get(0), {type: 'chars,words, lines'});
-            this.tlStickFade.fromTo(title.chars, {color: '#b3b3af'}, { color: '#282828', stagger: 0.03 })
+            let title = new SplitText($(this.el).find('.home-intro-content-title .heading').get(0), { type: 'chars,words, lines' });
+            this.tlStickFade.fromTo(title.chars, { color: '#b3b3af' }, { color: '#282828', stagger: 0.03 })
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
                let direction = $(item).attr('data-direction');
-               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
+               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'), $(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
             });
          }
          animationReveal() {
             new MasterTimeline({
-               timeline:this.tlBody,
+               timeline: this.tlBody,
                triggerInit: this.el,
                tweenArr: [
                   new ScaleInset({ el: $(this.el).find('.home-intro-img-inner').get(0) }),
@@ -2180,17 +2202,17 @@ const mainScript = () => {
                ]
             });
             new MasterTimeline({
-               timeline:this.tlPartner,
+               timeline: this.tlPartner,
                tweenArr: [
                   ...Array.from($(this.el).find('.home-intro-partner-label-wrap')).flatMap((item, index) => {
-                    return [
-                      new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.3}),
-                    ]
+                     return [
+                        new FadeSplitText({ el: $(item).find('.home-intro-partner-label .txt').get(0), delay: index * 0.3 }),
+                     ]
                   }),
                   ...Array.from($(this.el).find('.home-intro-partner-inner')).flatMap((item, index) => {
-                    return [
-                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
-                    ]
+                     return [
+                        new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
+                     ]
                   })
                ]
             });
@@ -2240,29 +2262,29 @@ const mainScript = () => {
                   start: 'top+=55% bottom',
                },
             });
-            if(viewport.w < 768) {
+            if (viewport.w < 768) {
                this.swiperCard();
             }
          }
          animationReveal() {
             new MasterTimeline({
-               timeline:this.tlHead,
+               timeline: this.tlHead,
                tweenArr: [
                   new FadeSplitText({ el: $(this.el).find('.home-problem-label .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-problem-sub .txt').get(0) }),
-                  new FadeSplitText({ el: $(this.el).find('.home-problem-title .heading').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.home-problem-title .heading').get(0) }),
                ]
             });
             $('.home-problem-item').each((index, item) => {
                new MasterTimeline({
-                  timeline:this.tlBody,
+                  timeline: this.tlBody,
                   stagger: 0.05,
                   tweenArr: [
-                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-title .txt').get(0)}),
-                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-num .txt').get(0)}),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-title .txt').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-head-num .txt').get(0) }),
                      new ScaleInset({ el: $(item).find('.home-problem-item-img').get(0) }),
-                     new FadeSplitText({ el: $(item).find('.home-problem-item-title .heading').get(0)}),
-                     new FadeSplitText({ el: $(item).find('.home-problem-item-sub .txt').get(0)}),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-title .heading').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.home-problem-item-sub .txt').get(0) }),
 
                   ]
                });
@@ -2284,8 +2306,8 @@ const mainScript = () => {
                on: {
                   touchEnd: (swiper) => {
                      smoothScroll.start();
-                   },
-                  slideChange: function(swiper) {
+                  },
+                  slideChange: function (swiper) {
                      smoothScroll.stop();
                      // check index active of swiper slide
                      const indexActive = swiper.activeIndex;
@@ -2296,10 +2318,10 @@ const mainScript = () => {
             });
          }
          destroy() {
-            if(this.tlHead) {
+            if (this.tlHead) {
                this.tlHead.kill();
             }
-            if(this.tlBody) {
+            if (this.tlBody) {
                this.tlBody.kill();
             }
          }
@@ -2342,17 +2364,17 @@ const mainScript = () => {
             });
          }
          interact() {
-            $(this.el).find('.home-map-number').on('mouseenter', function() {
+            $(this.el).find('.home-map-number').on('mouseenter', function () {
                $(this).parent().addClass('hover');
                let dataNumber = $(this).attr('data-number');
                $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('hover')
             });
-            $(this.el).find('.home-map-number').on('mouseleave', function() {
+            $(this.el).find('.home-map-number').on('mouseleave', function () {
                $(this).parent().removeClass('hover');
                let dataNumber = $(this).attr('data-number');
                $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('hover')
             });
-            $(this.el).find('.home-map-number').on('click', function() {
+            $(this.el).find('.home-map-number').on('click', function () {
                if ($(this).parent().hasClass('active')) {
                   $(this).parent().removeClass('active');
                   let dataNumber = $(this).attr('data-number');
@@ -2377,7 +2399,7 @@ const mainScript = () => {
                paused: true,
             });
             new MasterTimeline({
-               timeline:this.tlContent,
+               timeline: this.tlContent,
                triggerInit: this.el,
                stagger: 0.05,
                tweenArr: [
@@ -2385,10 +2407,10 @@ const mainScript = () => {
                   new FadeSplitText({ el: $(this.el).find('.home-map-content-title .heading').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-map-content-sub .txt').get(0) }),
                   ...Array.from($(this.el).find('.home-map-content-item')).flatMap((item, index) => {
-                    return [
-                      new ScaleInset({ el: $(item).find('.home-map-content-item-ic').get(0), elInner: $(item).find('.home-map-content-item-ic-inner').get(0) }),
-                      new FadeSplitText({ el: $(item).find('.home-map-content-item-title .txt').get(0)}),
-                    ]
+                     return [
+                        new ScaleInset({ el: $(item).find('.home-map-content-item-ic').get(0), elInner: $(item).find('.home-map-content-item-ic-inner').get(0) }),
+                        new FadeSplitText({ el: $(item).find('.home-map-content-item-title .txt').get(0) }),
+                     ]
                   })
                ]
             });
@@ -2402,7 +2424,7 @@ const mainScript = () => {
                   scrub: true
                }
             });
-            if(viewport.w > 767) {
+            if (viewport.w > 767) {
                this.tlStickFade
                   .fromTo($(this.el).find('.home-map-main-inner'), { y: -($(this.el).find('.home-map-inner').height()) }, { y: 0, ease: 'none' }, 0)
             }
@@ -2433,8 +2455,8 @@ const mainScript = () => {
 
             $(this.el).find('.home-intel-inner').each((idx, item) => {
                this.tl
-                     .fromTo(item, { autoAlpha: idx === 0 ? 1 : 0, y: cvUnit(3, 'rem'), scale: 1.04 }, { autoAlpha: 1, y: 0, scale: 1 }, '>=0')
-                     .fromTo(item, { autoAlpha: 1, y: 0, scale: 1 }, { autoAlpha: 0, y: -cvUnit(3, 'rem'), scale: .96 }, '>=.5');
+                  .fromTo(item, { autoAlpha: idx === 0 ? 1 : 0, y: cvUnit(3, 'rem'), scale: 1.04 }, { autoAlpha: 1, y: 0, scale: 1 }, '>=0')
+                  .fromTo(item, { autoAlpha: 1, y: 0, scale: 1 }, { autoAlpha: 0, y: -cvUnit(3, 'rem'), scale: .96 }, '>=.5');
                gsap.set(item, { autoAlpha: 0 });
             })
             gsap.set($(this.el).find('.home-map-main-img .home-map-img-svg path'), { opacity: 0, scale: 1.1 })
@@ -2449,7 +2471,7 @@ const mainScript = () => {
             };
             const introStep = (itemKey, introIdx) => ({
                opacity: 1,
-               onUpdate: function() {
+               onUpdate: function () {
                   const progress = this.progress();
                   if (progress > 0 && progress < 1) {
                      if (!activeItems.has(itemKey)) {
@@ -2466,7 +2488,7 @@ const mainScript = () => {
             this.tl
                .to($(this.el).find('.home-map-main-img:nth-child(3) .home-map-main-img-inner'), {
                   opacity: 1,
-                  onUpdate: function() {
+                  onUpdate: function () {
                      const progress = this.progress();
                      if (progress === 0) {
                         introWrap.removeClass('active');
@@ -2499,7 +2521,7 @@ const mainScript = () => {
 
                .to($(this.el).find('.home-map-main-img:nth-child(8) .home-map-main-img-inner'), {
                   opacity: 1,
-                  onUpdate: function() {
+                  onUpdate: function () {
                      const progress = this.progress();
                      const item = $(this.targets()[0]).closest('.home-map-main-img');
                      if (progress === 0) {
@@ -2521,10 +2543,10 @@ const mainScript = () => {
             if (this.tlStickFade) {
                this.tlStickFade.kill();
             }
-            if(this.tl) {
+            if (this.tl) {
                this.tl.kill();
             }
-            if(this.tlContent) {
+            if (this.tlContent) {
                this.tlContent.kill();
             }
          }
@@ -2546,7 +2568,7 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
-            if(viewport.w > 991) {
+            if (viewport.w > 991) {
                let centerStick = (viewport.h - $(this.el).find('.home-platform-content-inner').height()) / 2;
                $(this.el).find('.home-platform-content-inner').css('top', `${centerStick}px`);
             }
@@ -2558,12 +2580,12 @@ const mainScript = () => {
                }
             });
             new MasterTimeline({
-               timeline:this.tlContent,
+               timeline: this.tlContent,
                tweenArr: [
-                  new FadeIn({el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-number').get(0)}),
+                  new FadeIn({ el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-number').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-title .heading').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-platform-content-inner.active .home-platform-content-sub .txt').get(0) }),
-                  new FadeIn({el: $(this.el).find('.home-platform-content-inner.active .home-intro-btn-inner'), type: "bottom"}),
+                  new FadeIn({ el: $(this.el).find('.home-platform-content-inner.active .home-intro-btn-inner'), type: "bottom" }),
                ]
             });
             $('.home-platform-img-item').each((index, item) => {
@@ -2574,17 +2596,11 @@ const mainScript = () => {
                      once: true
                   }
                });
-               new MasterTimeline({
-                  timeline:this.tlImage,
-                  tweenArr: [
-                     new ScaleInset({el: $(item).find('.home-platform-img-item-inner').get(0)}),
-                  ]
-               });
             });
          }
-         interact() {}
+         interact() { }
          animationScrub() {
-            $(this.el).find('.home-platform-img-item-inner img').each((_, item) => new ParallaxImage({ el: item }));
+            $(this.el).find('.home-platform-img-item-inner').each((_, item) => new InkTransition($(item).get(0)));
 
             const contentItems = $(this.el).find('.home-platform-content-inner');
             const totalItems = contentItems.length;
@@ -2647,7 +2663,7 @@ const mainScript = () => {
                }
             });
             new MasterTimeline({
-               timeline:this.tlContent,
+               timeline: this.tlContent,
                tweenArr: [
                   new FadeSplitText({ el: $(this.el).find('.home-why-label .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.home-why-title .heading').get(0) }),
@@ -2665,24 +2681,24 @@ const mainScript = () => {
                });
                this.tlImages.push(tlImage);
                new MasterTimeline({
-                  timeline:tlImage,
+                  timeline: tlImage,
                   tweenArr: [
-                     new ScaleInset({el: $(item).find('.home-why-item-img-inner').get(0)}),
+                     new ScaleInset({ el: $(item).find('.home-why-item-img-inner').get(0) }),
                   ]
                });
             });
          }
          interact() {
-            if(viewport.w > 991) {
+            if (viewport.w > 991) {
                this.stickerCard();
             }
             else if (viewport.w <= 767) {
                this.swiperCard();
             }
-            $(this.el).find('.home-why-item').on('mouseenter', function() {
+            $(this.el).find('.home-why-item').on('mouseenter', function () {
                $(this).addClass('active');
             });
-            $(this.el).find('.home-why-item').on('mouseleave', function() {
+            $(this.el).find('.home-why-item').on('mouseleave', function () {
                $(this).removeClass('active');
             });
          }
@@ -2707,12 +2723,12 @@ const mainScript = () => {
                   clickable: true,
                },
                on: {
-                   touchEnd: (swiper) => {
+                  touchEnd: (swiper) => {
                      smoothScroll.start();
 
-                   },
+                  },
 
-                   slideChange: (swiper) => {
+                  slideChange: (swiper) => {
                      smoothScroll.stop();
                   },
                   // touchEnd: (swiper) => {
@@ -2809,7 +2825,7 @@ const mainScript = () => {
                }
             });
             new MasterTimeline({
-               timeline:this.tlImage,
+               timeline: this.tlImage,
                triggerInit: this.el,
                tweenArr: [
                   new ScaleInset({ el: $(this.el).find('.home-usecase-img-item:first-child').get(0) }),
@@ -2823,7 +2839,7 @@ const mainScript = () => {
                }
             });
             new MasterTimeline({
-               timeline:this.tlContent,
+               timeline: this.tlContent,
                triggerInit: this.el,
                tweenArr: [
                   new FadeSplitText({ el: $(this.el).find('.home-usecase-label .txt').get(0) }),
@@ -2839,7 +2855,7 @@ const mainScript = () => {
             });
             $(this.el).find('.home-usecase-faq-item').each((index, item) => {
                new MasterTimeline({
-                  timeline:this.tlList,
+                  timeline: this.tlList,
                   triggerInit: this.el,
                   stagger: 0.03,
                   tweenArr: [
@@ -2862,7 +2878,7 @@ const mainScript = () => {
                $(this.el).find('.home-usecase-faq-item').eq(idx).find('.home-usecase-faq-item-sub').slideToggle();
             }
             $(this.el).find('.home-usecase-faq-item-sub').hide();
-            $(this.el).find('.home-usecase-faq-item').on('click', function() {
+            $(this.el).find('.home-usecase-faq-item').on('click', function () {
                activeAccordion($(this).index());
             });
             activeAccordion(0);
@@ -2962,9 +2978,11 @@ const mainScript = () => {
                   new FadeSplitText({ el: $(this.el).find('.product-hero-sub .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.product-hero-btn .txt:first-child').get(0), delay: .1 }),
                   new ScaleInset({ el: $(this.el).find('.product-hero-btn .btn-bg-ic:first-child').get(0), delay: .3 }),
-                  new FadeIn({ el: $(this.el).find('.about-inves-logo-cms').get(0), delay: .5, onStart: () => {
-                     this.partnerMarquee.play();
-                  } }),
+                  new FadeIn({
+                     el: $(this.el).find('.about-inves-logo-cms').get(0), delay: .5, onStart: () => {
+                        this.partnerMarquee.play();
+                     }
+                  }),
                ].filter(Boolean)
             });
          }
@@ -3002,7 +3020,7 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
-            if(viewport.w < 992) {
+            if (viewport.w < 992) {
                this.swiperCard();
             }
             initNumberIndex($(this.el).find('.product-key-main-title-inner'));
@@ -3065,15 +3083,15 @@ const mainScript = () => {
                      end: viewport.w > 767 ? 'bottom bottom' : 'top bottom',
                      scrub: true,
                      onUpdate: (self) => {
-                        if(index > 0) {
+                        if (index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
 
-                           gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
-                           gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
-                           gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress*100}% 0)` });
-                           gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip*100}% 0 0 0)` });
-                           if(progress > limitProgress) {
+                           gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress * 100}% 0)` });
+                           gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip * 100}% 0 0 0)` });
+                           gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress * 100}% 0)` });
+                           gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip * 100}% 0 0 0)` });
+                           if (progress > limitProgress) {
                               tabItems.removeClass('active');
                               tabItems.eq(index).addClass('active');
                            }
@@ -3086,7 +3104,7 @@ const mainScript = () => {
                      // },
                      onEnterBack: (self) => {
                         tabItems.removeClass('active');
-                        viewport.w < 768 ? tabItems.eq(index-1).addClass('active') : tabItems.eq(index).addClass('active');
+                        viewport.w < 768 ? tabItems.eq(index - 1).addClass('active') : tabItems.eq(index).addClass('active');
                      },
                      // onLeaveEnter: () => {
                      //    tabItems.removeClass('active');
@@ -3115,24 +3133,24 @@ const mainScript = () => {
                });
                tlParallax
                   .to($(item).find('.product-key-main-title, .product-key-main-sub'),
-                  {
-                     keyframes: {
-                        scale: [.95, 1, .95],
-                        rotateX: [-10, 0, 10],
-                        '--transform-y-origin': ['0%', '100%', '0%'],
-                        color: ['#b4b4b0', '#282828', '#b4b4b0'],
-                     }
-                  },
-               )
+                     {
+                        keyframes: {
+                           scale: [.95, 1, .95],
+                           rotateX: [-10, 0, 10],
+                           '--transform-y-origin': ['0%', '100%', '0%'],
+                           color: ['#b4b4b0', '#282828', '#b4b4b0'],
+                        }
+                     },
+                  )
             });
          }
          interact() {
             let heightTab = $('.product-key-tab-wrap').height();
-            $('.product-key-tab-item').on('click', function() {
+            $('.product-key-tab-item').on('click', function () {
                const index = $(this).index();
                $('.product-key-tab-item').removeClass('active');
                $(this).addClass('active');
-               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: index > 0 ? heightTab*-1 : heightTab*-1 - 1 });
+               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: index > 0 ? heightTab * -1 : heightTab * -1 - 1 });
             });
          }
          swiperCard() {
@@ -3148,7 +3166,7 @@ const mainScript = () => {
             header.unregisterDependent($(this.el).find('.product-key-tab-wrap'));
          }
       },
-      How : class extends TriggerSetup {
+      How: class extends TriggerSetup {
          constructor() {
             super();
             this.el = null;
@@ -3162,7 +3180,7 @@ const mainScript = () => {
             super.setTrigger(this.el, this.onTrigger.bind(this));
          }
          onTrigger() {
-            if(viewport.w > 767) {
+            if (viewport.w > 767) {
                this.animationScrub();
             }
             this.interact();
@@ -3228,15 +3246,17 @@ const mainScript = () => {
                      new FadeSplitText({ el: $(item).find('.product-how-item-sub .txt').get(0), delay: .3 }),
                   ]
                });
-               const tween = this.tl.to(item, { yPercent: 0, stagger: 1, onUpdate: (self) => {
-                  if(tween.progress() > 0.1) {
-                     tlItem.play();
+               const tween = this.tl.to(item, {
+                  yPercent: 0, stagger: 1, onUpdate: (self) => {
+                     if (tween.progress() > 0.1) {
+                        tlItem.play();
+                     }
+                  }, onComplete: () => {
+                     $(item).addClass('active');
+                  }, onReverseComplete: () => {
+                     $(item).removeClass('active');
                   }
-               }, onComplete: () => {
-                  $(item).addClass('active');
-               }, onReverseComplete: () => {
-                  $(item).removeClass('active');
-               }});
+               });
             });
          }
          interact() {
@@ -3294,7 +3314,7 @@ const mainScript = () => {
                this.setupEnter(data);
             }
             else return;
-            if(viewport.w < 991 && viewport.w >= 768) {
+            if (viewport.w < 991 && viewport.w >= 768) {
                this.swiperCard();
             }
             this.animationScrub();
@@ -3356,14 +3376,14 @@ const mainScript = () => {
                      new FadeIn({ el: $(item).find('.pricing-hero-package-btn') }),
                      ...(viewport.w < 768 ? Array.from($(item).find('.pricing-hero-table.only-mob')).flatMap((table, index) => [
                         new FadeIn({ el: $(table).get(0) }),
-                     ]) :[]),
+                     ]) : []),
                   ]),
                   ...(viewport.w > 767 ? Array.from($(this.el).find('.pricing-hero-table:not(.only-mob) .pricing-hero-table-row')).flatMap((item, index) => [
                      ...Array.from($(item).find('.pricing-hero-table-col')).flatMap((cell, index) => [
-                       (!$(cell).find('.pricing-hero-table-col-sub').hasClass('w-condition-invisible')) ? new FadeSplitText({ el: $(cell).find('.txt').get(0) }) : null,
+                        (!$(cell).find('.pricing-hero-table-col-sub').hasClass('w-condition-invisible')) ? new FadeSplitText({ el: $(cell).find('.txt').get(0) }) : null,
                         (!$(cell).find('.pricing-hero-table-col-check').hasClass('w-condition-invisible')) ? new FadeIn({ el: $(cell).find('.pricing-hero-table-col-check').get(0) }) : null,
                      ]).filter(Boolean),
-                  ]) :[]),
+                  ]) : []),
                ]
             });
          }
@@ -3372,7 +3392,7 @@ const mainScript = () => {
                const type = $(e.currentTarget).attr('data-type');
                $('.pricing-hero-tab-item').removeClass('active');
                $(e.currentTarget).addClass('active');
-               if(type == 'year') {
+               if (type == 'year') {
                   $(this.el).find('.pricing-hero-package-item-title-wrap').addClass('active');
                } else {
                   $(this.el).find('.pricing-hero-package-item-title-wrap').removeClass('active');
@@ -3400,9 +3420,9 @@ const mainScript = () => {
                on: {
                   touchEnd: (swiper) => {
                      smoothScroll.start();
-                   },
+                  },
 
-                   slideChange: (swiper) => {
+                  slideChange: (swiper) => {
                      smoothScroll.stop();
                   },
                }
@@ -3423,14 +3443,14 @@ const mainScript = () => {
             }
          }
       },
-      faq: class{
+      faq: class {
          constructor() {
          }
          setup(data) {
             faq.init(data);
          }
       },
-      cta: class{
+      cta: class {
          constructor() {
          }
          setup(data) {
@@ -3504,26 +3524,26 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.05,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.contact-hero-title .heading').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.contact-hero-sub .txt').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.contact-hero-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.contact-hero-sub .txt').get(0) }),
                   ...Array.from($(this.el).find('.contact-hero-info-item')).flatMap((item, index) => {
                      return [
-                        new FadeSplitText({el: $(item).find('.contact-hero-info-item-label .txt').get(0)}),
-                        new FadeSplitText({el: $(item).find('.contact-hero-info-item-title .txt').get(0)}),
+                        new FadeSplitText({ el: $(item).find('.contact-hero-info-item-label .txt').get(0) }),
+                        new FadeSplitText({ el: $(item).find('.contact-hero-info-item-title .txt').get(0) }),
                      ]
                   }),
-                  new ScaleInset({el: $(this.el).find('.contact-hero-image-inner').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.contact-hero-form-title .heading').get(0)}),
+                  new ScaleInset({ el: $(this.el).find('.contact-hero-image-inner').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.contact-hero-form-title .heading').get(0) }),
                   ...Array.from($(this.el).find('.contact-hero-form-label .heading')).flatMap((item, index) => {
                      return [
-                        new FadeSplitText({el: $(item).get(0)}),
+                        new FadeSplitText({ el: $(item).get(0) }),
                      ]
                   }),
-                  new FadeSplitText({el: $(this.el).find('.contact-hero-form-input-submit .heading:first-child').get(0)}),
-                  new ScaleInset({el: $(this.el).find('.contact-hero-form-input-submit .btn-bg-ic:first-child').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.contact-hero-form-input-submit .heading:first-child').get(0) }),
+                  new ScaleInset({ el: $(this.el).find('.contact-hero-form-input-submit .btn-bg-ic:first-child').get(0) }),
                ]
             });
-            new ParallaxImage({el: $(this.el).find('.contact-hero-image-inner img').get(0)});
+            new ParallaxImage({ el: $(this.el).find('.contact-hero-image-inner img').get(0) });
          }
          interact() {
             $(this.el).find(".contact-hero-form-input").on("input", function () {
@@ -3556,7 +3576,7 @@ const mainScript = () => {
             $(this.form).find('[type="submit"]').on("click", function (e) {
                const data = mapFormToObject($(this.form).get(0));
                let isValid = true;
-               requiredNames.forEach( (name) => {
+               requiredNames.forEach((name) => {
                   if (!Object.prototype.hasOwnProperty.call(data, name)) return;
                   const v = String(data[name] ?? "").trim();
                   let hasError = false;
@@ -3578,13 +3598,13 @@ const mainScript = () => {
                   e.preventDefault();
                }
             });
-            const updateSubmitState =  ($f) => {
+            const updateSubmitState = ($f) => {
                let allFilled = true;
-               requiredNames.forEach( (name) => {
+               requiredNames.forEach((name) => {
                   const $input = $(this.form).find('[name="' + name + '"]');
                   if ($input.length) {
-                  const v = String($input.val() ?? "").trim();
-                  if (v.length === 0) allFilled = false;
+                     const v = String($input.val() ?? "").trim();
+                     if (v.length === 0) allFilled = false;
                   }
                });
                const $btn = $($f).find('[type="submit"]');
@@ -3593,24 +3613,24 @@ const mainScript = () => {
             };
             updateSubmitState($(this.form));
             $(this.form).on(
-            "input change",
-            '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]',
-            function () {
-               updateSubmitState(this.form);
-            }
+               "input change",
+               '[name="First-Name"], [name="Last-Name"], [name="Phone-Number"], [name="Email"]',
+               function () {
+                  updateSubmitState(this.form);
+               }
             );
          }
          submitHubspot() {
             const hubspot = {
-            portalId: 145687733,
-            formId: "69790463-8651-4e07-ad64-45f9c23549e9",
-            fields: [
-               { name: "firstname", value: (data) => data["First name"] },
-               { name: "lastname", value: (data) => data["Last name"] },
-               { name: "phone", value: (data) => data["Phone number"] },
-               { name: "email", value: (data) => data["Email"] },
-               { name: "message", value: (data) => data["Message"] },
-            ],
+               portalId: 145687733,
+               formId: "69790463-8651-4e07-ad64-45f9c23549e9",
+               fields: [
+                  { name: "firstname", value: (data) => data["First name"] },
+                  { name: "lastname", value: (data) => data["Last name"] },
+                  { name: "phone", value: (data) => data["Phone number"] },
+                  { name: "email", value: (data) => data["Email"] },
+                  { name: "message", value: (data) => data["Message"] },
+               ],
             };
             const { portalId, formId, fields } = hubspot;
             let url = `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`;
@@ -3621,16 +3641,16 @@ const mainScript = () => {
                const result = fields.map((field) => {
                   const { name, value } = field;
                   if (!value) {
-                  return {
-                     name,
-                     value: data[name] || "",
-                  };
+                     return {
+                        name,
+                        value: data[name] || "",
+                     };
                   } else {
-                  const getValue = value(data);
-                  return {
-                     name,
-                     value: getValue || "",
-                  };
+                     const getValue = value(data);
+                     return {
+                        name,
+                        value: getValue || "",
+                     };
                   }
                });
                return result;
@@ -3758,28 +3778,30 @@ const mainScript = () => {
                width: `${displayedWidth}px`,
                height: `${displayedHeight}px`,
             });
-            if(viewport.w > 991) {
+            if (viewport.w > 991) {
                header.registerDependent($(this.el).find('.about-hero-main'));
             }
             let imageItems = $(this.el).find('.about-hero-item');
             imageItems.each((index, item) => {
-               if(index == 0) return;
-               if(index == imageItems.length - 1) {
-                  timeline.to(imageItems.not(imageItems.last()), {autoAlpha: 0, duration: 1});
-                  timeline.fromTo($(item).find('svg path').eq(0), {autoAlpha: 0}, {autoAlpha: 1, duration: 1.2, onStart: () => {
-                     $(this.el).find('.about-hero-bg').addClass('active');
-                     this.updateGrind();
-                  }}, '<=.3');
-                  timeline.fromTo($(item).find('svg path').eq(1), {'fill': 'transparent'}, {'fill': '#282828', duration: 1}, '<=.4');
+               if (index == 0) return;
+               if (index == imageItems.length - 1) {
+                  timeline.to(imageItems.not(imageItems.last()), { autoAlpha: 0, duration: 1 });
+                  timeline.fromTo($(item).find('svg path').eq(0), { autoAlpha: 0 }, {
+                     autoAlpha: 1, duration: 1.2, onStart: () => {
+                        $(this.el).find('.about-hero-bg').addClass('active');
+                        this.updateGrind();
+                     }
+                  }, '<=.3');
+                  timeline.fromTo($(item).find('svg path').eq(1), { 'fill': 'transparent' }, { 'fill': '#282828', duration: 1 }, '<=.4');
                } else {
                   timeline
-                     .fromTo(item, {autoAlpha: 0}, {autoAlpha: 1, duration: .8})
-                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-brand'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.05})
-                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), {autoAlpha: 0}, {autoAlpha: 1, duration: .6, stagger: 0.1}, '<=.4');
+                     .fromTo(item, { autoAlpha: 0 }, { autoAlpha: 1, duration: .8 })
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-brand'), { autoAlpha: 0 }, { autoAlpha: 1, duration: .6, stagger: 0.05 })
+                     .fromTo($(item).find('.about-hero-item-deco-item.item-deco-normal'), { autoAlpha: 0 }, { autoAlpha: 1, duration: .6, stagger: 0.1 }, '<=.4');
                }
             });
 
-            if(viewport.w > 991) {
+            if (viewport.w > 991) {
                let heightContent = $(this.el).find('.about-intro').outerHeight();
                let heightHero = $(this.el).find('.about-hero').height() + heightContent;
                this.tlContentFade = gsap.timeline({
@@ -3790,15 +3812,15 @@ const mainScript = () => {
                   triggerInit: this.el,
                   stagger: 0.02,
                   tweenArr: [
-                     new ScaleDash({el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left'}),
-                     new FadeIn({el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none'}),
-                     new FadeSplitText({el: $(this.el).find('.about-intro-title .heading').get(0)}),
-                     new FadeSplitText({el: $(this.el).find('.about-intro-label .txt').get(0), delay: 0.3}),
-                     new ScaleDash({el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left'}),
-                     new FadeIn({el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none', delay: 1}),
+                     new ScaleDash({ el: $(this.el).find('.about-intro-left-label .line').get(0), type: 'left' }),
+                     new FadeIn({ el: $(this.el).find('.about-intro-left-label .txt').get(0), type: 'none' }),
+                     new FadeSplitText({ el: $(this.el).find('.about-intro-title .heading').get(0) }),
+                     new FadeSplitText({ el: $(this.el).find('.about-intro-label .txt').get(0), delay: 0.3 }),
+                     new ScaleDash({ el: $(this.el).find('.about-intro-right-label .line').get(0), type: 'left' }),
+                     new FadeIn({ el: $(this.el).find('.about-intro-right-label .txt').get(0), type: 'none', delay: 1 }),
                   ]
                });
-               $(this.el).find('.about-hero').css({height: `${heightHero}px`,});
+               $(this.el).find('.about-hero').css({ height: `${heightHero}px`, });
                this.tlScrubContent = gsap.timeline({
                   scrollTrigger: {
                      trigger: this.el,
@@ -3806,14 +3828,14 @@ const mainScript = () => {
                      end: `bottom bottom`,
                      scrub: true,
                   },
-                  onUpdate: ()=>{
-                     if(this.tlScrubContent.progress() > 0.55 && this.isContentFade == false) {
+                  onUpdate: () => {
+                     if (this.tlScrubContent.progress() > 0.55 && this.isContentFade == false) {
                         this.isContentFade = true;
                         this.tlContentFade.play();
                      }
                   }
                });
-               this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'),{height: 0}, {height: `${heightContent}px`, ease: 'none'});
+               this.tlScrubContent.fromTo($(this.el).find('.about-intro-wrap'), { height: 0 }, { height: `${heightContent}px`, ease: 'none' });
             }
 
 
@@ -3821,7 +3843,7 @@ const mainScript = () => {
          updateGrind() {
             $('.about-hero-item svg path').eq(0).css('stroke-dashoffset', `${parseFloat($('.about-hero-item svg path').eq(0).css('stroke-dashoffset')) + .6}px`)
             this.animationFrameGrind = requestAnimationFrame(this.updateGrind.bind(this))
-        }
+         }
          destroy() {
             if (this.tlOnce) {
                this.tlOnce.kill();
@@ -3841,16 +3863,16 @@ const mainScript = () => {
             if (this.tlContentFade) {
                this.tlContentFade.kill();
             }
-            if(viewport.w > 991) {
+            if (viewport.w > 991) {
                header.unregisterDependent($(this.el).find('.about-hero-main'));
             }
-            if(this.animationFrameGrind) {
+            if (this.animationFrameGrind) {
                cancelAnimationFrame(this.animationFrameGrind);
             }
             this.isContentFade = false;
          }
       },
-      Story : class extends TriggerSetup {
+      Story: class extends TriggerSetup {
          constructor() {
             super();
             this.el = null;
@@ -3877,10 +3899,10 @@ const mainScript = () => {
                timeline: this.tlImage,
                triggerInit: this.el,
                tweenArr: [
-                  new ScaleInset({el: $(this.el).find('.about-story-img').get(0)}),
+                  new ScaleInset({ el: $(this.el).find('.about-story-img').get(0) }),
                ]
             });
-            new ParallaxImage({el: $(this.el).find('.about-story-img img').get(0), speed: 0.2});
+            new ParallaxImage({ el: $(this.el).find('.about-story-img img').get(0), speed: 0.2 });
             this.tlHeader = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.about-story-title-wrap'),
@@ -3893,8 +3915,8 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.about-story-label .txt').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.about-story-title .heading').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.about-story-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.about-story-title .heading').get(0) }),
                ]
             });
             this.tlSub = gsap.timeline({
@@ -3911,7 +3933,7 @@ const mainScript = () => {
                tweenArr: [
                   ...Array.from($(this.el).find('.about-story-sub-item')).flatMap((item, index) => {
                      return [
-                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                        new FadeSplitText({ el: $(item).find('.txt').get(0) }),
                      ]
                   }),
                ]
@@ -3928,11 +3950,11 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.06,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.about-story-mission-title .heading').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.about-story-mission-title .heading').get(0) }),
                   ...Array.from($(this.el).find('.about-story-mission-item')).flatMap((item, index) => {
                      return [
-                        new ScaleInset({el: $(item).find('.about-story-mission-item-ic').get(0)}),
-                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                        new ScaleInset({ el: $(item).find('.about-story-mission-item-ic').get(0) }),
+                        new FadeSplitText({ el: $(item).find('.txt').get(0) }),
                      ]
                   }),
                ]
@@ -3967,7 +3989,7 @@ const mainScript = () => {
          onTrigger() {
             this.interact();
          }
-         setup () {
+         setup() {
             console.log('setup team');
             $(this.el).find('.about-team-popup').remove();
             $('.body-inner').append(this.popup);
@@ -3982,9 +4004,9 @@ const mainScript = () => {
                timeline: this.tlHead,
                triggerInit: this.el,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.about-team-label .txt').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.about-team-title .heading').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.about-team-sub .txt').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.about-team-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.about-team-title .heading').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.about-team-sub .txt').get(0) }),
                ]
             });
 
@@ -4001,19 +4023,21 @@ const mainScript = () => {
                   timeline: tlItem,
                   triggerInit: this.el,
                   tweenArr: [
-                     new ScaleInset({el: $(item).find('.about-team-item-img-item:first-child').get(0), onComplete: () => {
-                        $(item).find('.about-team-item-img-wrap').addClass('hover');
-                     }}),
-                     new FadeSplitText({el: $(item).find('.about-team-item-info-title .heading').get(0), delay: 0.6}),
-                     new FadeSplitText({el: $(item).find('.about-team-item-info-sub .txt').get(0), delay: 0.8}),
-                     new ScaleInset({el: $(item).find('.about-team-item-info-ic svg').get(0)}),
+                     new ScaleInset({
+                        el: $(item).find('.about-team-item-img-item:first-child').get(0), onComplete: () => {
+                           $(item).find('.about-team-item-img-wrap').addClass('hover');
+                        }
+                     }),
+                     new FadeSplitText({ el: $(item).find('.about-team-item-info-title .heading').get(0), delay: 0.6 }),
+                     new FadeSplitText({ el: $(item).find('.about-team-item-info-sub .txt').get(0), delay: 0.8 }),
+                     new ScaleInset({ el: $(item).find('.about-team-item-info-ic svg').get(0) }),
                   ]
                });
             });
          }
          interact() {
             $(this.el).find('.about-team-item').each((index, item) => {
-               let itemOpens =$(item).find('[data-popup="open"]');
+               let itemOpens = $(item).find('[data-popup="open"]');
                itemOpens.each((index, itemOpen) => {
                   $(itemOpen).on('click', () => {
                      let parent = $(itemOpen).closest('.about-team-item');
@@ -4022,15 +4046,15 @@ const mainScript = () => {
                      smoothScroll.stop();
                      parent.find('[data-team]').each((index, item) => {
                         let nameData = $(item).attr('data-team');
-                        if(nameData == 'image') {
+                        if (nameData == 'image') {
                            let src = $(item).attr('src');
                            $(`.about-team-popup [data-team=${nameData}]`).attr('src', src);
                         }
-                        else if(nameData == 'linkin') {
+                        else if (nameData == 'linkin') {
                            let linkin = $(item).attr('href');
                            $(`.about-team-popup [data-team=${nameData}]`).attr('href', linkin);
                         }
-                        else if(nameData == 'description') {
+                        else if (nameData == 'description') {
                            let description = $(item).html();
                            $(`.about-team-popup [data-team=${nameData}]`).html(description);
                         }
@@ -4048,7 +4072,7 @@ const mainScript = () => {
                smoothScroll.start();
             });
             $('.about-team-popup').on('click', (e) => {
-               if(!$(e.target).closest('.about-team-popup-content').length) {
+               if (!$(e.target).closest('.about-team-popup-content').length) {
                   $('.about-team-popup').removeClass('active');
                   $('.main').removeClass('has-popup');
                   smoothScroll.start();
@@ -4061,7 +4085,7 @@ const mainScript = () => {
             if (this.tlHead) {
                this.tlHead.kill();
             }
-            if(this.tlItems.length > 0) {
+            if (this.tlItems.length > 0) {
                this.tlItems.forEach(tl => tl.kill());
             }
          }
@@ -4083,7 +4107,7 @@ const mainScript = () => {
          setup() {
             $(this.el).find('.about-inves-logo-list').each((index, item) => {
                let direction = $(item).attr('data-direction');
-               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'),$(item), 40, direction);
+               let marqueeLogo = new Marquee($(item).closest('.about-inves-logo-cms'), $(item), 40, direction);
                marqueeLogo.setup();
                marqueeLogo.play();
             });
@@ -4098,9 +4122,9 @@ const mainScript = () => {
                timeline: this.tlContent,
                triggerInit: this.el,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.about-inves-label .txt').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.about-inves-title .heading').get(0)}),
-                  new ScaleInset({el: $(this.el).find('.about-inves-img-inner').get(0)})
+                  new FadeSplitText({ el: $(this.el).find('.about-inves-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.about-inves-title .heading').get(0) }),
+                  new ScaleInset({ el: $(this.el).find('.about-inves-img-inner').get(0) })
                ]
             });
             this.tlPartner = gsap.timeline({
@@ -4111,18 +4135,18 @@ const mainScript = () => {
                }
             });
             new MasterTimeline({
-               timeline:this.tlPartner,
+               timeline: this.tlPartner,
                triggerInit: this.el,
                tweenArr: [
                   ...Array.from($(this.el).find('.about-inves-logo-label')).flatMap((item, index) => {
-                    return [
-                      new FadeSplitText({ el: $(item).find('.txt').get(0), delay: index * .3}),
-                    ]
+                     return [
+                        new FadeSplitText({ el: $(item).find('.txt').get(0), delay: index * .3 }),
+                     ]
                   }),
                   ...Array.from($(this.el).find('.about-inves-logo-inner')).flatMap((item, index) => {
-                    return [
-                      new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
-                    ]
+                     return [
+                        new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
+                     ]
                   })
                ]
             });
@@ -4170,7 +4194,7 @@ const mainScript = () => {
                pagination: {
                   el: '.about-job-pagi',
                   type: "fraction",
-                },
+               },
             });
             this.tlHead = gsap.timeline({
                scrollTrigger: {
@@ -4184,9 +4208,9 @@ const mainScript = () => {
                timeline: this.tlHead,
                triggerInit: this.el,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.about-job-label .txt').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.about-job-title .heading').get(0), delay: 0.2}),
-                  new FadeSplitText({el: $(this.el).find('.about-job-sub .txt').get(0), delay: 0.4}),
+                  new FadeSplitText({ el: $(this.el).find('.about-job-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.about-job-title .heading').get(0), delay: 0.2 }),
+                  new FadeSplitText({ el: $(this.el).find('.about-job-sub .txt').get(0), delay: 0.4 }),
                ]
             });
             this.tlList = gsap.timeline({
@@ -4200,30 +4224,30 @@ const mainScript = () => {
                timeline: this.tlList,
                triggerInit: this.el,
                tweenArr: [
-                  new FadeIn({el: $(this.el).find('.about-job-pagi').get(0), type: 'bottom'}),
+                  new FadeIn({ el: $(this.el).find('.about-job-pagi').get(0), type: 'bottom' }),
                   ...Array.from($(this.el).find('.about-job-navi-item')).flatMap((item, index) => {
-                    return [
-                      new ScaleInset({el: $(item).find('svg').get(0)}),
-                    ]
+                     return [
+                        new ScaleInset({ el: $(item).find('svg').get(0) }),
+                     ]
                   }),
                ]
             });
             $(this.el).find('.about-job-item').each((index, item) => {
-               if(index <= 1) {
+               if (index <= 1) {
                   new MasterTimeline({
                      timeline: this.tlList,
                      tweenArr: [
-                        new FadeIn({el: $(item).find('.about-job-item-title .heading').get(0), type: 'bottom', delay: index * 0.2}),
+                        new FadeIn({ el: $(item).find('.about-job-item-title .heading').get(0), type: 'bottom', delay: index * 0.2 }),
                         ...Array.from($(item).find('.about-job-item-info-item')).flatMap((item, index) => {
                            return [
                               ...Array.from($(item).find('.txt')).flatMap((item, index) => {
                                  return [
-                                    new FadeIn({el: $(item).get(0), type: 'bottom', delay: index * 0.1}),
+                                    new FadeIn({ el: $(item).get(0), type: 'bottom', delay: index * 0.1 }),
                                  ]
                               }),
                            ]
                         }),
-                        new FadeIn({el: $(item).find('.about-job-item-link').get(0), type: 'bottom', delay: index * 0.2}),
+                        new FadeIn({ el: $(item).find('.about-job-item-link').get(0), type: 'bottom', delay: index * 0.2 }),
                      ]
                   });
                }
@@ -4305,19 +4329,19 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.schedule-hero-title .heading').get(0)}),
-                  new ScaleDash({el: $(this.el).find('.schedule-hero-title .line').get(0), type: 'left'}),
-                  new FadeSplitText({el: $(this.el).find('.schedule-hero-sub .txt').get(0)}),
+                  new FadeSplitText({ el: $(this.el).find('.schedule-hero-title .heading').get(0) }),
+                  new ScaleDash({ el: $(this.el).find('.schedule-hero-title .line').get(0), type: 'left' }),
+                  new FadeSplitText({ el: $(this.el).find('.schedule-hero-sub .txt').get(0) }),
                   ...Array.from($(this.el).find('.schedule-hero-desc')).flatMap((item, index) => {
                      return [
-                        new FadeIn({el: $(item).find('.schedule-hero-desc-ic')}),
-                        new FadeSplitText({el: $(item).find('.txt').get(0)}),
+                        new FadeIn({ el: $(item).find('.schedule-hero-desc-ic') }),
+                        new FadeSplitText({ el: $(item).find('.txt').get(0) }),
                      ]
                   }),
-                  new ScaleDash({el: $(this.el).find('.schedule-hero-email .line').get(0), type: 'left'}),
-                  new FadeSplitText({el: $(this.el).find('.schedule-hero-email-label .txt').get(0)}),
-                  new FadeSplitText({el: $(this.el).find('.schedule-hero-email-title .heading').get(0)}),
-                  new FadeIn({el: $(this.el).find('.meetings-iframe-container'), type: 'bottom'}),
+                  new ScaleDash({ el: $(this.el).find('.schedule-hero-email .line').get(0), type: 'left' }),
+                  new FadeSplitText({ el: $(this.el).find('.schedule-hero-email-label .txt').get(0) }),
+                  new FadeSplitText({ el: $(this.el).find('.schedule-hero-email-title .heading').get(0) }),
+                  new FadeIn({ el: $(this.el).find('.meetings-iframe-container'), type: 'bottom' }),
                ]
             });
          }
@@ -4406,7 +4430,7 @@ const mainScript = () => {
                }, 300);
             });
             $(this.el).find('.resource-hero-search-form').on('keypress', (e) => {
-               if(e.which === 13 ) {
+               if (e.which === 13) {
                   e.preventDefault();
                   this.searchItem($(this.el).find('.resource-hero-search-input').val());
                }
@@ -4422,8 +4446,8 @@ const mainScript = () => {
                triggerInit: this.el,
                stagger: 0.02,
                tweenArr: [
-                  new FadeSplitText({el: $(this.el).find('.resource-hero-title .heading').get(0)}),
-                  new FadeIn({el: $(this.el).find('.resource-hero-search-input-group input'), type: 'bottom'}),
+                  new FadeSplitText({ el: $(this.el).find('.resource-hero-title .heading').get(0) }),
+                  new FadeIn({ el: $(this.el).find('.resource-hero-search-input-group input'), type: 'bottom' }),
                ]
             });
             $(this.el).find('.resource-hero-item').each((index, item) => {
@@ -4433,15 +4457,17 @@ const mainScript = () => {
                   timeline: timeline,
                   stagger: 0.02,
                   tweenArr: [
-                     new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-                     new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
-                     new FadeIn({el: $(item).find('.resource-hero-item-img-inner').get(0), type: 'bottom'}),
-                     new ScaleDash({el: $(item).find('.resource-hero-item-img .line').get(0), type: 'top'}),
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true, onComplete: () => {
-                        multiLineText($(item).find('.resource-hero-item-title '));
-                     }}),
-                     new FadeSplitText({el: $(item).find('.resource-hero-item-sub .txt ')}),
-                     new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
+                     new FadeIn({ el: $(item).find('.resource-hero-item-date .txt') }),
+                     new ScaleDash({ el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left' }),
+                     new FadeIn({ el: $(item).find('.resource-hero-item-img-inner').get(0), type: 'bottom' }),
+                     new ScaleDash({ el: $(item).find('.resource-hero-item-img .line').get(0), type: 'top' }),
+                     new FadeSplitText({
+                        el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true, onComplete: () => {
+                           multiLineText($(item).find('.resource-hero-item-title '));
+                        }
+                     }),
+                     new FadeSplitText({ el: $(item).find('.resource-hero-item-sub .txt ') }),
+                     new FadeIn({ el: $(item).find('.resource-hero-item-link'), type: 'bottom' })
                   ]
                });
             });
@@ -4457,38 +4483,38 @@ const mainScript = () => {
                triggerInit: this.el,
                timeline: timelineLoadMore,
                tweenArr: [
-                  new FadeIn({el: $(this.el).find('.resource-hero-load'), type: 'bottom'}),
+                  new FadeIn({ el: $(this.el).find('.resource-hero-load'), type: 'bottom' }),
                ]
             });
          }
-         searchItem(val){
+         searchItem(val) {
             $(this.el).find('.resource-hero-load-wrap').hide();
             $(this.el).find('.resource-hero-item').hide();
             $(this.el).find('.resource-hero-item').each((index, item) => {
                let title = $(item).find('.resource-hero-item-title .heading');
-               if(title.attr('data-title')?.toLowerCase().includes(val?.toLowerCase())){
+               if (title.attr('data-title')?.toLowerCase().includes(val?.toLowerCase())) {
                   $(item).show();
                   this.activeItem($(item));
                }
             });
          }
-         activeItem(item){
+         activeItem(item) {
             ScrollTrigger.refresh();
-            new FadeIn({el: $(item).find('.resource-hero-item-img-inner').get(0)}),
-            new ScaleLine({el: $(item).find('.line-vertical'), type: 'top'}),
-            new FadeIn({el: $(item).find('.resource-hero-item-date .txt')}),
-            new ScaleDash({el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left'}),
-            new FadeSplitText({el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true}),
-            new FadeIn({el: $(item).find('.resource-hero-item-sub .txt ')}),
-            new FadeIn({el: $(item).find('.resource-hero-item-link'), type: 'bottom'})
+            new FadeIn({ el: $(item).find('.resource-hero-item-img-inner').get(0) }),
+               new ScaleLine({ el: $(item).find('.line-vertical'), type: 'top' }),
+               new FadeIn({ el: $(item).find('.resource-hero-item-date .txt') }),
+               new ScaleDash({ el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left' }),
+               new FadeSplitText({ el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true }),
+               new FadeIn({ el: $(item).find('.resource-hero-item-sub .txt ') }),
+               new FadeIn({ el: $(item).find('.resource-hero-item-link'), type: 'bottom' })
          }
          initLoadMore() {
-            if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
+            if (this.numberItem >= $(this.el).find('.resource-hero-item').length) {
                $(this.el).find('.resource-hero-load-wrap').hide();
             }
             else {
                $(this.el).find('.resource-hero-item').each((index, item) => {
-                  if(index >= this.numberItem) {
+                  if (index >= this.numberItem) {
                      $(item).hide();
                      $(item).addClass('hide');
                   }
@@ -4498,16 +4524,16 @@ const mainScript = () => {
          loadMore() {
             this.numberItem += 3;
             $(this.el).find('.resource-hero-item').each((index, item) => {
-               if(index < this.numberItem) {
+               if (index < this.numberItem) {
                   $(item).addClass('active');
                }
             });
             $(this.el).find('.resource-hero-item.hide.active').each((index, item) => {
-                  $(item).show();
-                  this.activeItem($(item));
-                  $(item).removeClass('hide');
+               $(item).show();
+               this.activeItem($(item));
+               $(item).removeClass('hide');
             });
-            if(this.numberItem >= $(this.el).find('.resource-hero-item').length) {
+            if (this.numberItem >= $(this.el).find('.resource-hero-item').length) {
                $(this.el).find('.resource-hero-load-wrap').hide();
             }
          }
@@ -4521,7 +4547,7 @@ const mainScript = () => {
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
             }
-            if(this.masterTimeline) {
+            if (this.masterTimeline) {
                this.masterTimeline.destroy();
             }
             this.numberItem = 3;
@@ -4585,109 +4611,109 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
-           const $el = $(this.el);
-           const $tableList = $el.find('.policy-hero-table-list');
-           const $tableHead = $el.find('.policy-hero-table-head');
-           const $contentRichtext = $el.find('.policy-hero-content-richtext');
-           const $contentHeaders = $contentRichtext.find('h2');
-           const isMobile = viewport.w < 992;
-           const SCROLL_OFFSET = -100;
+            const $el = $(this.el);
+            const $tableList = $el.find('.policy-hero-table-list');
+            const $tableHead = $el.find('.policy-hero-table-head');
+            const $contentRichtext = $el.find('.policy-hero-content-richtext');
+            const $contentHeaders = $contentRichtext.find('h2');
+            const isMobile = viewport.w < 992;
+            const SCROLL_OFFSET = -100;
 
-           $tableList.on('click', '.policy-hero-table-item', (e) => {
-            e.preventDefault();
-            const $currentTarget = $(e.currentTarget);
-
-            if(isMobile) {
-               $tableList.slideUp();
-               $tableHead.toggleClass('active');
-            }
-
-            const dataTitle = $currentTarget.attr('data-title');
-            const content = $contentRichtext.find(`h2[data-title="${dataTitle}"]`)[0];
-
-            smoothScroll.scrollTo(content, {
-               offset: SCROLL_OFFSET,
-               duration: 1,
-            });
-
-            $tableList.find('.policy-hero-table-item').removeClass('active');
-            $currentTarget.addClass('active');
-           });
-
-           smoothScroll.lenis.on('scroll', () => {
-            this.itemContentActiveCheck($contentHeaders);
-           });
-
-           if(isMobile){
-            header.registerDependent($el.find('.policy-hero-table'));
-            $tableHead.on('click', (e) => {
-               console.log(e.currentTarget);
-               $(e.currentTarget).toggleClass('active');
-               $tableList.slideToggle();
-            });
-           } else {
-            header.registerDependent($el.find('.policy-hero-table-inner'));
-           }
-
-           $contentRichtext.on('click', 'a', (e) => {
-            const link = $(e.currentTarget).attr('href');
-            if(link && link.startsWith('#')) {
+            $tableList.on('click', '.policy-hero-table-item', (e) => {
                e.preventDefault();
-               const id = link.substring(1);
-               smoothScroll.scrollTo(`#${id}`, {
+               const $currentTarget = $(e.currentTarget);
+
+               if (isMobile) {
+                  $tableList.slideUp();
+                  $tableHead.toggleClass('active');
+               }
+
+               const dataTitle = $currentTarget.attr('data-title');
+               const content = $contentRichtext.find(`h2[data-title="${dataTitle}"]`)[0];
+
+               smoothScroll.scrollTo(content, {
                   offset: SCROLL_OFFSET,
                   duration: 1,
                });
+
+               $tableList.find('.policy-hero-table-item').removeClass('active');
+               $currentTarget.addClass('active');
+            });
+
+            smoothScroll.lenis.on('scroll', () => {
+               this.itemContentActiveCheck($contentHeaders);
+            });
+
+            if (isMobile) {
+               header.registerDependent($el.find('.policy-hero-table'));
+               $tableHead.on('click', (e) => {
+                  console.log(e.currentTarget);
+                  $(e.currentTarget).toggleClass('active');
+                  $tableList.slideToggle();
+               });
+            } else {
+               header.registerDependent($el.find('.policy-hero-table-inner'));
             }
-           });
+
+            $contentRichtext.on('click', 'a', (e) => {
+               const link = $(e.currentTarget).attr('href');
+               if (link && link.startsWith('#')) {
+                  e.preventDefault();
+                  const id = link.substring(1);
+                  smoothScroll.scrollTo(`#${id}`, {
+                     offset: SCROLL_OFFSET,
+                     duration: 1,
+                  });
+               }
+            });
          }
          itemContentActiveCheck(el) {
             for (let i = 0; i < $(el).length; i++) {
-                let top = $(el).eq(i).get(0).getBoundingClientRect().top;
-                if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
-                    $('.policy-hero-table-item').removeClass('active');
-                    $('.policy-hero-table-item').eq(i).addClass('active');
-                }
-                }
-          }
-          initTableContent() {
+               let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+               if (top > 0 && top - $(el).eq(i).height() < ($(window).height() / 2)) {
+                  $('.policy-hero-table-item').removeClass('active');
+                  $('.policy-hero-table-item').eq(i).addClass('active');
+               }
+            }
+         }
+         initTableContent() {
             $(this.el).find('.policy-content-number').text($('.policy-hero-content-richtext h2').length);
             let titleLeft = $(this.el).find('.policy-hero-table-item').eq(0).clone();
             $(this.el).find('.policy-hero-table-item').remove();
             $(this.el).find('.policy-hero-content-richtext h2').each((i, el) => {
-                $(el).attr('data-title', `toch-${i}`);
-                let titleLeftClone = titleLeft.clone();
-                if(i == 0) {
-                    titleLeftClone.addClass('active');
-                }
-                let index = `${i+1}.`
-                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
-                titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(0).text(index);
-                titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(1).text(cleanText);
-                titleLeftClone.attr('data-title', `toch-${i}`);
-                $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
+               $(el).attr('data-title', `toch-${i}`);
+               let titleLeftClone = titleLeft.clone();
+               if (i == 0) {
+                  titleLeftClone.addClass('active');
+               }
+               let index = `${i + 1}.`
+               let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
+               titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(0).text(index);
+               titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(1).text(cleanText);
+               titleLeftClone.attr('data-title', `toch-${i}`);
+               $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
             })
-          }
-          async loadTermlyPolicy() {
+         }
+         async loadTermlyPolicy() {
             const id = $(this.el).find('[policyUUID]').attr('policyUUID');
             console.log(id);
             const fullUrl = `https://kestrellabs-bp.netlify.app/.netlify/functions/fetchPolicy?policyUUID=${id}`;
 
             try {
-                $(this.el).find('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
+               $(this.el).find('.policy-hero-content-richtext').html('<div class="loading">Đang tải policy...</div>');
 
-                const response = await fetch(fullUrl);      // ✅ Thêm await
-                const data = await response.json();
-                data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-                $(this.el).find('.policy-hero-content-richtext').html(data.content);
-                $(this.el).find('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
-                $(this.el).find('.policy-hero-content-richtext *').removeAttr('align');
-                this.initTableContent();
+               const response = await fetch(fullUrl);      // ✅ Thêm await
+               const data = await response.json();
+               data.content = data.content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+               $(this.el).find('.policy-hero-content-richtext').html(data.content);
+               $(this.el).find('.policy-hero-content-richtext *:not(table):not(table, section)').removeAttr('style');
+               $(this.el).find('.policy-hero-content-richtext *').removeAttr('align');
+               this.initTableContent();
             } catch (error) {
-                console.error('Error loading policy:', error);
-                $(this.el).find('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
+               console.error('Error loading policy:', error);
+               $(this.el).find('.policy-hero-content-richtext').html('<p class="error">Không thể tải policy. Vui lòng thử lại sau.</p>');
             }
-        }
+         }
          destroy() {
             if (this.tlOnce) {
                this.tlOnce.kill();
@@ -4698,7 +4724,7 @@ const mainScript = () => {
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
             }
-            if(viewport.w < 992){
+            if (viewport.w < 992) {
                header.unregisterDependent($(this.el).find('.policy-hero-table'));
             }
             else {
@@ -4764,106 +4790,106 @@ const mainScript = () => {
          }
          interact() {
             this.actionShare();
-           $(this.el).find('.tp-resource-hero-table-item').on('click', (e) => {
-            let dataTitle = $(e.currentTarget).closest('.tp-resource-hero-table-item').attr('data-title');
-            let content = $(this.el).find(`.tp-resource-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
-            let offset = -100;
-            smoothScroll.scrollTo(content, {
-               offset: offset,
-               duration: 1,
+            $(this.el).find('.tp-resource-hero-table-item').on('click', (e) => {
+               let dataTitle = $(e.currentTarget).closest('.tp-resource-hero-table-item').attr('data-title');
+               let content = $(this.el).find(`.tp-resource-hero-content-richtext h2[data-title="${dataTitle}"]`).get(0);
+               let offset = -100;
+               smoothScroll.scrollTo(content, {
+                  offset: offset,
+                  duration: 1,
+               });
+               $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
+               $(e.currentTarget).closest('.tp-resource-hero-table-item').addClass('active');
             });
-            $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
-            $(e.currentTarget).closest('.tp-resource-hero-table-item').addClass('active');
-           });
-           smoothScroll.lenis.on('scroll', () => {
-            this.itemContentActiveCheck($(this.el).find('.tp-resource-hero-content-richtext h2'));
-           });
-           if(viewport.w < 992){
-            header.registerDependent($(this.el).find('.tp-resource-hero-table'));
-            $(this.el).find('.tp-resource-hero-table-head').on('click', (e) => {
-               $(e.currentTarget).closest('.tp-resource-hero-table-head').toggleClass('active');
-               $(this.el).find('.tp-resource-hero-table-list').slideToggle();
+            smoothScroll.lenis.on('scroll', () => {
+               this.itemContentActiveCheck($(this.el).find('.tp-resource-hero-content-richtext h2'));
             });
-           }
-           else {
-            let heightTableContentWrap = $(this.el).find('.tp-resource-hero-table-content-wrap').outerHeight();
-            let heightTableContent = $(this.el).find('.tp-resource-hero-table-content').outerHeight();
-            if(heightTableContent > heightTableContentWrap) {
-               $(this.el).find('.tp-resource-hero-table-content-wrap').attr('data-lenis-prevent', 'true');
+            if (viewport.w < 992) {
+               header.registerDependent($(this.el).find('.tp-resource-hero-table'));
+               $(this.el).find('.tp-resource-hero-table-head').on('click', (e) => {
+                  $(e.currentTarget).closest('.tp-resource-hero-table-head').toggleClass('active');
+                  $(this.el).find('.tp-resource-hero-table-list').slideToggle();
+               });
             }
-            header.registerDependent($(this.el).find('.tp-resource-hero-table-inner'));
-           }
+            else {
+               let heightTableContentWrap = $(this.el).find('.tp-resource-hero-table-content-wrap').outerHeight();
+               let heightTableContent = $(this.el).find('.tp-resource-hero-table-content').outerHeight();
+               if (heightTableContent > heightTableContentWrap) {
+                  $(this.el).find('.tp-resource-hero-table-content-wrap').attr('data-lenis-prevent', 'true');
+               }
+               header.registerDependent($(this.el).find('.tp-resource-hero-table-inner'));
+            }
          }
          itemContentActiveCheck(el) {
             for (let i = 0; i < $(el).length; i++) {
-                let top = $(el).eq(i).get(0).getBoundingClientRect().top;
-                if (top > 0 && top - $(el).eq(i).height() < ($(window).height()/2)) {
-                    $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
-                    $(this.el).find('.tp-resource-hero-table-item').eq(i).addClass('active');
-                }
-                }
-          }
-          initTableContent() {
+               let top = $(el).eq(i).get(0).getBoundingClientRect().top;
+               if (top > 0 && top - $(el).eq(i).height() < ($(window).height() / 2)) {
+                  $(this.el).find('.tp-resource-hero-table-item').removeClass('active');
+                  $(this.el).find('.tp-resource-hero-table-item').eq(i).addClass('active');
+               }
+            }
+         }
+         initTableContent() {
             $(this.el).find('.tp-resource-content-number').text($('.tp-resource-hero-content-richtext h2').length);
             let titleLeft = $(this.el).find('.tp-resource-hero-table-item').eq(0).clone();
             $(this.el).find('.tp-resource-hero-table-item').remove();
             $(this.el).find('.tp-resource-hero-content-richtext h2').each((i, el) => {
-                $(el).attr('data-title', `toch-${i}`);
-                let titleLeftClone = titleLeft.clone();
-                if(i == 0) {
-                    titleLeftClone.addClass('active');
-                }
-                let index = `${i+1}.`
-                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
-                titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(0).text(index);
-                titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(1).text(cleanText);
-                titleLeftClone.attr('data-title', `toch-${i}`);
-                $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
+               $(el).attr('data-title', `toch-${i}`);
+               let titleLeftClone = titleLeft.clone();
+               if (i == 0) {
+                  titleLeftClone.addClass('active');
+               }
+               let index = `${i + 1}.`
+               let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
+               titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(0).text(index);
+               titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(1).text(cleanText);
+               titleLeftClone.attr('data-title', `toch-${i}`);
+               $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
             })
-          }
+         }
          actionShare() {
-            $(this.el).find('.tp-resource-hero-share-item').on('click', function(e) {
-                e.preventDefault();
-                const shareType = $(this).data('share');
-                const currentURL = window.location.href;
-                const pageTitle = document.title;
-                const encodedURL = encodeURIComponent(currentURL);
-                const encodedTitle = encodeURIComponent(pageTitle);
-                switch(shareType) {
-                    case 'fb':
-                        const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodedURL}`;
-                        window.open(facebookURL, 'facebook-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
-                        break;
+            $(this.el).find('.tp-resource-hero-share-item').on('click', function (e) {
+               e.preventDefault();
+               const shareType = $(this).data('share');
+               const currentURL = window.location.href;
+               const pageTitle = document.title;
+               const encodedURL = encodeURIComponent(currentURL);
+               const encodedTitle = encodeURIComponent(pageTitle);
+               switch (shareType) {
+                  case 'fb':
+                     const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodedURL}`;
+                     window.open(facebookURL, 'facebook-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                     break;
 
-                    case 'x':
-                        const twitterURL = `https://twitter.com/intent/tweet?url=${encodedURL}&text=${encodedTitle}`;
-                        window.open(twitterURL, 'twitter-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
-                        break;
+                  case 'x':
+                     const twitterURL = `https://twitter.com/intent/tweet?url=${encodedURL}&text=${encodedTitle}`;
+                     window.open(twitterURL, 'twitter-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                     break;
 
-                    case 'linkin':
-                        const linkedinURL = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedURL}`;
-                        window.open(linkedinURL, 'linkedin-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
-                        break;
+                  case 'linkin':
+                     const linkedinURL = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedURL}`;
+                     window.open(linkedinURL, 'linkedin-share', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                     break;
 
-                    case 'link':
-                        if (navigator.clipboard && window.isSecureContext) {
-                            navigator.clipboard.writeText(currentURL).then(function() {
-                                showCopySuccess();
-                            }).catch(function(err) {
-                                console.error('Failed to copy: ', err);
-                                fallbackCopyTextToClipboard(currentURL);
-                            });
-                        } else {
-                            fallbackCopyTextToClipboard(currentURL);
-                        }
-                        break;
+                  case 'link':
+                     if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(currentURL).then(function () {
+                           showCopySuccess();
+                        }).catch(function (err) {
+                           console.error('Failed to copy: ', err);
+                           fallbackCopyTextToClipboard(currentURL);
+                        });
+                     } else {
+                        fallbackCopyTextToClipboard(currentURL);
+                     }
+                     break;
 
-                    default:
-                        console.warn('Unknown share type:', shareType);
-                }
+                  default:
+                     console.warn('Unknown share type:', shareType);
+               }
             });
 
-           function fallbackCopyTextToClipboard(text) {
+            function fallbackCopyTextToClipboard(text) {
                const textArea = document.createElement("textarea");
                textArea.value = text;
                textArea.style.position = "fixed";
@@ -4874,19 +4900,19 @@ const mainScript = () => {
                textArea.select();
 
                try {
-                   const successful = document.execCommand('copy');
-                   if (successful) {
-                       showCopySuccess();
-                   } else {
-                       showCopyError();
-                   }
+                  const successful = document.execCommand('copy');
+                  if (successful) {
+                     showCopySuccess();
+                  } else {
+                     showCopyError();
+                  }
                } catch (err) {
-                   console.error('Fallback: Unable to copy', err);
-                   showCopyError();
+                  console.error('Fallback: Unable to copy', err);
+                  showCopyError();
                }
 
                document.body.removeChild(textArea);
-           }
+            }
 
             function showCopySuccess() {
                showNotification('Copied to clipboard', 'success');
@@ -4897,8 +4923,8 @@ const mainScript = () => {
             function showNotification(message, type) {
                $(this.el).find('.tp-resource-hero-share-item-tooltip .txt').text(message)
                $(this.el).find('.tp-resource-hero-share-item-tooltip').addClass('active');
-               setTimeout(function() {
-               $(this.el).find('.tp-resource-hero-share-item-tooltip').removeClass('active')
+               setTimeout(function () {
+                  $(this.el).find('.tp-resource-hero-share-item-tooltip').removeClass('active')
                }, 1000);
             }
          }
@@ -4912,7 +4938,7 @@ const mainScript = () => {
             if (this.tlTriggerEnter) {
                this.tlTriggerEnter.kill();
             }
-            if(viewport.w < 992){
+            if (viewport.w < 992) {
                header.unregisterDependent($(this.el).find('.tp-resource-hero-table'));
             }
             else {
@@ -4933,7 +4959,7 @@ const mainScript = () => {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
 
-          // Bind event handlers
+         // Bind event handlers
          this.boundSetupHandler = this.setupHandler.bind(this);
          this.boundOncePlayHandler = this.oncePlayHandler.bind(this);
          this.boundEnterPlayHandler = this.enterPlayHandler.bind(this);
@@ -5042,7 +5068,7 @@ const mainScript = () => {
       tpResource: new TpResourcePageManager(TpResourcePage),
    };
 
-	const SCRIPT = {
+   const SCRIPT = {
       home: {
          namespace: 'home',
          afterEnter(data) {
@@ -5124,7 +5150,7 @@ const mainScript = () => {
             PageManagerRegistry.tpResource.destroy(data);
          }
       }
-	};
+   };
 
    let namespace = $('.main-inner').attr('data-barba-namespace');
    const VIEWS = Object.values(SCRIPT);
