@@ -1705,6 +1705,7 @@ const mainScript = () => {
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'center' }),
                   new FadeIn({ el: $(this.el).find('.home-hero .bg-border'), type: 'none' }),
+                  ...Array.from($(this.el).find('.home-hero-img-deco')).map((item, index) => new FadeIn({ el: item, type: 'none', delay: index * 0.1 })),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-sub .txt:first-child').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-btn .txt').get(0) }),
@@ -1720,6 +1721,10 @@ const mainScript = () => {
                this.drawBox();
                this.drawImageContainer();
             }
+            $(this.el).find('.home-hero-img-deco').on('click', function () {
+               console.log('click');
+               $(this).removeClass('active');
+            })
          }
          initRuler() {
             this.rulerWrap = $(this.el).find('.home-hero-img-wrap').get(0);
@@ -1871,6 +1876,7 @@ const mainScript = () => {
                this.box.style.left = `${mouse.mousePos.x}px`;
                this.box.style.border = '1px solid #F15534';
                this.box.style.zIndex = '100';
+               this.box.style.pointerEvents = 'none';
                this.rulerWrap.prepend(this.box);
                return this.box;
             }
@@ -2378,13 +2384,17 @@ const mainScript = () => {
                if ($(this).parent().hasClass('active')) {
                   $(this).parent().removeClass('active');
                   let dataNumber = $(this).attr('data-number');
-                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('active')
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('active');
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-label-wrap').slideUp();
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideUp();
                } else {
                   $('.home-map-number-wrap').removeClass('active');
                   $('.home-map-main-img-sub-hover').removeClass('active');
                   $(this).parent().addClass('active');
                   let dataNumber = $(this).attr('data-number');
-                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active')
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active');
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-label-wrap').slideDown();
+                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideDown();
                }
             });
             $(document).on('click', (e) => {
