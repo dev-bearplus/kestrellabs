@@ -2392,6 +2392,9 @@ const mainScript = () => {
                   $('.home-map-main-img-sub-hover').removeClass('active');
                   $(this).parent().addClass('active');
                   let dataNumber = $(this).attr('data-number');
+                  $('.home-map-main-img-sub-hover').removeClass('active');
+                  $('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-label-wrap').slideUp();
+                  $('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active');
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-label-wrap').slideDown();
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideDown();
@@ -2401,6 +2404,8 @@ const mainScript = () => {
                if (!$(e.target).closest('.home-map-number').length) {
                   $(this.el).find('.home-map-number-wrap').removeClass('active');
                   $(this.el).find('.home-map-main-img-sub-hover').removeClass('active');
+                  $(this.el).find('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-label-wrap').slideUp();
+                  $(this.el).find('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
                }
             });
          }
