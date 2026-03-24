@@ -766,6 +766,7 @@ const mainScript = () => {
          data.next.container.dispatchEvent(event);
       }
       triggerOnceSetup(data) {
+         updateImageMask(data);
          console.log('Global Hooks: onceSetup');
          this.triggerEvent("onceSetup", data);
       }
@@ -776,6 +777,7 @@ const mainScript = () => {
       }
       triggerEnterSetup(data) {
          console.log('Global Hooks: enterSetup');
+         updateImageMask(data);
          this.triggerEvent("enterSetup", data);
          requestAnimationFrame(() => window.scrollY === 0 && window.scrollTo(0, 1))
       }
@@ -1395,8 +1397,9 @@ const mainScript = () => {
       }
    }
    const footer = new Footer();
-   function updateImageMask() {
-      $('.ink-mask').each(function (index) {
+   function updateImageMask(data) {
+      console.log('updateImageMask', data);
+      $(data.next.container).find('.ink-mask').each(function (index) {
          const $maskContainer = $(this);
          const maskId = 'inkCircleMask-' + index;
          const $mask = $maskContainer.find('mask');
@@ -1405,7 +1408,6 @@ const mainScript = () => {
          $image.attr('mask', 'url(#' + maskId + ')');
       });
    }
-   updateImageMask();
    class InkTransition {
       DOM = {
          el: null,
@@ -5252,6 +5254,7 @@ const mainScript = () => {
                scrollTop(PageManagerRegistry[namespace]?.initOnce?.(data));
                resetScroll(data);
                header.init(data);
+
             },
             async leave(data) {
                await pageTrans.play(data);
