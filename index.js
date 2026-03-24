@@ -1486,7 +1486,7 @@ const mainScript = () => {
             this.DOM.mask.setAttribute('d', newD);
          }
 
-         const scaleVal = 1 + 0.01 * progress;
+         // const scaleVal = 1 + 0.01 * progress;
          // this.DOM.image.setAttribute('transform', `scale(${scaleVal})`);
       }
    }
@@ -1562,6 +1562,7 @@ const mainScript = () => {
       }
       init(data) {
          this.el = data.next.container.querySelector('.product-faq-wrap');
+         initNumberIndex($(this.el).find('.product-faq-item'));
          this.onTrigger();
       }
       onTrigger() {
@@ -1597,6 +1598,7 @@ const mainScript = () => {
             stagger: 0.05,
             tweenArr: [
                ...Array.from($(this.el).find('.product-faq-item')).flatMap((item, index) => [
+                  new FadeSplitText({ el: $(item).find('.product-faq-item-num .txt').get(0) }),
                   new FadeSplitText({ el: $(item).find('.product-faq-item-title .heading').get(0) }),
                   new FadeIn({ el: $(item).find('.product-faq-item-ic') }),
                   new ScaleDash({ el: $(item).find('.line-dash').get(0), type: 'left' }),
@@ -2936,6 +2938,31 @@ const mainScript = () => {
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.product-hero-wrap');
+            this.swiper = new Swiper($(this.el).find('.product-hero-logo').get(0), {
+               slidesPerView: 4,
+               spaceBetween: 0,
+               speed: 600,
+               loop: true,
+               slidesPerGroup: 1,
+               autoplay: {
+                  delay: 3000,
+                  disableOnInteraction: false,
+               },
+               breakpoints: {
+                  768: {
+                     slidesPerView: 5,
+                  },
+                  992: {
+                     slidesPerView: 'auto',
+                     slidesPerGroup: 2,
+                  }
+               },
+
+               navigation: {
+                  nextEl: $(this.el).find('.product-hero-logo-control.item-next').get(0),
+                  prevEl: $(this.el).find('.product-hero-logo-control.item-prev').get(0),
+               }
+            });
             if (mode === 'once') {
                this.setupOnce(data);
             } else if (mode === 'enter') {
@@ -2993,11 +3020,13 @@ const mainScript = () => {
                   new FadeSplitText({ el: $(this.el).find('.product-hero-sub .txt').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.product-hero-btn .txt:first-child').get(0), delay: .1 }),
                   new ScaleInset({ el: $(this.el).find('.product-hero-btn .btn-bg-ic:first-child').get(0), delay: .3 }),
+                  new FadeIn({ el: $(this.el).find('.product-hero-logo-control.item-prev').get(0), delay: .5 }),
                   new FadeIn({
-                     el: $(this.el).find('.about-inves-logo-cms').get(0), delay: .5, onStart: () => {
+                     el: $(this.el).find('.product-hero-logo').get(0), delay: .5, onStart: () => {
                         this.partnerMarquee.play();
                      }
                   }),
+                  new FadeIn({ el: $(this.el).find('.product-hero-logo-control.item-next').get(0), delay: .5 }),
                ].filter(Boolean)
             });
          }
@@ -3157,6 +3186,16 @@ const mainScript = () => {
                         }
                      },
                   )
+                  .to($(item).find('.product-key-main-tab-title'),
+                     {
+                        keyframes: {
+                           scale: [.95, 1, .95],
+                           rotateX: [-10, 0, 10],
+                           '--transform-y-origin': ['0%', '100%', '0%'],
+                           color: ['#b4b4b0', '#F15534', '#b4b4b0'],
+                        }
+                     }, '<0'
+                  )
             });
          }
          interact() {
@@ -3201,6 +3240,7 @@ const mainScript = () => {
             this.interact();
          }
          setup(data) {
+            new InkTransition($(this.el).find('.product-how-img').get(0));
             this.tlHead = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.product-how-head').get(0),
@@ -3221,7 +3261,7 @@ const mainScript = () => {
             this.tlImage = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.product-how-img-wrap').get(0),
-                  start: 'top+=65% bottom',
+                  start: 'top+=75% bottom',
                   once: true
                },
             });
@@ -3232,7 +3272,6 @@ const mainScript = () => {
                   new ScaleInset({ el: $(this.el).find('.product-how-img').get(0) }),
                ]
             });
-            new ParallaxImage({ el: $(this.el).find('.product-how-img img').get(0) });
          }
          animationScrub() {
             this.tl = gsap.timeline({
@@ -3261,6 +3300,7 @@ const mainScript = () => {
                      new FadeSplitText({ el: $(item).find('.product-how-item-sub .txt').get(0), delay: .3 }),
                   ]
                });
+
                const tween = this.tl.to(item, {
                   yPercent: 0, stagger: 1, onUpdate: (self) => {
                      if (tween.progress() > 0.1) {
