@@ -823,13 +823,12 @@ const mainScript = () => {
             });
          }
          this.tlLeave
-            .fromTo('html', { '--trans-percent': '0%' }, { '--trans-percent': '50%', duration: .6, ease: 'power1.inOut' })
-            .fromTo('html', { '--size--line': '0' }, { '--size--line': this.widthLineVertical, duration: .6, ease: 'power1.inOut' }, '<=0')
+            .fromTo('html', { '--trans-percent': '0%', '--mask-percent': '0%' }, { '--trans-percent': '50%', '--mask-percent': '50%', duration: .6, ease: 'power1.in' })
+            .fromTo('html', { '--size--line': '0' }, { '--size--line': this.widthLineVertical, duration: .6, ease: 'power1.in' }, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
          this.tlEnter = gsap.timeline({
-            delay: 0.4,
             onStart: () => {
                this.enterSetup(data);
                setTimeout(() => {
@@ -838,8 +837,8 @@ const mainScript = () => {
             },
          })
          this.tlEnter
-            .fromTo('html', { '--trans-percent': '50%' }, { '--trans-percent': '0%', duration: .6, ease: 'power1.out' })
-            .fromTo('html', { '--size-line': this.widthLineVertical }, { '--size-line': 0, duration: .6, ease: 'power1.inOut' }, '<=0')
+            .fromTo('html', { '--trans-percent': '50%', '--mask-percent': '50%' }, { '--trans-percent': '100%', '--mask-percent': '0%', duration: .6, ease: 'power1.out' })
+            .fromTo('html', { '--size-line': this.widthLineVertical }, { '--size-line': 0, duration: .6, ease: 'power1.out' }, '<=0')
          return this.tlEnter;
       }
       async play(data) {
