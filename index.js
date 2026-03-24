@@ -4091,6 +4091,28 @@ const mainScript = () => {
             });
          }
          interact() {
+            $(this.el).find('.about-team-item').on('mouseenter', (e) => {
+               let rItem = $(e.currentTarget).closest('.about-team-item').find('.about-team-item-img').width() + 100;
+               gsap.to($(e.currentTarget).closest('.about-team-item').find('mask circle'), {
+                  attr: {
+                     'r': rItem
+                  },
+                  duration: 0.8,
+                  ease: 'power2.out'
+               });
+
+            });
+            $(this.el).find('.about-team-item').on('mouseleave', (e) => {
+               // let dataValue = $(e.currentTarget).closest('.about-team-item').find('mask path').attr('data-value-init');
+               // set data-value-final to mask path attribute d transition
+               gsap.to($(e.currentTarget).closest('.about-team-item').find('mask circle'), {
+                  attr: {
+                     'r': 0
+                  },
+                  duration: 0.8,
+                  ease: 'power2.out'
+               });
+            });
             $(this.el).find('.about-team-item').each((index, item) => {
                let itemOpens = $(item).find('[data-popup="open"]');
                itemOpens.each((index, itemOpen) => {
