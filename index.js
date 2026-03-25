@@ -2977,8 +2977,6 @@ const mainScript = () => {
             }
             else return;
             this.animMarquee();
-
-            this.chatTimers.push(startChatTimer);
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -2993,6 +2991,7 @@ const mainScript = () => {
                this.chatTimers = this.chatTimers.filter(t => t !== startChatTimer);
                this.initChat();
             }, 2000);
+            this.chatTimers.push(startChatTimer);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
@@ -3015,7 +3014,7 @@ const mainScript = () => {
                this.chatTimers = this.chatTimers.filter(t => t !== startChatTimer);
                this.initChat();
             }, 500);
-
+            this.chatTimers.push(startChatTimer);
          }
          playOnce() {
             this.tlOnce.play();
@@ -3168,13 +3167,18 @@ const mainScript = () => {
                   await delay(5000);
                   if (this.isDestroyed) break;
 
-                  await new Promise(resolve => {
-                     gsap.to(this.chatBody, {
-                        opacity: 0,
-                        duration: 0.8,
-                        onComplete: resolve
+                  const messagesToFade = this.chatBody.children();
+                  if (messagesToFade.length > 0) {
+                     await new Promise(resolve => {
+                        gsap.to(messagesToFade, {
+                           opacity: 0,
+                           x: (i, target) => $(target).hasClass('item-user') ? -20 : 20,
+                           duration: 0.5,
+                           stagger: 0.1,
+                           onComplete: resolve
+                        });
                      });
-                  });
+                  }
                }
             }
             simulateChat();
