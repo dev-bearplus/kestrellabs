@@ -2936,9 +2936,11 @@ const mainScript = () => {
             this.tlOnce = null;
             this.tlEnter = null;
             this.tlTriggerEnter = null;
+            this.isChatStarted = false;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.product-hero-wrap');
+            this.prepareChat();
             this.swiper = new Swiper($(this.el).find('.product-hero-logo').get(0), {
                slidesPerView: 4,
                spaceBetween: 0,
@@ -2978,6 +2980,9 @@ const mainScript = () => {
                delay: .3,
                onStart: () => {
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
+               },
+               onComplete: () => {
+                  this.initChat();
                }
             })
             this.animationReveal(this.tlOnce);
@@ -2996,13 +3001,131 @@ const mainScript = () => {
                   once: true,
                   onEnter: () => this.tlEnter.play(),
                   onEnterBack: () => this.tlEnter.play(),
-                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden')
+                  onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden'),
+                  onComplete: () => {
+                     this.initChat();
+                  }
                }
             })
 
          }
          playOnce() {
             this.tlOnce.play();
+         }
+         prepareChat() {
+            if (!$(this.el).find('.product-hero-chat-body').length) return;
+            this.chatBody = $(this.el).find('.product-hero-chat-body');
+            this.typingIndicator = $(this.el).find('#typing-indicator');
+            this.inputPlaceholder = $(this.el).find('#chat-input-placeholder ');
+            this.defaultPlaceholder = "Ask me anything about your design...";
+
+            this.myTemplate = this.chatBody.find('.item-my-chat').clone();
+            this.userTemplate = this.chatBody.find('.item-user').clone();
+
+            [this.myTemplate, this.userTemplate].forEach($el => {
+               $el.css({
+                  'opacity': '0',
+                  'transform': 'translateY(10px)',
+                  'display': 'flex'
+               });
+            });
+
+            this.chatBody.empty();
+         }
+         initChat() {
+            if (this.isChatStarted || !this.chatBody) return;
+            this.isChatStarted = true;
+
+            const messages = [
+               { role: 'me', text: 'How much tempered glass is required?', time: '2:38:56 PM' },
+               { role: 'user', text: 'Approx. 300–400 m² of tempered glass (window + railing estimate for a mid-sized building).' },
+               { role: 'me', text: 'What about the structural steel?', time: '2:40:12 PM' },
+               { role: 'user', text: 'For a building of this scale, you would need approximately 150-200 tonnes of structural steel, depending on the load requirements.' },
+               { role: 'me', text: 'That sounds reasonable. Can you export the estimate?', time: '2:41:05 PM' },
+               { role: 'user', text: 'Certainly! I am preparing the data sheet for you now...' }
+            ];
+            const scrollToBottom = () => {
+               this.chatBody.animate({
+                  scrollTop: this.chatBody[0].scrollHeight
+               }, 500);
+            }
+            const typeInPlaceholder = (text) => {
+               return new Promise(resolve => {
+                  this.inputPlaceholder.addClass('fill');
+                  const txtElement = this.inputPlaceholder.find('.txt');
+                  txtElement.html(`<span class="typed-text"></span><span class="chat-cursor" style="opacity: 1;">|</span>`);
+                  const typedSpan = txtElement.find('.typed-text');
+                  const cursorSpan = txtElement.find('.chat-cursor');
+
+                  const blink = gsap.to(cursorSpan, { opacity: 0, repeat: -1, yoyo: true, duration: 0.4, ease: "steps(1)" });
+
+                  let i = 0;
+                  const speed = 50;
+                  const timer = setInterval(() => {
+                     if (i < text.length) {
+                        typedSpan.text(text.substring(0, i + 1));
+                        i++;
+                     } else {
+                        clearInterval(timer);
+                        setTimeout(() => {
+                           blink.kill();
+                           this.inputPlaceholder.removeClass('fill');
+                           resolve();
+                        }, 1000);
+                     }
+                  }, speed);
+               });
+            }
+
+            const appendMessage = (role, text, time) => {
+               let $msg;
+               if (role === 'me') {
+                  $msg = this.myTemplate.clone();
+                  $msg.find('.product-hero-chat-message-title .txt').text(text);
+                  $msg.find('.product-hero-chat-message-time .txt').text(time || new Date().toLocaleTimeString());
+               } else {
+                  $msg = this.userTemplate.clone();
+                  $msg.find('.product-hero-chat-message-title .txt').text(text);
+               }
+
+               this.chatBody.append($msg);
+
+               setTimeout(() => {
+                  $msg.css({
+                     'opacity': '1',
+                     'transform': 'translateY(0)'
+                  });
+                  scrollToBottom();
+               }, 50);
+            }
+
+            const simulateChat = async () => {
+               while (true) {
+                  this.chatBody.empty();
+                  this.inputPlaceholder.find('.txt').text(this.defaultPlaceholder);
+
+                  for (const msg of messages) {
+                     await new Promise(resolve => setTimeout(resolve, 1500));
+
+                     if (msg.role === 'me') {
+                        await typeInPlaceholder(msg.text);
+                        this.inputPlaceholder.find('.txt').text(this.defaultPlaceholder);
+                     } else if (msg.role === 'user') {
+                        this.typingIndicator.fadeIn(200);
+                        scrollToBottom();
+                        const typingDuration = 1000 + Math.random() * 2000;
+                        await new Promise(resolve => setTimeout(resolve, typingDuration));
+                        this.typingIndicator.fadeOut(200);
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                     }
+
+                     appendMessage(msg.role, msg.text, msg.time);
+                  }
+
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+               }
+            }
+            simulateChat();
          }
          playEnter() {
             this.tlEnter.play();
@@ -3016,6 +3139,7 @@ const mainScript = () => {
                stagger: 0.05,
                tweenArr: [
                   new ScaleInset({ el: $(this.el).find('.product-hero-img-inner').get(0) }),
+                  new FadeIn({ el: $(this.el).find('.product-hero-chat').get(0), type: 'left' }),
                   new FadeSplitText({ el: $(this.el).find('.product-hero-label .txt').get(0), delay: 0 }),
                   new FadeSplitText({ el: $(this.el).find('.product-hero-title .heading').get(0) }),
                   new FadeSplitText({ el: $(this.el).find('.product-hero-sub .txt').get(0) }),
