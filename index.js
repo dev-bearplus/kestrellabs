@@ -3041,8 +3041,12 @@ const mainScript = () => {
                { role: 'user', text: 'Approx. 300–400 m² of tempered glass (window + railing estimate for a mid-sized building).' },
                { role: 'me', text: 'What about the structural steel?', time: '2:40:12 PM' },
                { role: 'user', text: 'For a building of this scale, you would need approximately 150-200 tonnes of structural steel, depending on the load requirements.' },
-               { role: 'me', text: 'That sounds reasonable. Can you export the estimate?', time: '2:41:05 PM' },
-               { role: 'user', text: 'Certainly! I am preparing the data sheet for you now...' }
+               { role: 'me', text: 'What is the projected energy efficiency rating?', time: '2:41:45 PM' },
+               { role: 'user', text: 'By utilizing low-e coating on the glass, we can achieve a LEED Gold rating with a 25% reduction in thermal gain.' },
+               { role: 'me', text: 'Can we also optimize the HVAC load?', time: '2:42:30 PM' },
+               { role: 'user', text: 'Yes. Reducing the Solar Heat Gain Coefficient (SHGC) to 0.25 will decrease the cooling load by roughly 15%.' },
+               { role: 'me', text: 'That sounds like a significant improvement. Can you export the full estimate?', time: '2:43:15 PM' },
+               { role: 'user', text: 'Certainly! I am preparing the data sheet with structural and thermal analysis now...' }
             ];
             const scrollToBottom = () => {
                this.chatBody.animate({
