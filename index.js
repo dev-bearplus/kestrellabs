@@ -2937,9 +2937,13 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.isChatStarted = false;
+            this.chatTimers = [];
+            this.isDestroyed = false;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.product-hero-wrap');
+            this.isChatStarted = false;
+            this.isDestroyed = false;
             this.prepareChat();
             this.swiper = new Swiper($(this.el).find('.product-hero-logo').get(0), {
                slidesPerView: 4,
@@ -2973,9 +2977,8 @@ const mainScript = () => {
             }
             else return;
             this.animMarquee();
-            setTimeout(() => {
-               this.initChat();
-            }, 2200);
+
+            this.chatTimers.push(startChatTimer);
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -2986,6 +2989,10 @@ const mainScript = () => {
                },
             })
             this.animationReveal(this.tlOnce);
+            const startChatTimer = setTimeout(() => {
+               this.chatTimers = this.chatTimers.filter(t => t !== startChatTimer);
+               this.initChat();
+            }, 2000);
          }
          setupEnter(data) {
             this.tlEnter = gsap.timeline({
@@ -3004,6 +3011,10 @@ const mainScript = () => {
                   onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden'),
                }
             })
+            const startChatTimer = setTimeout(() => {
+               this.chatTimers = this.chatTimers.filter(t => t !== startChatTimer);
+               this.initChat();
+            }, 500);
 
          }
          playOnce() {
@@ -3030,8 +3041,18 @@ const mainScript = () => {
             this.chatBody.empty();
          }
          initChat() {
-            if (this.isChatStarted || !this.chatBody) return;
+            if (this.isChatStarted || !this.chatBody || this.isDestroyed) return;
             this.isChatStarted = true;
+
+            const delay = (ms) => {
+               return new Promise(resolve => {
+                  const t = setTimeout(() => {
+                     this.chatTimers = this.chatTimers.filter(timer => timer !== t);
+                     resolve();
+                  }, ms);
+                  this.chatTimers.push(t);
+               });
+            }
 
             const messages = [
                { role: 'me', text: 'How much tempered glass is required?', time: '2:38:56 PM' },
@@ -3046,12 +3067,14 @@ const mainScript = () => {
                { role: 'user', text: 'Certainly! I am preparing the data sheet with structural and thermal analysis now...' }
             ];
             const scrollToBottom = () => {
+               if (this.isDestroyed) return;
                this.chatBody.animate({
                   scrollTop: this.chatBody[0].scrollHeight
                }, 500);
             }
             const typeInPlaceholder = (text) => {
                return new Promise(resolve => {
+                  if (this.isDestroyed) return resolve();
                   this.inputPlaceholder.addClass('fill');
                   const txtElement = this.inputPlaceholder.find('.txt');
                   txtElement.html(`<span class="typed-text"></span><span class="chat-cursor" style="opacity: 1;">|</span>`);
@@ -3061,24 +3084,33 @@ const mainScript = () => {
                   const blink = gsap.to(cursorSpan, { opacity: 0, repeat: -1, yoyo: true, duration: 0.4, ease: "steps(1)" });
 
                   let i = 0;
-                  const speed = 50;
+                  const speed = 70;
                   const timer = setInterval(() => {
+                     if (this.isDestroyed) {
+                        clearInterval(timer);
+                        blink.kill();
+                        return resolve();
+                     }
                      if (i < text.length) {
                         typedSpan.text(text.substring(0, i + 1));
                         i++;
                      } else {
                         clearInterval(timer);
-                        setTimeout(() => {
+                        const finishTimer = setTimeout(() => {
+                           this.chatTimers = this.chatTimers.filter(t => t !== finishTimer);
                            blink.kill();
                            this.inputPlaceholder.removeClass('fill');
                            resolve();
                         }, 1000);
+                        this.chatTimers.push(finishTimer);
                      }
                   }, speed);
+                  this.chatTimers.push(timer);
                });
             }
 
             const appendMessage = (role, text, time) => {
+               if (this.isDestroyed) return;
                let $msg;
                if (role === 'me') {
                   $msg = this.myTemplate.clone();
@@ -3091,39 +3123,58 @@ const mainScript = () => {
 
                this.chatBody.append($msg);
 
-               setTimeout(() => {
+               const revealTimer = setTimeout(() => {
+                  this.chatTimers = this.chatTimers.filter(t => t !== revealTimer);
+                  if (this.isDestroyed) return;
                   $msg.css({
                      'opacity': '1',
                      'transform': 'translateY(0)'
                   });
                   scrollToBottom();
-               }, 50);
+               }, 200);
+               this.chatTimers.push(revealTimer);
             }
 
             const simulateChat = async () => {
-               while (true) {
+               while (!this.isDestroyed) {
                   this.chatBody.empty();
+                  this.chatBody.css('opacity', '1');
                   this.inputPlaceholder.find('.txt').text(this.defaultPlaceholder);
 
                   for (const msg of messages) {
-                     await new Promise(resolve => setTimeout(resolve, 1500));
+                     if (this.isDestroyed) break;
+                     await delay(1500);
+                     if (this.isDestroyed) break;
 
                      if (msg.role === 'me') {
                         await typeInPlaceholder(msg.text);
+                        if (this.isDestroyed) break;
                         this.inputPlaceholder.find('.txt').text(this.defaultPlaceholder);
                      } else if (msg.role === 'user') {
                         this.typingIndicator.fadeIn(200);
                         scrollToBottom();
                         const typingDuration = 1000 + Math.random() * 2000;
-                        await new Promise(resolve => setTimeout(resolve, typingDuration));
+                        await delay(typingDuration);
+                        if (this.isDestroyed) break;
                         this.typingIndicator.fadeOut(200);
-                        await new Promise(resolve => setTimeout(resolve, 200));
+                        await delay(200);
                      }
 
+                     if (this.isDestroyed) break;
                      appendMessage(msg.role, msg.text, msg.time);
                   }
 
-                  await new Promise(resolve => setTimeout(resolve, 5000));
+                  if (this.isDestroyed) break;
+                  await delay(5000);
+                  if (this.isDestroyed) break;
+
+                  await new Promise(resolve => {
+                     gsap.to(this.chatBody, {
+                        opacity: 0,
+                        duration: 0.8,
+                        onComplete: resolve
+                     });
+                  });
                }
             }
             simulateChat();
@@ -3163,6 +3214,15 @@ const mainScript = () => {
             this.partnerMarquee.setup();
          }
          destroy() {
+            this.isDestroyed = true;
+            this.isChatStarted = false;
+            if (this.chatTimers && this.chatTimers.length > 0) {
+               this.chatTimers.forEach(t => {
+                  clearTimeout(t);
+                  clearInterval(t);
+               });
+               this.chatTimers = [];
+            }
             if (this.tlOnce) {
                this.tlOnce.kill();
             }
