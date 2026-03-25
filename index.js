@@ -825,8 +825,8 @@ const mainScript = () => {
             });
          }
          this.tlLeave
-            .fromTo('html', { '--trans-percent': '0%', '--mask-percent': '0%' }, { '--trans-percent': '50%', '--mask-percent': '50%', duration: .6, ease: 'power1.in' })
-            .fromTo('html', { '--size--line': '0' }, { '--size--line': this.widthLineVertical, duration: .6, ease: 'power1.in' }, '<=0')
+            .fromTo('html', { '--trans-percent': '0%', '--mask-percent': '0%' }, { '--trans-percent': '50%', '--mask-percent': '50%', duration: .8, ease: 'power1.in' })
+            .fromTo('html', { '--size--line': '0' }, { '--size--line': this.widthLineVertical, duration: .8, ease: 'power1.in' }, '<=0')
          return this.tlLeave;
       }
       enterAnim(data) {
@@ -839,8 +839,8 @@ const mainScript = () => {
             },
          })
          this.tlEnter
-            .fromTo('html', { '--trans-percent': '50%', '--mask-percent': '50%' }, { '--trans-percent': '100%', '--mask-percent': '0%', duration: .6, ease: 'power1.out' })
-            .fromTo('html', { '--size-line': this.widthLineVertical }, { '--size-line': 0, duration: .6, ease: 'power1.out' }, '<=0')
+            .fromTo('html', { '--trans-percent': '50%', '--mask-percent': '50%' }, { '--trans-percent': '100%', '--mask-percent': '0%', duration: .8, ease: 'power1.out' })
+            .fromTo('html', { '--size-line': this.widthLineVertical }, { '--size-line': 0, duration: .8, ease: 'power1.out' }, '<=0')
          return this.tlEnter;
       }
       async play(data) {
@@ -3429,6 +3429,7 @@ const mainScript = () => {
                      new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-label .txt').get(0) }),
                      new ScaleDash({ el: $(item).find('.line-dash').get(0), type: 'left' }),
                      new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-title .heading').get(0) }),
+                     new FadeSplitText({ el: $(item).find('.pricing-hero-package-item-unit-txt .txt').get(0) }),
                      new FadeIn({ el: $(item).find('.pricing-hero-package-btn') }),
                      ...(viewport.w < 768 ? Array.from($(item).find('.pricing-hero-table.only-mob')).flatMap((table, index) => [
                         new FadeIn({ el: $(table).get(0) }),
@@ -4092,28 +4093,6 @@ const mainScript = () => {
             });
          }
          interact() {
-            $(this.el).find('.about-team-item').on('mouseenter', (e) => {
-               let rItem = $(e.currentTarget).closest('.about-team-item').find('.about-team-item-img').width() + 100;
-               gsap.to($(e.currentTarget).closest('.about-team-item').find('mask circle'), {
-                  attr: {
-                     'r': rItem
-                  },
-                  duration: 0.8,
-                  ease: 'power2.out'
-               });
-
-            });
-            $(this.el).find('.about-team-item').on('mouseleave', (e) => {
-               // let dataValue = $(e.currentTarget).closest('.about-team-item').find('mask path').attr('data-value-init');
-               // set data-value-final to mask path attribute d transition
-               gsap.to($(e.currentTarget).closest('.about-team-item').find('mask circle'), {
-                  attr: {
-                     'r': 0
-                  },
-                  duration: 0.8,
-                  ease: 'power2.out'
-               });
-            });
             $(this.el).find('.about-team-item').each((index, item) => {
                let itemOpens = $(item).find('[data-popup="open"]');
                itemOpens.each((index, itemOpen) => {
