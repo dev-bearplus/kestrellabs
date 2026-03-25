@@ -2973,6 +2973,9 @@ const mainScript = () => {
             }
             else return;
             this.animMarquee();
+            setTimeout(() => {
+               this.initChat();
+            }, 2200);
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -2981,9 +2984,6 @@ const mainScript = () => {
                onStart: () => {
                   $('[data-init-hidden]').removeAttr('data-init-hidden');
                },
-               onComplete: () => {
-                  this.initChat();
-               }
             })
             this.animationReveal(this.tlOnce);
          }
@@ -3002,9 +3002,6 @@ const mainScript = () => {
                   onEnter: () => this.tlEnter.play(),
                   onEnterBack: () => this.tlEnter.play(),
                   onStart: () => $('[data-init-hidden]').removeAttr('data-init-hidden'),
-                  onComplete: () => {
-                     this.initChat();
-                  }
                }
             })
 
