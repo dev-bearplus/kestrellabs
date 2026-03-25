@@ -3054,6 +3054,8 @@ const mainScript = () => {
             super();
             this.el = null;
             this.tlHead = null;
+            this.activeIndex = -1;
+            this.scrubTriggers = [];
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-key-wrap');
@@ -3071,6 +3073,8 @@ const mainScript = () => {
             initNumberIndex($(this.el).find('.product-key-main-title-inner'));
             initNumberIndex($(this.el).find('.product-key-main-left-main'));
             initNumberIndex($(this.el).find('.product-key-tab-item'));
+            let widthTabItem = $(this.el).find('.product-key-tab-item').outerWidth();
+            $(this.el).find('.product-key-tab-bg-active').css('width', widthTabItem + 'px');
          }
          animationReveal() {
             this.tlHead = gsap.timeline({
@@ -3108,7 +3112,20 @@ const mainScript = () => {
                ]
             });
          }
+         activeTab(index) {
+            if (this.activeIndex === index) return;
+            this.activeIndex = index;
+            const tabItems = $(this.el).find('.product-key-tab-item');
+            const container = $(this.el).find('.product-key-tab-cms');
+            tabItems.removeClass('active');
+            tabItems.eq(index).addClass('active');
+            const itemActive = tabItems.eq(index);
+            const left = itemActive.offset().left - container.offset().left + 1;
+            const width = itemActive.outerWidth();
+            gsap.to($(this.el).find('.product-key-tab-bg-active'), { left: left, width: width, duration: 0.4 });
+         }
          animationScrub() {
+            this.scrubTriggers = [];
             const tabItems = $(this.el).find('.product-key-tab-item');
             tabItems.eq(0).addClass('active');
             const items = $(this.el).find('.product-key-main-title-inner');
@@ -3131,32 +3148,21 @@ const mainScript = () => {
                         if (index > 0) {
                            const progress = self.progress;
                            let prevItemClip = 1 - progress;
-
-                           gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress * 100}% 0)` });
+                           gsap.set(itemImgPrev, { 'clip-path': `inset(0 0 ${progress * 100}% 0)`, 'opacity': 1 - progress });
                            gsap.set(itemImgCurrent, { 'clip-path': `inset(${prevItemClip * 100}% 0 0 0)` });
                            gsap.set(itemLabelPrev, { 'clip-path': `inset(0 0 ${progress * 100}% 0)` });
                            gsap.set(itemLabelCurrent, { 'clip-path': `inset(${prevItemClip * 100}% 0 0 0)` });
-                           if (progress > limitProgress) {
-                              tabItems.removeClass('active');
-                              tabItems.eq(index).addClass('active');
+                           const targetIndex = progress > limitProgress ? index : index - 1;
+                           if (targetIndex >= 0) {
+                              this.activeTab(targetIndex);
                            }
                         }
                      },
-                     // onEnter: () => {
-                     //    console.log('start');
-                     //    tabItems.removeClass('active');
-                     //    tabItems.eq(index).addClass('active');
-                     // },
                      onEnterBack: (self) => {
-                        tabItems.removeClass('active');
-                        viewport.w < 768 ? tabItems.eq(index - 1).addClass('active') : tabItems.eq(index).addClass('active');
                      },
-                     // onLeaveEnter: () => {
-                     //    tabItems.removeClass('active');
-                     //    tabItems.eq(index).addClass('active');
-                     // }
                   }
                });
+               this.scrubTriggers.push(tlItem.scrollTrigger);
                tlItem.to(item, { opacity: 1, y: 0, stagger: 0.1 });
 
                const tlParallax = gsap.timeline({
@@ -3201,11 +3207,14 @@ const mainScript = () => {
          }
          interact() {
             let heightTab = $('.product-key-tab-wrap').height();
-            $('.product-key-tab-item').on('click', function () {
-               const index = $(this).index();
-               $('.product-key-tab-item').removeClass('active');
-               $(this).addClass('active');
-               smoothScroll.scrollTo($('.product-key-main-title-inner').eq(index).get(0), { duration: 1, offset: index > 0 ? heightTab * -1 : heightTab * -1 - 1 });
+            $('.product-key-tab-item').on('click', (e) => {
+               const index = $(e.currentTarget).closest('.product-key-tab-item').index();
+               const st = this.scrubTriggers[index];
+               if (st) {
+                  const targetPos = st.start + (st.end - st.start) * 0.9999999;
+                  smoothScroll.scrollTo(targetPos, { duration: 1 });
+               }
+               // this.activeTab(index);
             });
          }
          swiperCard() {
