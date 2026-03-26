@@ -1719,14 +1719,14 @@ const mainScript = () => {
 
          }
          interact() {
-            this.initRuler();
-            this.drawBox();
-            this.drawImageContainer();
-            // if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
-            // }
-            // else {
-            //    $('.home-hero-ruler, .home-hero-img-interact-wrap').hide();
-            // }
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
+               this.initRuler();
+               this.drawBox();
+               this.drawImageContainer();
+            }
+            else {
+               $('.home-hero-ruler, .home-hero-img-interact-wrap').hide();
+            }
             $(this.el).find('.home-hero-img-deco').on('click', function () {
                console.log('click');
                $(this).removeClass('active');
