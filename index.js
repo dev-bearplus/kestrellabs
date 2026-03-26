@@ -1708,7 +1708,7 @@ const mainScript = () => {
                tweenArr: [
                   new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'center' }),
                   new FadeIn({ el: $(this.el).find('.home-hero .bg-border'), type: 'none' }),
-                  ...Array.from($(this.el).find('.home-hero-img-deco')).map((item, index) => new FadeIn({ el: item, type: 'none', delay: index * 0.1 })),
+                  ...Array.from($(this.el).find('.home-hero-img-deco-bg')).map((item, index) => new FadeIn({ el: item, type: 'none', delay: index * 0.1 })),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-sub .txt:first-child').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-btn .txt').get(0) }),
@@ -1719,11 +1719,14 @@ const mainScript = () => {
 
          }
          interact() {
-            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
-               this.initRuler();
-               this.drawBox();
-               this.drawImageContainer();
-            }
+            this.initRuler();
+            this.drawBox();
+            this.drawImageContainer();
+            // if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
+            // }
+            // else {
+            //    $('.home-hero-ruler, .home-hero-img-interact-wrap').hide();
+            // }
             $(this.el).find('.home-hero-img-deco').on('click', function () {
                console.log('click');
                $(this).removeClass('active');
@@ -2017,15 +2020,39 @@ const mainScript = () => {
 
             const containerRatio = containerWidth / containerHeight;
             const imgRatio = imgNaturalWidth / imgNaturalHeight;
-
             let displayedWidth, displayedHeight;
 
             if (imgRatio > containerRatio) {
                displayedWidth = containerWidth;
                displayedHeight = containerWidth / imgRatio;
+               $('.home-hero-img-deco').each((index, item) => {
+                  let scale = displayedWidth / imgNaturalWidth;
+                  let widthDecoWillScale = $(item).width() * (1 - scale) / 2;
+                  let heightDecoWillScale = $(item).height() * (1 - scale) / 2;
+                  let left = displayedWidth * parseFloat($(item).css('left')) / containerWidth;
+                  let bottom = displayedHeight * parseFloat($(item).css('bottom')) / containerHeight;
+                  $(item).css({
+                     transform: `scale(${scale})`,
+                     left: `${widthDecoWillScale + left}px`,
+                     bottom: `${heightDecoWillScale + bottom}px`,
+                  });
+               })
+
             } else {
                displayedHeight = containerHeight;
                displayedWidth = containerHeight * imgRatio;
+               $('.home-hero-img-deco').each((index, item) => {
+                  let scale = displayedHeight / imgNaturalHeight;
+                  let heightDecoWillScale = $(item).height() * (1 - scale) / 2;
+                  let widthDecoWillScale = $(item).width() * (1 - scale) / 2;
+                  let left = displayedWidth * parseFloat($(item).css('left')) / containerWidth;
+                  let bottom = displayedHeight * parseFloat($(item).css('bottom')) / containerHeight;
+                  $(item).css({
+                     transform: `scale(${scale})`,
+                     bottom: `${heightDecoWillScale + bottom}px`,
+                     left: `${left + widthDecoWillScale}px`,
+                  });
+               })
             }
             $('.home-hero-img-deco-main').css({
                width: `${displayedWidth}px`,
