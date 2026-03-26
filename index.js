@@ -2400,6 +2400,7 @@ const mainScript = () => {
             });
          }
          interact() {
+            let maxWidth = $(this.el).find('.home-map-main-img-sub-hover').css('max-width');
             $(this.el).find('.home-map-number').on('mouseenter', function () {
                $(this).parent().addClass('hover');
                let dataNumber = $(this).attr('data-number');
@@ -2415,27 +2416,29 @@ const mainScript = () => {
                   $(this).parent().removeClass('active');
                   let dataNumber = $(this).attr('data-number');
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').removeClass('active');
-                  // $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-label-wrap').slideUp();
-                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideUp();
+                  if (viewport.w > 767) {
+                     $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideUp();
+                  }
                } else {
                   $('.home-map-number-wrap').removeClass('active');
                   $('.home-map-main-img-sub-hover').removeClass('active');
                   $(this).parent().addClass('active');
                   let dataNumber = $(this).attr('data-number');
                   $('.home-map-main-img-sub-hover').removeClass('active');
-                  // $('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-label-wrap').slideUp();
-                  $('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
                   $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').addClass('active');
-                  // $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-label-wrap').slideDown();
-                  $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideDown();
+                  if (viewport.w > 767) {
+                     $('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
+                     $('.home-map-main-img-sub-hover[data-hover="' + dataNumber + '"]').find('.home-map-main-img-sub-desc-wrap').slideDown();
+                  }
                }
             });
             $(document).on('click', (e) => {
                if (!$(e.target).closest('.home-map-number').length) {
                   $(this.el).find('.home-map-number-wrap').removeClass('active');
                   $(this.el).find('.home-map-main-img-sub-hover').removeClass('active');
-                  // $(this.el).find('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-label-wrap').slideUp();
-                  $(this.el).find('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
+                  if (viewport.w > 767) {
+                     $(this.el).find('.home-map-main-img-sub-hover').find('.home-map-main-img-sub-desc-wrap').slideUp();
+                  }
                }
             });
          }
@@ -4458,6 +4461,9 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
+            if ($(this.el).find('.about-job-item').length <= 3) {
+               $(this.el).find('.about-job-control').hide();
+            }
             new Swiper('.about-job-cms', {
                slidesPerView: 'auto',
                pagination: {
@@ -4466,7 +4472,7 @@ const mainScript = () => {
                },
                breakpoints: {
                   768: {
-                     slidesPerView: 2,
+                     slidesPerView: 3,
                   },
                },
                navigation: {
