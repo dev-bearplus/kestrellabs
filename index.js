@@ -2086,12 +2086,13 @@ const mainScript = () => {
             const containerRatio = containerWidth / containerHeight;
             const imgRatio = imgNaturalWidth / imgNaturalHeight;
             let displayedWidth, displayedHeight;
+            console.log(imgNaturalWidth, imgNaturalHeight)
 
             if (imgRatio > containerRatio) {
                displayedWidth = containerWidth;
                displayedHeight = containerWidth / imgRatio;
                $('.home-hero-img-deco').each((index, item) => {
-                  let scale = displayedWidth / imgNaturalWidth;
+                  let scale = displayedHeight / $img.height();
                   let widthDecoWillScale = $(item).width() * (1 - scale) / 2;
                   let heightDecoWillScale = $(item).height() * (1 - scale) / 2;
                   let left = displayedWidth * parseFloat($(item).css('left')) / containerWidth;
@@ -2107,7 +2108,7 @@ const mainScript = () => {
                displayedHeight = containerHeight;
                displayedWidth = containerHeight * imgRatio;
                $('.home-hero-img-deco').each((index, item) => {
-                  let scale = displayedHeight / imgNaturalHeight;
+                  let scale = displayedWidth / $img.width();
                   let heightDecoWillScale = $(item).height() * (1 - scale) / 2;
                   let widthDecoWillScale = $(item).width() * (1 - scale) / 2;
                   let left = displayedWidth * parseFloat($(item).css('left')) / containerWidth;
@@ -5145,7 +5146,41 @@ const mainScript = () => {
          playOnce() {
             this.tlOnce.play();
          }
+         validForm() {
+            const debounce = (func, timeout = 100) => {
+               let timer;
+               return (...args) => {
+                  clearTimeout(timer);
+                  timer = setTimeout(() => func.apply(this, args), timeout);
+               };
+            };
+            $(this.el).find('.tp-resource-hero-form-main input').on('input', debounce((e) => {
+               const value = $(e.currentTarget).val();
+               if (emailRegex.test(value)) {
+                  $(e.currentTarget).parent().find('button[type="submit"]').addClass('active');
+               } else {
+                  $(e.currentTarget).parent().find('button[type="submit"]').removeClass('active');
+               }
+            }, 300));
+            const onSuccessForm = (formID) => {
+               // this.submitHubspot();
+               $(this.el).find('input').val('');
+               $(this.el).find('button[type="submit"]').removeClass("active");
+               $(this.el).find('.tp-resource-hero-form-desc').addClass('hidden')
+               $(this.el).find('.tp-resource-hero-form-success-txt').addClass('active')
+               setTimeout(() => {
+                  $(this.el).find('.tp-resource-hero-form-desc').removeClass('hidden')
+                  $(this.el).find('.tp-resource-hero-form-success-txt').removeClass('active')
+               }, 5000);
+            };
+
+            formSubmitEvent.init({
+               onlyWorkOnThisFormName: "TP Resource Hero Form",
+               onSuccess: () => onSuccessForm("#tp-resource-hero-form"),
+            });
+         }
          interact() {
+            this.validForm();
             this.actionShare();
             $(this.el).find('.tp-resource-hero-table-item').on('click', (e) => {
                let dataTitle = $(e.currentTarget).closest('.tp-resource-hero-table-item').attr('data-title');
@@ -5196,9 +5231,9 @@ const mainScript = () => {
                if (i == 0) {
                   titleLeftClone.addClass('active');
                }
-               let index = `${i + 1}.`
+               let index = i <= 9 ? `0${i + 1}` : i + 1;
                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
-               titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(0).text(index);
+               titleLeftClone.find('.tp-resource-hero-table-item-txt .number-text').eq(0).text(index);
                titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(1).text(cleanText);
                titleLeftClone.attr('data-title', `toch-${i}`);
                $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
