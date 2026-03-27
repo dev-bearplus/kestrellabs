@@ -616,8 +616,6 @@ const mainScript = () => {
          })
          this.tlLoadMaster = gsap.timeline({
             paused: true,
-            delay: this.isLoaded ? 0 : 1,
-            duration: 1,
             onStart: () => {
                this.onceSetup(data);
             },
@@ -627,18 +625,22 @@ const mainScript = () => {
          })
          this.rulerWrap = document.querySelector('.loading-inner');
          this.el = document.querySelector('.loading');
-         // if (isMouseInArea(this.rulerWrap, mouse.mousePos) || isInViewport(this.el)) {
-         //    if (
-         //       mouse.cacheMousePos.y !== this.lastMousePos.y ||
-         //       mouse.cacheMousePos.x !== this.lastMousePos.x ||
-         //       smoothScroll.scroller.scrollY !== this.lastScrollY) {
-         //    }
-         // }
-         requestAnimationFrame(() => {
-            this.updateTargetPosition();
-            this.animateRuler();
-         });
-         $(this.rulerWrap).find('.loading-ruler').addClass('active');
+         const $progress = $(this.el).find('.loading-progress-item.active');
+         this.tlLoadMaster
+            .set($progress, { 'clip-path': 'inset(0 100% 0 0)' })
+            .to($progress, { 'clip-path': 'inset(0 60% 0 0)', duration: 0.6, ease: 'power2.out' })
+            .to($progress, { 'clip-path': 'inset(0 35% 0 0)', duration: 0.8, ease: 'power1.inOut' })
+            .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 0.5, ease: 'none' })
+            .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.4, ease: 'power3.in' });
+         if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
+            requestAnimationFrame(() => {
+               this.updateTargetPosition();
+               this.animateRuler();
+            });
+            $(this.rulerWrap).find('.loading-ruler').addClass('active');
+         }
+
+
       }
       updateTargetPosition() {
          if (!this.rulerWrap) return;
