@@ -603,6 +603,12 @@ const mainScript = () => {
          this.isLoaded = sessionStorage.getItem('isLoaded') === 'true' ? true : false;
          this.tlLoadDone = null;
          this.tlLoadMaster = null;
+         this.el = null;
+         this.rulerWrap = null;
+         this.targetX = 0;
+         this.targetY = 0;
+         this.currentX = 0;
+         this.currentY = 0;
       }
       init(data) {
          this.tlLoading = gsap.timeline({
@@ -619,49 +625,108 @@ const mainScript = () => {
                this.oncePlay(data);
             }
          })
-         let currentViewportWidth = viewport.w - cvUnit(16, 'rem');
-         let currentViewportHeight = viewport.h - cvUnit(16, 'rem');
-         let widthHexagon = currentViewportHeight * 200 / 231;
-         let borderHeight = $('.main-deco-inner .line-horizital.top').css('height');
-         if (viewport.w > 991) {
-            this.tlLoadMaster
-               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 200, ease: 'power1.out' })
-               .to('.loading .hexagon-animated', { duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out' })
-               .to('.loading .hexagon-animated', { duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none' })
-               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in' })
-               .to('.loading .hexagon-animated', { 'width': widthHexagon, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out' })
-               .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-               .to('.loading .hexagon-animated', { 'width': currentViewportWidth, duration: .6 }, '<=0.3')
-               .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .6 }, '<=0')
-               .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .6 }, '<=0')
-               .eventCallback('onUpdate', () => {
-                  const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray') / 686;
-                  $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
-                  if (currentDashProgress >= 1) {
-                     $('.hexagon-stroke').addClass('active');
-                     $('.hexagon-animated .embed-ic').addClass('hidden')
-                  }
-               });
-         }
-         else {
-            this.tlLoadMaster
-               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 200, ease: 'power1.out' })
-               .to('.loading .hexagon-animated', { duration: 0.2, '--loading-logo-dasharray': 350, ease: 'power1.out' })
-               .to('.loading .hexagon-animated', { duration: 0.4, '--loading-logo-dasharray': 380, ease: 'none' })
-               .to('.loading .hexagon-animated', { duration: 0.3, '--loading-logo-dasharray': 686, ease: 'power2.in' })
-               .to('.loading .hexagon-animated', { 'width': currentViewportWidth, 'height': currentViewportHeight, duration: .4, delay: .2, ease: 'power1.out' })
-               .to('.loading .hexagon-number', { autoAlpha: 0, duration: .4 }, '<=0')
-               .to('.loading .hexagon-stroke', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', duration: .4 }, '<=0')
-               .to('.loading .hexagon-stroke-inner', { 'clip-path': 'polygon(50% 0%, 100% 0%, 100% 100%, 51% 100%, 0% 100%, 0% 0%)', 'inset': `${borderHeight}`, duration: .4 }, '<=0')
-               .eventCallback('onUpdate', () => {
-                  const currentDashProgress = gsap.getProperty('.loading .hexagon-animated', '--loading-logo-dasharray') / 686;
-                  $('.hexagon-number .heading').text(`${(currentDashProgress * 100).toFixed(0) < 10 ? '0' : ''}${(currentDashProgress * 100).toFixed(0)}`);
-                  if (currentDashProgress >= 1) {
-                     $('.hexagon-stroke').addClass('active');
-                     $('.hexagon-animated .embed-ic').addClass('hidden')
-                  }
-               });
-         }
+         this.rulerWrap = document.querySelector('.loading-inner');
+         this.el = document.querySelector('.loading');
+         // if (isMouseInArea(this.rulerWrap, mouse.mousePos) || isInViewport(this.el)) {
+         //    if (
+         //       mouse.cacheMousePos.y !== this.lastMousePos.y ||
+         //       mouse.cacheMousePos.x !== this.lastMousePos.x ||
+         //       smoothScroll.scroller.scrollY !== this.lastScrollY) {
+         //    }
+         // }
+         requestAnimationFrame(() => {
+            this.updateTargetPosition();
+            this.animateRuler();
+         });
+         $(this.rulerWrap).find('.loading-ruler').addClass('active');
+      }
+      updateTargetPosition() {
+         if (!this.rulerWrap) return;
+         const parentRect = this.rulerWrap.getBoundingClientRect();
+         this.targetX = mouse.mousePos.x - parentRect.left;
+         this.targetY = mouse.mousePos.y - parentRect.top;
+         requestAnimationFrame(this.updateTargetPosition.bind(this));
+      }
+      animateRuler() {
+         if (!this.rulerWrap) return;
+         // Lerp and clamp current positions
+         this.offset = cvUnit(16, 'rem');
+         this.minX = this.offset;
+         this.maxX = this.rulerWrap.offsetWidth - this.offset;
+         this.minY = this.offset;
+         this.maxY = this.rulerWrap.offsetHeight - this.offset;
+         this.currentX = Math.max(this.minX, Math.min(lerp(this.currentX, this.targetX, 0.3), this.maxX));
+         this.currentY = Math.max(this.minY, Math.min(lerp(this.currentY, this.targetY, 0.3), this.maxY));
+
+         // Cache DOM elements and dimensions
+         const $el = $('.loading-inner');
+         const $verticalLine = $el.find('.loading-ruler-line.line-vertical');
+         const $horizontalLine = $el.find('.loading-ruler-line.line-horizital');
+         const $plus = $el.find('.loading-ruler-plus');
+         const $coordi = $el.find('.loading-ruler-coordi');
+
+         const coordiWidth = $coordi.width();
+         const coordiHeight = $coordi.height();
+         const padding = cvUnit(4, 'rem');
+         const edgeThreshold = cvUnit(20, 'rem');
+
+         // Calculate normalized positions
+         const halfWidth = this.rulerWrap.offsetWidth / 2;
+         const halfHeight = this.rulerWrap.offsetHeight / 2;
+         const normalizedX = normalize(this.currentX, this.rulerWrap.offsetWidth) * halfWidth;
+         const normalizedY = normalize(this.currentY, this.rulerWrap.offsetHeight) * halfHeight;
+
+         // Edge detection
+         const isAtEdgeX = this.currentX === this.minX || this.currentX === this.maxX;
+         const isAtEdgeY = this.currentY === this.minY || this.currentY === this.maxY;
+         const isAtChangeCoordiX = this.currentX <= this.minX + coordiWidth + edgeThreshold;
+         const isAtChangeCoordiY = this.currentY >= this.maxY - coordiHeight - edgeThreshold;
+
+         // Calculate lerped values
+         const currentScale = gsap.getProperty($plus.get(0), 'scale') || 1;
+         const scale = lerp(currentScale, (isAtEdgeX || isAtEdgeY) ? 1.2 : 1, 0.08);
+
+         const currentOpacityVertical = gsap.getProperty($verticalLine.get(0), 'opacity') || .16;
+         const currentOpacityHorizontal = gsap.getProperty($horizontalLine.get(0), 'opacity') || .16;
+         const autoAlphaVertical = lerp(currentOpacityVertical, isAtEdgeX ? 0 : .16, 0.1);
+         const autoAlphaHorizontal = lerp(currentOpacityHorizontal, isAtEdgeY ? 0 : .16, 0.1);
+
+         const currentBgColor = gsap.getProperty($plus.get(0), 'backgroundColor');
+         const currentColorAlpha = parseFloat(currentBgColor.split(',')[3]) || 0;
+         const targetColorAlpha = (isAtEdgeX && isAtEdgeY) ? 1 : 0;
+         const lerpedColorAlpha = lerp(currentColorAlpha, targetColorAlpha, 0.08);
+
+         // Calculate positions with cached dimensions
+         const coordiHalfWidth = coordiWidth / 2 + padding;
+         const coordiHalfHeight = coordiHeight / 2 + padding;
+         const defaultCoordiX = normalizedX - coordiHalfWidth;
+         const coordiX = normalizedX >= 0
+            ? defaultCoordiX
+            : normalizedX + coordiHalfWidth;
+         const defaultCoordiY = isAtChangeCoordiX ? normalizedY - coordiHalfHeight : normalizedY + coordiHalfHeight;
+         const coordiY = normalizedY >= 0
+            ? normalizedY - coordiHalfHeight
+            : defaultCoordiY;
+
+         // Apply all transforms
+         gsap.set($verticalLine, { x: normalizedX, autoAlpha: autoAlphaVertical });
+         gsap.set($horizontalLine, { y: normalizedY, autoAlpha: autoAlphaHorizontal });
+         gsap.set($plus, {
+            x: normalizedX,
+            y: normalizedY,
+            scale: scale,
+            color: `rgba(241, 85, 52, ${1 - lerpedColorAlpha})`
+         });
+         gsap.set($coordi, {
+            x: isAtChangeCoordiX ? coordiX : defaultCoordiX,
+            y: isAtChangeCoordiY ? coordiY : defaultCoordiY,
+            autoAlpha: 1 - lerpedColorAlpha
+         });
+         $('[data-loading-control="x"]').text(this.targetX.toFixed(0));
+         $('[data-loading-control="y"]').text(this.targetY.toFixed(0));
+         requestAnimationFrame(() => {
+            this.animateRuler();
+         });
       }
       play(data) {
          this.tlLoadMaster.play();
@@ -1756,7 +1821,7 @@ const mainScript = () => {
                   this.updateTargetPosition();
                   this.animateRuler();
                }
-            } else { }
+            }
 
             this.lastScrollY = smoothScroll.scroller.scrollY;
             this.lastMousePos = { ...mouse.cacheMousePos };
@@ -4667,7 +4732,7 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.masterTimeline = null;
-            this.numberItem = 3;
+            this.numberItem = 4;
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".resource-hero-wrap");
@@ -4723,8 +4788,17 @@ const mainScript = () => {
                   this.searchItem($(this.el).find('.resource-hero-search-input').val());
                }
             });
-            $(this.el).find('.resource-hero-load').on('click', () => {
-               this.loadMore();
+            this.loadTrigger = ScrollTrigger.create({
+               trigger: $(this.el).find('.resource-hero-load').get(0),
+               start: "bottom bottom",
+               onEnter: () => {
+                  if ($(this.el).find('.resource-hero-load-wrap').is(':visible')) {
+                     setTimeout(() => {
+                        this.loadMore();
+                     }, 1000);
+                     setTimeout(() => ScrollTrigger.refresh(), 1200);
+                  }
+               }
             });
          }
          initContent(timeline) {
@@ -4745,17 +4819,12 @@ const mainScript = () => {
                   timeline: timeline,
                   stagger: 0.02,
                   tweenArr: [
-                     new FadeIn({ el: $(item).find('.resource-hero-item-date .txt') }),
-                     new ScaleDash({ el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left' }),
                      new FadeIn({ el: $(item).find('.resource-hero-item-img-inner').get(0), type: 'bottom' }),
-                     new ScaleDash({ el: $(item).find('.resource-hero-item-img .line').get(0), type: 'top' }),
+                     new FadeIn({ el: $(item).find('.resource-hero-item-date .txt') }),
                      new FadeSplitText({
-                        el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true, onComplete: () => {
-                           multiLineText($(item).find('.resource-hero-item-title '));
-                        }
+                        el: $(item).find('.resource-hero-item-title .heading')
                      }),
                      new FadeSplitText({ el: $(item).find('.resource-hero-item-sub .txt ') }),
-                     new FadeIn({ el: $(item).find('.resource-hero-item-link'), type: 'bottom' })
                   ]
                });
             });
@@ -4787,14 +4856,11 @@ const mainScript = () => {
             });
          }
          activeItem(item) {
-            ScrollTrigger.refresh();
             new FadeIn({ el: $(item).find('.resource-hero-item-img-inner').get(0) }),
                new ScaleLine({ el: $(item).find('.line-vertical'), type: 'top' }),
                new FadeIn({ el: $(item).find('.resource-hero-item-date .txt') }),
-               new ScaleDash({ el: $(item).find('.resource-hero-item-date .line').get(0), type: 'left' }),
-               new FadeSplitText({ el: $(item).find('.resource-hero-item-title .heading'), isDisableRevert: true }),
-               new FadeIn({ el: $(item).find('.resource-hero-item-sub .txt ') }),
-               new FadeIn({ el: $(item).find('.resource-hero-item-link'), type: 'bottom' })
+               new FadeSplitText({ el: $(item).find('.resource-hero-item-title .heading') }),
+               new FadeIn({ el: $(item).find('.resource-hero-item-sub .txt ') })
          }
          initLoadMore() {
             if (this.numberItem >= $(this.el).find('.resource-hero-item').length) {
@@ -4810,7 +4876,7 @@ const mainScript = () => {
             }
          }
          loadMore() {
-            this.numberItem += 3;
+            this.numberItem += 4;
             $(this.el).find('.resource-hero-item').each((index, item) => {
                if (index < this.numberItem) {
                   $(item).addClass('active');
@@ -4826,6 +4892,9 @@ const mainScript = () => {
             }
          }
          destroy() {
+            if (this.loadTrigger) {
+               this.loadTrigger.kill();
+            }
             if (this.tlOnce) {
                this.tlOnce.kill();
             }
