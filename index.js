@@ -680,7 +680,9 @@ const mainScript = () => {
          let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 3, ease: 'none' }, .4)
+            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': `${topCenter3D - 40}px`, duration: 2, ease: 'none' }, .4)
+            .to('.loading-3d', { 'top': cvUnit(48, 'rem'), duration: 3, ease: 'none' }, 2.4)
+            .to('.loading-3d', { 'top': cvUnit(8, 'rem'), duration: 1, ease: 'none' }, 5.4)
             // .to(lottieProxy, {
             //    progress: 1,
             //    duration: 3,
@@ -704,8 +706,8 @@ const mainScript = () => {
                   gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .6 })
                   gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .6 })
                }
-            }, 3.2)
-            .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 3.2)
+            }, 9)
+            .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 9)
          this.tlLoadMaster
             .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .1, ease: 'power3.out' }, .5)
             .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 3)
