@@ -620,7 +620,7 @@ const mainScript = () => {
                renderer: 'svg',
                loop: false,
                autoplay: false,
-               path: 'https://cdn.prod.website-files.com/69ba2931409788e5495ff1d9/69ca4e98e55c21277bf0253d_data.json'
+               path: 'https://cdn.prod.website-files.com/69ba2931409788e5495ff1d9/69ca4e98e55c21277bf0253d_314339013ddb786a396ae732ff1b52e7_data.json'
             });
 
             this.lottieAnim.addEventListener('DOMLoaded', () => {
@@ -630,7 +630,7 @@ const mainScript = () => {
       }
 
       init(data) {
-         this.initLottie();
+         // this.initLottie();
          this.tlLoading = gsap.timeline({
             paused: true
          })
@@ -674,42 +674,41 @@ const mainScript = () => {
             .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 0.4, ease: 'none' })
             .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.3, ease: 'power3.in' });
          this.tlLoadMaster
-            .to(title.words, { opacity: 1, yPercent: 0, duration: 0.4, stagger: 0.015, ease: 'power2.out' }, 0)
-            .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 2, ease: 'power2.out' }, .4)
+            .to(title.words, { opacity: 1, yPercent: 0, duration: 0.6, stagger: 0.02, ease: 'none' }, 0)
+         // .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 3, ease: 'none' }, .4)
 
          let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 2, ease: 'power2.out' }, .4)
-            .to(lottieProxy, {
-               progress: 1,
-               duration: 2,
-               ease: 'none',
-               onUpdate: () => {
-                  if (this.lottieAnim && this.lottieAnim.isLoaded) {
-                     let currentFrame = lottieProxy.progress * (this.lottieAnim.totalFrames - 1);
-                     this.lottieAnim.goToAndStop(Math.round(currentFrame), true);
-                     console.log(currentFrame);
-                  }
-               }
-            }, .4)
+            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 3, ease: 'none' }, .4)
+            // .to(lottieProxy, {
+            //    progress: 1,
+            //    duration: 3,
+            //    ease: 'none',
+            //    onUpdate: () => {
+            //       if (this.lottieAnim && this.lottieAnim.isLoaded) {
+            //          let currentFrame = lottieProxy.progress * (this.lottieAnim.totalFrames - 1);
+            //          this.lottieAnim.goToAndStop(Math.round(currentFrame), true);
+            //       }
+            //    }
+            // }, .4)
             .to('.loading-line-wrap', {
-               opacity: 1, duration: .1, ease: 'none', onComplete: () => {
+               opacity: 1, duration: 0, ease: 'none', onComplete: () => {
                   gsap.to('.loading-line-item.item-horizital.bot-center', {
-                     'bottom': `${distToBottom}px`, duration: 1.2, ease: 'power2.out', autoRound: false, delay: .5, onComplete: () => {
+                     'bottom': `${distToBottom}px`, duration: 1.2, ease: 'power2.out', autoRound: false, onComplete: () => {
                         this.oncePlay(data);
                      }
                   })
-                  gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: 1.2, ease: 'power2.out', delay: .5 })
-                  gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false, delay: .5 })
-                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .5 })
-                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .5 })
+                  gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: 1.2, ease: 'power2.out', delay: .6 })
+                  gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false, delay: .6 })
+                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .6 })
+                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .6 })
                }
-            }, 2.5)
-            .to('.loading-3d', { opacity: 0, duration: .1, ease: 'none' }, 2.5)
+            }, 3.2)
+            .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 3.2)
          this.tlLoadMaster
             .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .1, ease: 'power3.out' }, .5)
-            .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 2.4)
+            .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 3)
          if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
             requestAnimationFrame(() => {
                this.updateTargetPosition();
@@ -4319,21 +4318,7 @@ const mainScript = () => {
             this.interact();
          }
          setup() {
-            this.tlImage = gsap.timeline({
-               scrollTrigger: {
-                  trigger: $(this.el).find('.about-story-img-wrap'),
-                  start: 'top+=40% bottom',
-                  once: true,
-               }
-            });
-            new MasterTimeline({
-               timeline: this.tlImage,
-               triggerInit: this.el,
-               tweenArr: [
-                  new ScaleInset({ el: $(this.el).find('.about-story-img').get(0) }),
-               ]
-            });
-            new ParallaxImage({ el: $(this.el).find('.about-story-img img').get(0), speed: 0.2 });
+            new InkTransition($(this.el).find('.about-story-img').get(0));
             this.tlHeader = gsap.timeline({
                scrollTrigger: {
                   trigger: $(this.el).find('.about-story-title-wrap'),
@@ -4574,7 +4559,7 @@ const mainScript = () => {
                         new FadeSplitText({ el: $(item).find('.txt').get(0), delay: index * .3 }),
                      ]
                   }),
-                  ...Array.from($(this.el).find('.about-inves-logo-inner')).flatMap((item, index) => {
+                  ...Array.from($(this.el).find('.about-inves-logo-cms')).flatMap((item, index) => {
                      return [
                         new FadeIn({ el: $(item), type: 'bottom', delay: index * 0.2 }),
                      ]
