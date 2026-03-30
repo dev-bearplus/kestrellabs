@@ -609,8 +609,28 @@ const mainScript = () => {
          this.targetY = 0;
          this.currentX = 0;
          this.currentY = 0;
+         this.lottieAnim = null;
       }
+
+      initLottie() {
+         const lottieContainer = document.querySelector('.loading-3d');
+         if (lottieContainer && !this.lottieAnim) {
+            this.lottieAnim = lottie.loadAnimation({
+               container: lottieContainer,
+               renderer: 'svg',
+               loop: false,
+               autoplay: false,
+               path: 'https://cdn.prod.website-files.com/69ba2931409788e5495ff1d9/69ca4e98e55c21277bf0253d_data.json'
+            });
+
+            this.lottieAnim.addEventListener('DOMLoaded', () => {
+               console.log("Lottie loaded. Total frames: ", this.lottieAnim.totalFrames);
+            });
+         }
+      }
+
       init(data) {
+         this.initLottie();
          this.tlLoading = gsap.timeline({
             paused: true
          })
@@ -620,18 +640,66 @@ const mainScript = () => {
                this.onceSetup(data);
             },
             onComplete: () => {
-               this.oncePlay(data);
             }
          })
+         let title = new SplitText('.loading-content-title', {
+            type: 'lines, words',
+            linesClass: 'bp-line',
+            mask: 'lines'
+         });
+         //set top center of viewport for .loading-content-title
+         let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
+         let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
+         let widthInner = $('.loading-inner').width() - cvUnit(16, 'rem');
+         let heightInner = $('.loading-inner').height() - cvUnit(16, 'rem');
+         let heightHeader = $('.header').height();
+         let nameSpaceCurrent = $('.main-inner').attr('data-barba-namespace');
+         let bottomLine = $('.home-hero-content .line-horizital.top')
+         let distToBottom = 0;
+         if (bottomLine.length > 0 && nameSpaceCurrent === 'home') {
+            let rect = bottomLine[0].getBoundingClientRect();
+            distToBottom = window.innerHeight - rect.top - cvUnit(8, 'rem');
+         }
+         console.log('Distance to bottom:', distToBottom);
+         console.log(nameSpaceCurrent);
+         gsap.set('.loading-content-title', { 'top': `${topCenterTitle}px` });
+         gsap.set(title.words, { opacity: 0, yPercent: 100 });
+         gsap.set('.loading-line-wrap', { opacity: 0 })
+         gsap.set('.loading-content-sub .loading-content-sub-item-txt', { opacity: 0 });
+         gsap.set('.loading-3d', { opacity: 0 });
          this.rulerWrap = document.querySelector('.loading-inner');
          this.el = document.querySelector('.loading');
          const $progress = $(this.el).find('.loading-progress-item.active');
          this.tlLoadMaster
             .set($progress, { 'clip-path': 'inset(0 100% 0 0)' })
-            .to($progress, { 'clip-path': 'inset(0 60% 0 0)', duration: 0.6, ease: 'power2.out' })
-            .to($progress, { 'clip-path': 'inset(0 35% 0 0)', duration: 0.8, ease: 'power1.inOut' })
-            .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 0.5, ease: 'none' })
-            .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.4, ease: 'power3.in' });
+            .to($progress, { 'clip-path': 'inset(0 40% 0 0)', duration: 0.5, ease: 'power1.out' })
+            .to($progress, { 'clip-path': 'inset(0 35% 0 0)', duration: 0.3, ease: 'power1.inOut' })
+            .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 0.4, ease: 'none' })
+            .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.3, ease: 'power3.in' });
+         this.tlLoadMaster
+            .to(title.words, { opacity: 1, yPercent: 0, duration: 0.4, stagger: 0.015, ease: 'power2.out' }, 0)
+            .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 1.2, ease: 'power2.out' }, .4)
+
+         this.tlLoadMaster
+            .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
+            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 1.2, ease: 'power2.out' }, .4)
+            .to('.loading-line-wrap', {
+               opacity: 1, duration: .1, ease: 'none', onComplete: () => {
+                  gsap.to('.loading-line-item.item-horizital.bot-center', {
+                     'bottom': `${distToBottom}px`, duration: 1.2, ease: 'power2.out', autoRound: false, delay: .5, onComplete: () => {
+                        this.oncePlay(data);
+                     }
+                  })
+                  gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: 1.2, ease: 'power2.out', delay: .5 })
+                  gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false, delay: .5 })
+                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .5 })
+                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .5 })
+               }
+            }, 1.5)
+            .to('.loading-3d', { opacity: 0, duration: .1, ease: 'none' }, 1.5)
+         this.tlLoadMaster
+            .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .1, ease: 'power3.out' }, .5)
+            .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 2.4)
          if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
             requestAnimationFrame(() => {
                this.updateTargetPosition();
@@ -639,8 +707,6 @@ const mainScript = () => {
             });
             $(this.rulerWrap).find('.loading-ruler').addClass('active');
          }
-
-
       }
       updateTargetPosition() {
          if (!this.rulerWrap) return;
@@ -731,6 +797,7 @@ const mainScript = () => {
          });
       }
       play(data) {
+         $('[df-init]').removeAttr('df-init');
          this.tlLoadMaster.play();
       }
       onceSetup(data) {
@@ -738,7 +805,7 @@ const mainScript = () => {
       }
       oncePlay(data) {
          globalHooks.triggerOncePlay(data);
-         $('.loading').addClass('loaded');
+         // $('.loading').addClass('loaded');
          sessionStorage.setItem('isLoaded', true);
          if (viewport.w > 767) {
             $('.body').css({
@@ -1711,6 +1778,14 @@ const mainScript = () => {
          setup(data, mode) {
             this.el = data.next.container.querySelector('.home-hero-wrap');
             this.taglineMarquee = new Marquee($(this.el).find('.home-hero-work'), $(this.el).find('.home-hero-work-inner'), 40);
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
+               this.initRuler();
+               this.drawBox();
+               this.drawImageContainer();
+            }
+            else {
+               $('.home-hero-ruler, .home-hero-img-interact-wrap').hide();
+            }
             if (mode === 'once') {
                this.setupOnce(data);
             } else if (mode === 'enter') {
@@ -1786,14 +1861,7 @@ const mainScript = () => {
 
          }
          interact() {
-            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
-               this.initRuler();
-               this.drawBox();
-               this.drawImageContainer();
-            }
-            else {
-               $('.home-hero-ruler, .home-hero-img-interact-wrap').hide();
-            }
+
             $(this.el).find('.home-hero-img-deco').on('click', function () {
                console.log('click');
                $(this).removeClass('active');
@@ -4589,7 +4657,7 @@ const mainScript = () => {
                ]
             });
             $(this.el).find('.about-job-item').each((index, item) => {
-               if (index <= 1) {
+               if (index <= 2) {
                   new MasterTimeline({
                      timeline: this.tlList,
                      tweenArr: [
