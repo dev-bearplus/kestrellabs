@@ -647,7 +647,6 @@ const mainScript = () => {
             linesClass: 'bp-line',
             mask: 'lines'
          });
-         //set top center of viewport for .loading-content-title
          let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
          let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
          let widthInner = $('.loading-inner').width() - cvUnit(16, 'rem');
@@ -660,8 +659,6 @@ const mainScript = () => {
             let rect = bottomLine[0].getBoundingClientRect();
             distToBottom = window.innerHeight - rect.top - cvUnit(8, 'rem');
          }
-         console.log('Distance to bottom:', distToBottom);
-         console.log(nameSpaceCurrent);
          gsap.set('.loading-content-title', { 'top': `${topCenterTitle}px` });
          gsap.set(title.words, { opacity: 0, yPercent: 100 });
          gsap.set('.loading-line-wrap', { opacity: 0 })
@@ -678,11 +675,24 @@ const mainScript = () => {
             .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.3, ease: 'power3.in' });
          this.tlLoadMaster
             .to(title.words, { opacity: 1, yPercent: 0, duration: 0.4, stagger: 0.015, ease: 'power2.out' }, 0)
-            .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 1.2, ease: 'power2.out' }, .4)
+            .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 2, ease: 'power2.out' }, .4)
 
+         let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 1.2, ease: 'power2.out' }, .4)
+            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': cvUnit(8, 'rem'), duration: 2, ease: 'power2.out' }, .4)
+            .to(lottieProxy, {
+               progress: 1,
+               duration: 2,
+               ease: 'none',
+               onUpdate: () => {
+                  if (this.lottieAnim && this.lottieAnim.isLoaded) {
+                     let currentFrame = lottieProxy.progress * (this.lottieAnim.totalFrames - 1);
+                     this.lottieAnim.goToAndStop(Math.round(currentFrame), true);
+                     console.log(currentFrame);
+                  }
+               }
+            }, .4)
             .to('.loading-line-wrap', {
                opacity: 1, duration: .1, ease: 'none', onComplete: () => {
                   gsap.to('.loading-line-item.item-horizital.bot-center', {
@@ -695,8 +705,8 @@ const mainScript = () => {
                   gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .5 })
                   gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .5 })
                }
-            }, 1.5)
-            .to('.loading-3d', { opacity: 0, duration: .1, ease: 'none' }, 1.5)
+            }, 2.5)
+            .to('.loading-3d', { opacity: 0, duration: .1, ease: 'none' }, 2.5)
          this.tlLoadMaster
             .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .1, ease: 'power3.out' }, .5)
             .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 2.4)
