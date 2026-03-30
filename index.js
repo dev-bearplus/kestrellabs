@@ -805,7 +805,7 @@ const mainScript = () => {
       }
       oncePlay(data) {
          globalHooks.triggerOncePlay(data);
-         // $('.loading').addClass('loaded');
+         $('.loading').addClass('loaded');
          sessionStorage.setItem('isLoaded', true);
          if (viewport.w > 767) {
             $('.body').css({
