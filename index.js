@@ -648,7 +648,8 @@ const mainScript = () => {
             mask: 'lines'
          });
          let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
-         let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
+         // let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
+         let topCenter3D = cvUnit(88, 'rem');
          let widthInner = $('.loading-inner').width() - cvUnit(16, 'rem');
          let heightInner = $('.loading-inner').height() - cvUnit(16, 'rem');
          let heightHeader = $('.header').height();
@@ -669,10 +670,10 @@ const mainScript = () => {
          const $progress = $(this.el).find('.loading-progress-item.active');
          this.tlLoadMaster
             .set($progress, { 'clip-path': 'inset(0 100% 0 0)' })
-            .to($progress, { 'clip-path': 'inset(0 40% 0 0)', duration: 0.5, ease: 'power1.out' })
-            .to($progress, { 'clip-path': 'inset(0 35% 0 0)', duration: 0.3, ease: 'power1.inOut' })
-            .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 0.4, ease: 'none' })
-            .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 0.3, ease: 'power3.in' });
+            .to($progress, { 'clip-path': 'inset(0 40% 0 0)', duration: 2, ease: 'power1.out' })
+            .to($progress, { 'clip-path': 'inset(0 35% 0 0)', duration: 1.5, ease: 'power1.inOut' })
+            .to($progress, { 'clip-path': 'inset(0 15% 0 0)', duration: 1.7, ease: 'none' })
+            .to($progress, { 'clip-path': 'inset(0 0% 0 0)', duration: 1.5, ease: 'power3.in' });
          this.tlLoadMaster
             .to(title.words, { opacity: 1, yPercent: 0, duration: 0.6, stagger: 0.02, ease: 'none' }, 0)
          // .fromTo('.loading-content-title', { 'top': `${topCenterTitle}px` }, { 'top': cvUnit(32, 'rem'), duration: 3, ease: 'none' }, .4)
@@ -680,9 +681,9 @@ const mainScript = () => {
          let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': `${topCenter3D - 40}px`, duration: 2, ease: 'none' }, .4)
-            .to('.loading-3d', { 'top': cvUnit(48, 'rem'), duration: 3, ease: 'none' }, 2.4)
-            .to('.loading-3d', { 'top': cvUnit(8, 'rem'), duration: 1, ease: 'none' }, 5.4)
+            .fromTo('.loading-3d', { 'top': `${topCenter3D}px` }, { 'top': `${topCenter3D - cvUnit(40, 'rem')}px`, duration: 2, ease: 'none' }, .4)
+            .to('.loading-3d', { duration: 6, ease: 'none' }, 2.4)
+            .to('.loading-3d', { 'top': cvUnit(8, 'rem'), duration: 1, ease: 'none' }, 8.4)
             // .to(lottieProxy, {
             //    progress: 1,
             //    duration: 3,
@@ -709,8 +710,8 @@ const mainScript = () => {
             }, 9)
             .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 9)
          this.tlLoadMaster
-            .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .1, ease: 'power3.out' }, .5)
-            .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 3)
+            .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .15, ease: 'power3.out' }, 0.5)
+            .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 9.5)
          if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
             requestAnimationFrame(() => {
                this.updateTargetPosition();
