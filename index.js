@@ -639,7 +639,7 @@ const mainScript = () => {
             let x2 = x1;
             let y2 = y1 * Math.cos(rotX) - z1 * Math.sin(rotX);
             let z2 = y1 * Math.sin(rotX) + z1 * Math.cos(rotX);
-            return { x: x2 * scaleX, y: y2 * scaleX, z: z2 * scaleY }; // Scale Z vì Z biểu diễn chiều dọc 2D
+            return { x: x2 * scaleX, y: y2 * scaleX, z: z2 * scaleY };
          });
 
          let closestIndex = 0;
@@ -687,7 +687,7 @@ const mainScript = () => {
             }
             d += " Z";
 
-            pathsHTML += `<path d="${d}" fill="url(#imgBg)" stroke="#282828" stroke-width="2" stroke-linejoin="round" />`;
+            pathsHTML += `<path d="${d}" fill="url(#bg-pattern)" stroke="#282828" stroke-width="2" stroke-linejoin="round" />`;
          }
 
          return pathsHTML;
@@ -708,7 +708,10 @@ const mainScript = () => {
       }
 
       init3d() {
-         const container = document.getElementById('loading-3d');
+         const svgEl = document.getElementById('loading-3d');
+         if (svgEl) svgEl.setAttribute('preserveAspectRatio', 'xMaxYMin meet');
+
+         const container = document.getElementById('rings-layer');
          const dx = 280 / 2;
          const dy = 310 / 2 + 40;
          const size = 180;
@@ -721,14 +724,6 @@ const mainScript = () => {
          ];
          let rootRotX = Math.asin(1 / Math.sqrt(3));
          let isAnimating = false;
-         const defsHTML = `
-         <defs>
-            <pattern id="imgBg" patternUnits="userSpaceOnUse" width="100%" height="100%">
-               <image href="https://cdn.prod.website-files.com/68f73a0fbae6fa626a19135c/6900476d411e3ea05889428f_bg.svg" x="0" y="0" width="280" height="350" preserveAspectRatio="xMidYMid slice" />
-            </pattern>
-         </defs>
-         `;
-
          let animationStartTime = null;
          let currentStepIndex = 0;
          let currentStartRotZ = 45 * Math.PI / 180;
@@ -736,6 +731,10 @@ const mainScript = () => {
          let currentStartScaleX = 1.0;
          let currentStartScaleY = 1.0;
          let currentStartYOffset = 0;
+         let currentStartVbX = 0;
+         let currentStartVbY = 0;
+         let currentStartVbW = 280;
+         let currentStartVbH = 310;
          let animSteps = [
             {
                type: 'together',
@@ -743,6 +742,10 @@ const mainScript = () => {
                staggerDuration: 100,
                totalRotZ: -Math.PI,
                duration: 1100
+            },
+            {
+               type: 'pause',
+               duration: 300
             },
             {
                type: 'layered',
@@ -756,19 +759,15 @@ const mainScript = () => {
             {
                type: 'standup',
                baseDuration: 600,
-               staggerDuration: 150,
+               staggerDuration: 100,
                targetRotX: 0,
                targetRotZOffset: -135 * Math.PI / 180,
                duration: 900,
                easing: 'easeInOutCubic'
             },
             {
-               type: 'zoom_in',
-               baseDuration: 800,
-               targetScaleX: 1.54, // Kích kịch kim viền trái phải
-               targetScaleY: 1.83, // Giãn dọc kịch kim viền trên dưới
-               targetYOffset: 62, // Kéo bù trọng tâm tâm khối lệch cho cân chính giữa 310 / 2 = 155
-               duration: 800,
+               type: 'push_top',
+               duration: 400,
                easing: 'easeInOutCubic'
             }
          ];
@@ -792,24 +791,42 @@ const mainScript = () => {
                } else if (stepCurrent.type === 'standup') {
                   currentStartRotZ += stepCurrent.targetRotZOffset;
                   currentStartRotX = stepCurrent.targetRotX;
-               } else if (stepCurrent.type === 'spin_flat') {
-                  currentStartRotZ += stepCurrent.totalRotZ;
-               } else if (stepCurrent.type === 'zoom_in') {
-                  currentStartScaleX = stepCurrent.targetScaleX;
-                  currentStartScaleY = stepCurrent.targetScaleY;
-                  currentStartYOffset = stepCurrent.targetYOffset;
                }
-
                currentStepIndex++;
                if (currentStepIndex >= animSteps.length) {
                   isAnimating = false;
                   let finishAnglesZ = [currentStartRotZ, currentStartRotZ, currentStartRotZ];
                   let finishAnglesX = [currentStartRotX, currentStartRotX, currentStartRotX];
                   let targetPaths = '';
+
+                  let max_px = -Infinity;
+                  let min_py = Infinity;
                   for (let i = 0; i < rings.length; i++) {
-                     targetPaths += rings[i].getRenderData(dx, dy + currentStartYOffset, finishAnglesZ[i], finishAnglesX[i], currentStartScaleX, currentStartScaleY);
+                     let rZ = finishAnglesZ[i];
+                     let rX = finishAnglesX[i];
+                     let zOff = rings[i].zOffset;
+                     for (let v of rings[i].baseVertices) {
+                        let x1 = v.x * Math.cos(rZ) - v.y * Math.sin(rZ);
+                        let y1 = v.x * Math.sin(rZ) + v.y * Math.cos(rZ);
+                        let z1 = v.z + zOff;
+                        let z2 = y1 * Math.sin(rX) + z1 * Math.cos(rX);
+
+                        let px = x1 * currentStartScaleX;
+                        let py = -z2 * currentStartScaleY;
+
+                        if (px > max_px) max_px = px;
+                        if (py < min_py) min_py = py;
+                     }
                   }
-                  container.innerHTML = defsHTML + targetPaths;
+                  let finalDx = 279 - max_px;
+                  let finalDy = dy + currentStartYOffset;
+                  if (animSteps[animSteps.length - 1].type === 'push_top') {
+                     finalDy = -min_py;
+                  }
+
+                  for (let i = 0; i < rings.length; i++) {
+                     targetPaths += rings[i].getRenderData(finalDx, finalDy, finishAnglesZ[i], finishAnglesX[i], currentStartScaleX, currentStartScaleY);
+                  }
                   return;
                } else {
                   animationStartTime = timestamp;
@@ -823,7 +840,8 @@ const mainScript = () => {
             let currentScaleX = currentStartScaleX;
             let currentScaleY = currentStartScaleY;
             let currentYOffset = currentStartYOffset;
-
+            let currentDx = dx;
+            let currentDy = dy;
             let easeFn = easings[stepCurrent.easing] || easings.easeInOutCubic;
 
             if (stepCurrent.type === 'together') {
@@ -864,34 +882,50 @@ const mainScript = () => {
                rotX_middle = currentStartRotX + easeFn(p_middle) * (stepCurrent.targetRotX - currentStartRotX);
                rotX_bottom = currentStartRotX + easeFn(p_bottom) * (stepCurrent.targetRotX - currentStartRotX);
 
-            } else if (stepCurrent.type === 'pause') {
+            } else if (stepCurrent.type === 'pause' || stepCurrent.type === 'push_top') {
                rotZ_top = currentStartRotZ;
                rotZ_middle = currentStartRotZ;
                rotZ_bottom = currentStartRotZ;
-            } else if (stepCurrent.type === 'spin_flat') {
-               let p_top = Math.max(0, Math.min(1, elapsed / stepCurrent.baseDuration));
-               let p_middle = Math.max(0, Math.min(1, (elapsed - stepCurrent.staggerDuration) / stepCurrent.baseDuration));
-               let p_bottom = Math.max(0, Math.min(1, (elapsed - stepCurrent.staggerDuration * 2) / stepCurrent.baseDuration));
-
-               rotZ_top = currentStartRotZ + easeFn(p_top) * stepCurrent.totalRotZ;
-               rotZ_middle = currentStartRotZ + easeFn(p_middle) * stepCurrent.totalRotZ;
-               rotZ_bottom = currentStartRotZ + easeFn(p_bottom) * stepCurrent.totalRotZ;
-            } else if (stepCurrent.type === 'zoom_in') {
-               let p = Math.max(0, Math.min(1, elapsed / stepCurrent.baseDuration));
-               currentScaleX = currentStartScaleX + easeFn(p) * (stepCurrent.targetScaleX - currentStartScaleX);
-               currentScaleY = currentStartScaleY + easeFn(p) * (stepCurrent.targetScaleY - currentStartScaleY);
-               currentYOffset = currentStartYOffset + easeFn(p) * (stepCurrent.targetYOffset - currentStartYOffset);
             }
 
             let anglesZ = [rotZ_bottom, rotZ_middle, rotZ_top];
             let anglesX = [rotX_bottom, rotX_middle, rotX_top];
+
+            let max_px = -Infinity;
+            let min_py = Infinity;
+            for (let i = 0; i < rings.length; i++) {
+               let rZ = anglesZ[i];
+               let rX = anglesX[i];
+               let zOff = rings[i].zOffset;
+               for (let v of rings[i].baseVertices) {
+                  let x1 = v.x * Math.cos(rZ) - v.y * Math.sin(rZ);
+                  let y1 = v.x * Math.sin(rZ) + v.y * Math.cos(rZ);
+                  let z1 = v.z + zOff;
+                  let z2 = y1 * Math.sin(rX) + z1 * Math.cos(rX);
+
+                  let px = x1 * currentScaleX;
+                  let py = -z2 * currentScaleY;
+
+                  if (px > max_px) max_px = px;
+                  if (py < min_py) min_py = py;
+               }
+            }
+            let dynamicDx = 279 - max_px;
+
+            let dynamicDy = dy + currentYOffset;
+            if (stepCurrent.type === 'push_top') {
+               let p_dy = Math.max(0, Math.min(1, elapsed / stepCurrent.duration));
+               let targetDy = -min_py;
+               let startDy = dy + currentYOffset;
+               dynamicDy = startDy + easeFn(p_dy) * (targetDy - startDy);
+            }
+
             let allPaths = '';
 
             for (let i = 0; i < rings.length; i++) {
-               allPaths += rings[i].getRenderData(dx, dy + currentYOffset, anglesZ[i], anglesX[i], currentScaleX, currentScaleY);
+               allPaths += rings[i].getRenderData(dynamicDx, dynamicDy, anglesZ[i], anglesX[i], currentScaleX, currentScaleY);
             }
-            container.innerHTML = defsHTML + allPaths;
-
+            container.innerHTML = allPaths;
             requestAnimationFrame(tick);
          }
          this.play3d = () => {
@@ -921,12 +955,12 @@ const mainScript = () => {
             linesClass: 'bp-line',
             mask: 'lines'
          });
-         let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
-         let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
-         // let topCenter3D = cvUnit(88, 'rem');
          let widthInner = $('.loading-inner').width() - cvUnit(16, 'rem');
          let heightInner = $('.loading-inner').height() - cvUnit(16, 'rem');
          let heightHeader = $('.header').height();
+         let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
+         let bottom3D = viewport.h - cvUnit(8, 'rem') - $('.loading-3d').height();
+         let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
          let nameSpaceCurrent = $('.main-inner').attr('data-barba-namespace');
          let bottomLine = $('.home-hero-content .line-horizital.top')
          let distToBottom = 0;
@@ -938,7 +972,7 @@ const mainScript = () => {
          gsap.set(title.words, { opacity: 0, yPercent: 100 });
          gsap.set('.loading-line-wrap', { opacity: 0 })
          gsap.set('.loading-content-sub .loading-content-sub-item-txt', { opacity: 0 });
-         gsap.set('.loading-3d', { opacity: 0 });
+         gsap.set('.loading-3d, .loading-progress, .loading-init-txt', { opacity: 0 });
          this.rulerWrap = document.querySelector('.loading-inner');
          this.el = document.querySelector('.loading');
          const $progress = $(this.el).find('.loading-progress-item.active');
@@ -953,25 +987,46 @@ const mainScript = () => {
          let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${topCenter3D + cvUnit(40, 'rem')}px` }, { 'top': `${topCenter3D}px`, duration: 1, ease: 'none' }, .4)
-            .to('.loading-3d', { duration: 4, ease: 'none' }, 1.4)
-            .to('.loading-3d', { 'top': cvUnit(8, 'rem'), duration: 1.4, ease: 'none' }, 5.4)
+            .fromTo('.loading-3d', { 'top': `${bottom3D}px` }, { 'top': `${topCenter3D}px`, duration: .8, ease: 'power3.out' }, 0)
+            .to('.loading-progress, .loading-init-txt', { opacity: 1, duration: .6, ease: 'power2.out' }, 0.2)
+            .to('.loading-3d', { duration: 4.8, ease: 'none', }, 1.2)
+            .to('.loading-3d', {
+               'top': cvUnit(8, 'rem'), duration: .7, ease: 'power3.out', onStart: () => {
+                  setTimeout(() => {
+                     const el = document.getElementById("rings-layer");
+
+                     const rect = el.getBoundingClientRect();
+                     $('.loading-line-wrap').css({
+                        width: rect.width - 1,
+                        height: rect.height - 1
+                     })
+                     $('.loading-line-item.item-horizital.top-center').css({
+                        'top': `${rect.height / 3 - cvUnit(2, 'rem')}px`,
+                     })
+                     $('.loading-line-item.item-horizital.bot-center').css({
+                        'bottom': `${rect.height / 3 - cvUnit(2, 'rem')}px`,
+                     })
+                     console.log("real width:", rect.width - 1);
+                     console.log("real height:", rect.height - 1);
+                  }, 300);
+               }
+            }, 6.4)
             .to('.loading-line-wrap', {
                opacity: 1, duration: 0, ease: 'none', onComplete: () => {
                   gsap.to('.loading-line-item.item-horizital.bot-center', {
-                     'bottom': `${distToBottom}px`, duration: 1.2, ease: 'power2.out', autoRound: false, onComplete: () => {
+                     'bottom': `${distToBottom}px`, duration: .9, ease: 'power2.out', autoRound: false, onComplete: () => {
                         setTimeout(() => {
                            this.oncePlay(data);
                         }, 300);
                      }
                   })
-                  gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: 1.2, ease: 'power2.out', delay: .4 })
-                  gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false, delay: .4 })
-                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: 1.2, ease: 'power2.out', delay: .4 })
-                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: 1.2, ease: 'power2.out', delay: .4 })
+                  gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: .9, ease: 'power2.out' })
+                  gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false })
+                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: .9, ease: 'power2.out' })
+                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: .9, ease: 'power2.out' })
                }
-            }, 6.8)
-            .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 6.8)
+            }, 7.4)
+            .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 7.4)
          this.tlLoadMaster
             .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .25, stagger: .3, ease: 'power3.out' }, 0.5)
             .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 7.4)
