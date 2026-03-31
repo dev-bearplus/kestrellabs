@@ -960,7 +960,9 @@ const mainScript = () => {
                opacity: 1, duration: 0, ease: 'none', onComplete: () => {
                   gsap.to('.loading-line-item.item-horizital.bot-center', {
                      'bottom': `${distToBottom}px`, duration: 1.2, ease: 'power2.out', autoRound: false, onComplete: () => {
-                        this.oncePlay(data);
+                        setTimeout(() => {
+                           this.oncePlay(data);
+                        }, 300);
                      }
                   })
                   gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: 1.2, ease: 'power2.out', delay: .4 })
@@ -971,7 +973,7 @@ const mainScript = () => {
             }, 6.8)
             .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 6.8)
          this.tlLoadMaster
-            .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .2, stagger: .15, ease: 'power3.out' }, 0.5)
+            .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .25, stagger: .2, ease: 'power3.out' }, 0.5)
             .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 7.4)
          if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
             requestAnimationFrame(() => {
