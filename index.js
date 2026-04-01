@@ -731,10 +731,6 @@ const mainScript = () => {
          let currentStartScaleX = 1.0;
          let currentStartScaleY = 1.0;
          let currentStartYOffset = 0;
-         let currentStartVbX = 0;
-         let currentStartVbY = 0;
-         let currentStartVbW = 280;
-         let currentStartVbH = 310;
          let animSteps = [
             {
                type: 'together',
@@ -987,7 +983,7 @@ const mainScript = () => {
          let lottieProxy = { progress: 0 };
          this.tlLoadMaster
             .to('.loading-3d', { opacity: 1, duration: 0.5, ease: 'power1.out' }, 0)
-            .fromTo('.loading-3d', { 'top': `${bottom3D}px` }, { 'top': `${topCenter3D}px`, duration: .8, ease: 'power3.out' }, 0)
+            .fromTo('.loading-3d', { 'top': `${bottom3D}px` }, { 'top': `${viewport.w > 767 ? topCenter3D : topCenter3D - cvUnit(100, 'rem')}px`, duration: .8, ease: 'power3.out' }, 0)
             .to('.loading-progress, .loading-init-txt', { opacity: 1, duration: .6, ease: 'power2.out' }, 0.2)
             .to('.loading-3d', { duration: 4.8, ease: 'none', }, 1.2)
             .to('.loading-3d', {
@@ -1022,8 +1018,9 @@ const mainScript = () => {
                   })
                   gsap.to('.loading-line-wrap', { width: widthInner, height: heightInner, duration: .9, ease: 'power2.out' })
                   gsap.to('.loading-line-item.item-horizital.top-center', { 'top': `${heightHeader}px`, duration: .6, ease: 'power2.out', autoRound: false })
-                  gsap.to('.loading-line-item.item-vertical', { 'background-color': '#b3b3af', width: 'max(.1rem, 1px)', height: heightInner, duration: .9, ease: 'power2.out' })
-                  gsap.to('.loading-line-item.item-horizital', { 'background-color': '#b3b3af', width: widthInner, height: 'max(.1rem, 1px)', duration: .9, ease: 'power2.out' })
+                  gsap.to('.loading-line-item.item-vertical', { width: 'max(.1rem, 1px)', height: heightInner, duration: .9, ease: 'power2.out' })
+                  gsap.fromTo('.loading-line-item', { 'background-color': '#282828' }, { 'background-color': '#b3b3af', duration: .6, ease: 'power2.out' })
+                  gsap.to('.loading-line-item.item-horizital', { width: widthInner, height: 'max(.1rem, 1px)', duration: .9, ease: 'power2.out' })
                }
             }, 7.4)
             .to('.loading-3d', { opacity: 0, duration: 0, ease: 'none' }, 7.4)
