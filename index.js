@@ -1867,6 +1867,10 @@ const mainScript = () => {
          $mask.attr('id', maskId);
          const $image = $maskContainer.find('image');
          $image.attr('mask', 'url(#' + maskId + ')');
+         $image.css({
+            'mask-image': `url(#${maskId})`,
+            '-webkit-mask-image': `url(#${maskId})`
+         })
       });
    }
    class InkTransition {
