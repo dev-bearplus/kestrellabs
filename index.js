@@ -1902,6 +1902,7 @@ const mainScript = () => {
          this.DOM.svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
 
          this.isCircle = this.DOM.mask.tagName.toLowerCase() === 'circle';
+         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
          // Store start & end values
          if (this.isCircle) {
@@ -1913,7 +1914,13 @@ const mainScript = () => {
 
             this.startNums = this.parsePath(this.startPath);
             this.endNums = this.parsePath(this.endPath);
-            this.pathChunks = this.startPath.split(/-?\d+\.?\d*/g);
+
+            if (this.isSafari) {
+               this.DOM.mask.setAttribute('d', this.endPath);
+               this.translateYStart = this.startNums[1] - this.endNums[1];
+            } else {
+               this.pathChunks = this.startPath.split(/-?\d+\.?\d*/g);
+            }
          }
 
          this.updateMetrics();
@@ -1959,13 +1966,18 @@ const mainScript = () => {
             const currentR = this.startVal + (this.endVal - this.startVal) * progress;
             this.DOM.mask.setAttribute('r', currentR);
          } else {
-            let newD = '';
-            for (let i = 0; i < this.startNums.length; i++) {
-               const val = this.startNums[i] + (this.endNums[i] - this.startNums[i]) * progress;
-               newD += this.pathChunks[i] + val;
+            if (this.isSafari) {
+               const currentY = this.translateYStart * (1 - progress);
+               this.DOM.mask.style.transform = `translateY(${currentY}px)`;
+            } else {
+               let newD = '';
+               for (let i = 0; i < this.startNums.length; i++) {
+                  const val = this.startNums[i] + (this.endNums[i] - this.startNums[i]) * progress;
+                  newD += this.pathChunks[i] + val;
+               }
+               newD += this.pathChunks[this.startNums.length];
+               this.DOM.mask.setAttribute('d', newD);
             }
-            newD += this.pathChunks[this.startNums.length];
-            this.DOM.mask.setAttribute('d', newD);
          }
       }
    }
