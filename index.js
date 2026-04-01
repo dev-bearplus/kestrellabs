@@ -2213,8 +2213,8 @@ const mainScript = () => {
 
                         tl.to(current.targets, {
                            opacity: 0,
-                           duration: 0.15,
-                           stagger: 0.07
+                           duration: 0.1,
+                           stagger: 0.05
                         });
 
                         tl.set(current.el, { display: 'none' });
@@ -2222,8 +2222,8 @@ const mainScript = () => {
 
                         tl.to(next.targets, {
                            opacity: 1,
-                           duration: 0.15,
-                           stagger: 0.07
+                           duration: 0.1,
+                           stagger: 0.05
                         });
                      }
                      this.tlRotate = tl;
