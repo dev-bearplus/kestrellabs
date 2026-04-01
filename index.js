@@ -1868,7 +1868,6 @@ const mainScript = () => {
          const $image = $maskContainer.find('image');
          $image.attr('mask', 'url(#' + maskId + ')');
          $image.css({
-            'mask-image': `url(#${maskId})`,
             '-webkit-mask-image': `url(#${maskId})`
          })
       });
@@ -1908,9 +1907,25 @@ const mainScript = () => {
 
             this.startNums = this.parsePath(this.startPath);
             this.endNums = this.parsePath(this.endPath);
+            this.pathChunks = this.startPath.split(/-?\d+\.?\d*/g);
          }
 
+         this.updateMetrics();
+         window.addEventListener('resize', () => {
+            this.updateMetrics();
+            this.updateOnScroll();
+         });
+
          this.scrub();
+      }
+
+      updateMetrics() {
+         if (!this.DOM.el) return;
+         const rect = this.DOM.el.getBoundingClientRect();
+         this.cachedHeight = rect.height;
+         const scrollY = (typeof smoothScroll !== 'undefined' && smoothScroll.lenis) ? smoothScroll.lenis.scroll : window.scrollY;
+         this.cachedTop = rect.top + scrollY;
+         this.totalTravel = (this.start - this.end) + this.cachedHeight;
       }
 
       scrub() {
@@ -1923,37 +1938,29 @@ const mainScript = () => {
          return d.match(/-?\d+\.?\d*/g).map(Number);
       }
 
-      buildPath(template, values) {
-         let i = 0;
-         return template.replace(/-?\d+\.?\d*/g, () => values[i++]);
-      }
       updateOnScroll() {
          if (!this.DOM.el) return;
-         if (!isInViewport(this.DOM.el)) return;
 
-         const rect = this.DOM.el.getBoundingClientRect();
+         const scrollY = (typeof smoothScroll !== 'undefined' && smoothScroll.lenis) ? smoothScroll.lenis.scroll : window.scrollY;
+         const currentRectTop = this.cachedTop - scrollY;
 
-         const start = this.start;
-         const end = this.end;
+         if (currentRectTop > window.innerHeight || currentRectTop + this.cachedHeight < 0) return;
 
-         const totalTravel = (start - end) + rect.height;
-         const currentPos = start - rect.top;
-         const progress = Math.max(0, Math.min(1, currentPos / totalTravel));
+         const currentPos = this.start - currentRectTop;
+         const progress = Math.max(0, Math.min(1, currentPos / this.totalTravel));
 
          if (this.isCircle) {
             const currentR = this.startVal + (this.endVal - this.startVal) * progress;
             this.DOM.mask.setAttribute('r', currentR);
          } else {
-            const currentNums = this.startNums.map((start, i) => {
-               return start + (this.endNums[i] - start) * progress;
-            });
-
-            const newD = this.buildPath(this.startPath, currentNums);
+            let newD = '';
+            for (let i = 0; i < this.startNums.length; i++) {
+               const val = this.startNums[i] + (this.endNums[i] - this.startNums[i]) * progress;
+               newD += this.pathChunks[i] + val;
+            }
+            newD += this.pathChunks[this.startNums.length];
             this.DOM.mask.setAttribute('d', newD);
          }
-
-         // const scaleVal = 1 + 0.01 * progress;
-         // this.DOM.image.setAttribute('transform', `scale(${scaleVal})`);
       }
    }
    class Cta {
