@@ -1027,13 +1027,19 @@ const mainScript = () => {
          this.tlLoadMaster
             .to('.loading-content-sub .loading-content-sub-item-txt', { opacity: 1, duration: .25, stagger: .3, ease: 'power3.out' }, 0.5)
             .to('.loading-content, .loading-content-title, .loading-progress, .loading-init-txt', { opacity: 0, duration: .6, ease: 'power2.out' }, 7.4)
-         if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
-            requestAnimationFrame(() => {
-               this.updateTargetPosition();
-               this.animateRuler();
-            });
-            $(this.rulerWrap).find('.loading-ruler').addClass('active');
-         }
+         let isMousePointer = false;
+         $('.loading-inner').on('mouseenter', () => {
+            if (isMousePointer) return;
+            if (isMouseInArea(this.rulerWrap, mouse.mousePos)) {
+               requestAnimationFrame(() => {
+                  this.updateTargetPosition();
+                  this.animateRuler();
+               });
+               $(this.rulerWrap).find('.loading-ruler').addClass('active');
+            }
+            isMousePointer = true;
+         })
+
       }
       updateTargetPosition() {
          if (!this.rulerWrap) return;
