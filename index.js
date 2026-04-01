@@ -2867,7 +2867,7 @@ const mainScript = () => {
                const relativeLeft = numberRect.left - parentRect.left + gap + numberRect.width;
                const relativeTop = numberRect.top - parentRect.top;
 
-               $(this.el).find(`.home-map-main-img-sub-hover`).eq(index).css({
+               viewport.w > 767 && $(this.el).find(`.home-map-main-img-sub-hover`).eq(index).css({
                   left: `${relativeLeft}px`,
                   top: `${relativeTop}px`,
                });
