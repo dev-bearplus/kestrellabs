@@ -1889,20 +1889,26 @@ const mainScript = () => {
       constructor(DOM_el) {
          this.DOM.el = DOM_el;
          this.DOM.backdrop = this.DOM.el.querySelector('.ink-mask-img.main');
+         this.DOM.imgsub = this.DOM.el.querySelector('.ink-mask-img.sub');
          this.DOM.svg = this.DOM.el.querySelector('.layer');
          this.DOM.mask = this.DOM.svg.querySelector('.mask');
          this.DOM.image = this.DOM.svg.querySelector('image');
          this.start = parseFloat($(this.DOM.backdrop).attr('data-start')) / 100 * window.innerHeight;
          this.end = parseFloat($(this.DOM.backdrop).attr('data-end')) / 100 * window.innerHeight;
-         this.DOM.backdrop.style.opacity = 0.5;
-         this.DOM.backdrop.style.filter = 'grayscale(1)';
+         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+         if (!this.isSafari) {
+            this.DOM.backdrop.style.opacity = 0.5;
+            this.DOM.backdrop.style.filter = 'grayscale(1)';
+         }
+         else {
+            this.DOM.imgsub.style.display = 'none';
+         }
 
          const vbWidth = 1000;
          const vbHeight = (this.DOM.el.offsetHeight / this.DOM.el.offsetWidth) * 1000;
          this.DOM.svg.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
 
          this.isCircle = this.DOM.mask.tagName.toLowerCase() === 'circle';
-         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
          // Store start & end values
          if (this.isCircle) {
@@ -1967,8 +1973,7 @@ const mainScript = () => {
             this.DOM.mask.setAttribute('r', currentR);
          } else {
             if (this.isSafari) {
-               const currentY = this.translateYStart * (1 - progress);
-               this.DOM.mask.style.transform = `translateY(${currentY}px)`;
+               return;
             } else {
                let newD = '';
                for (let i = 0; i < this.startNums.length; i++) {
