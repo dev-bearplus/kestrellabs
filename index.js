@@ -2112,10 +2112,20 @@ const mainScript = () => {
             this.tlEnter = null;
             this.tlTriggerEnter = null;
             this.taglineMarquee = null;
+            this.splits = [];
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector('.home-hero-wrap');
             this.taglineMarquee = new Marquee($(this.el).find('.home-hero-work'), $(this.el).find('.home-hero-work-inner'), 40);
+            const headings = $(this.el).find('.home-hero-title');
+            if (headings.length === 0) return;
+            headings.each((ind, item) => {
+               let el = $(item);
+               let st = new SplitText(el, { type: 'words, chars', wordsClass: 'word', charsClass: 'char' });
+               this.splits.push({ el: el, targets: st.chars });
+               gsap.set(st.chars, { opacity: 0 });
+            });
+            console.log(this.splits);
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
                this.initRuler();
                this.drawBox();
@@ -2137,9 +2147,11 @@ const mainScript = () => {
             this.tlOnce = gsap.timeline({
                paused: true,
                delay: .3,
+               onStart: () => {
+                  this.rotateText()
+               },
                onComplete: () => {
                   gsap.to($(this.el).find('.home-hero-img-interact-wrap'), { autoAlpha: 1, duration: 0.5 });
-                  this.rotateText()
                   this.taglineMarquee.play();
                }
             })
@@ -2150,9 +2162,11 @@ const mainScript = () => {
             this.tlEnter = gsap.timeline({
                paused: true,
                delay: 0.3,
+               onStart: () => {
+                  this.rotateText()
+               },
                onComplete: () => {
                   gsap.to($(this.el).find('.home-hero-img-interact-wrap'), { autoAlpha: 1, duration: 0.5 });
-                  this.rotateText();
                   this.taglineMarquee.play();
                }
             })
@@ -2177,9 +2191,39 @@ const mainScript = () => {
             this.tlEnter.play();
          }
          rotateText() {
-            let headingFlipping = new FlipText($(this.el).find('.home-hero-title-wrap').get(0), {});
-            headingFlipping.setup();
-            headingFlipping.play();
+            gsap.to(this.splits[0].targets, {
+               opacity: 1,
+               duration: 0.4,
+               stagger: 0.1,
+               onComplete: () => {
+                  if (this.splits.length > 1) {
+                     let tl = gsap.timeline({ repeat: -1 });
+
+                     for (let i = 0; i < this.splits.length; i++) {
+                        let current = this.splits[i];
+                        let next = this.splits[(i + 1) % this.splits.length];
+
+                        tl.to({}, { duration: 2.5 });
+
+                        tl.to(current.targets, {
+                           opacity: 0,
+                           duration: 0.15,
+                           stagger: 0.07
+                        });
+
+                        tl.set(current.el, { display: 'none' });
+                        tl.set(next.el, { display: 'block' });
+
+                        tl.to(next.targets, {
+                           opacity: 1,
+                           duration: 0.15,
+                           stagger: 0.07
+                        });
+                     }
+                     this.tlRotate = tl;
+                  }
+               }
+            });
          }
          animationReveal(timeline) {
             new MasterTimeline({
@@ -2189,7 +2233,7 @@ const mainScript = () => {
                   new FadeIn({ el: $(this.el).find('.home-hero-img-inner'), type: 'center' }),
                   new FadeIn({ el: $(this.el).find('.home-hero .bg-border'), type: 'none' }),
                   ...Array.from($(this.el).find('.home-hero-img-deco-bg')).map((item, index) => new FadeIn({ el: item, type: 'none', delay: index * 0.1 })),
-                  new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading').get(0), delay: .1 }),
+                  // new FadeSplitText({ el: $(this.el).find('.home-hero-title:first-child .heading').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-sub .txt:first-child').get(0), delay: .1 }),
                   new FadeSplitText({ el: $(this.el).find('.home-hero-btn .txt').get(0) }),
                   new FadeIn({ el: $(this.el).find('.home-hero-btn .btn-bg-ic:first-child'), type: 'bottom' }),
