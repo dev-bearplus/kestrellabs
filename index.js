@@ -693,6 +693,165 @@ const mainScript = () => {
          return pathsHTML;
       }
    }
+   class Image {
+      constructor(el) {
+         this.DOM = { el: el };
+         this.defaultStyle = {
+            scale: 0,
+            x: 0,
+            y: 0,
+            opacity: 0
+         };
+         this.getRect();
+         this.initEvents();
+      }
+
+      initEvents() {
+         window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+         gsap.set(this.DOM.el, this.defaultStyle);
+         this.getRect();
+      }
+
+      getRect() {
+         this.rect = this.DOM.el.getBoundingClientRect();
+      }
+
+      isActive() {
+         return gsap.isTweening(this.DOM.el) || parseFloat(this.DOM.el.style.opacity) !== 0;
+      }
+   }
+   const getMouseDistance = (mousePos, lastMousePos) => distance(mousePos.x, mousePos.y, lastMousePos.x, lastMousePos.y);
+   class ImageTrail {
+      constructor(wrapperSelector = '.home-explore') {
+         this.DOM = { content: document.querySelector(wrapperSelector) };
+         this.wrapperSelector = wrapperSelector;
+         this.images = [];
+         const TRAIL_COUNT = 14;
+         const imgSource = this.DOM.content.querySelector('.img-anim');
+         if (imgSource) {
+            const existing = [...this.DOM.content.querySelectorAll('.img-anim')];
+            const needed = TRAIL_COUNT - existing.length;
+            for (let i = 0; i < needed; i++) {
+               const clone = imgSource.cloneNode(true);
+               imgSource.parentNode.appendChild(clone);
+            }
+         }
+         [...this.DOM.content.querySelectorAll('.img-anim')].forEach(img => this.images.push(new Image(img)));
+         this.imagesTotal = this.images.length;
+         this.imgPosition = 0;
+         this.zIndexVal = 1;
+         this.threshold = 40;
+         this.isInside = false;
+         this.idleInterval = null;
+         this.mousePos = { x: 0, y: 0 };
+         this.lastMousePos = { x: 0, y: 0 };
+         this.cacheMousePos = { x: 0, y: 0 };
+         this.bindHoverArea();
+         requestAnimationFrame(() => this.render());
+      }
+
+      bindHoverArea() {
+         const wrapper = document.querySelector(this.wrapperSelector);
+         wrapper.addEventListener('mouseenter', () => {
+            this.isInside = true;
+         });
+         wrapper.addEventListener('mouseleave', () => {
+            this.isInside = false;
+         });
+         wrapper.addEventListener('mousemove', (e) => {
+            this.mousePos = { x: e.clientX, y: e.clientY };
+         });
+      }
+
+      render() {
+         if (!this.isInside) {
+            requestAnimationFrame(() => this.render());
+            if (this.idleInterval) {
+               clearInterval(this.idleInterval);
+               this.idleInterval = null;
+            }
+            return;
+         }
+
+         let distance = getMouseDistance(this.mousePos, this.lastMousePos);
+         this.cacheMousePos.x = lerp(this.cacheMousePos.x || this.mousePos.x, this.mousePos.x, 0.2);
+         this.cacheMousePos.y = lerp(this.cacheMousePos.y || this.mousePos.y, this.mousePos.y, 0.2);
+
+         if (distance > this.threshold) {
+            this.showNextImage();
+            this.zIndexVal++;
+            this.imgPosition = this.imgPosition < this.imagesTotal - 1 ? this.imgPosition + 1 : 0;
+            this.lastMousePos = { ...this.mousePos };
+            if (this.idleInterval) {
+               clearInterval(this.idleInterval);
+               this.idleInterval = null;
+            }
+         }
+         else {
+            if (!this.idleInterval && distance == 0) {
+               this.idleInterval = setInterval(() => {
+                  this.showNextImage();
+                  this.zIndexVal++;
+                  this.imgPosition = this.imgPosition < this.imagesTotal - 1 ? this.imgPosition + 1 : 0;
+                  this.lastMousePos = { ...this.mousePos };
+               }, 600);
+            }
+         }
+
+
+         let isIdle = true;
+         for (let img of this.images) {
+            if (img.isActive()) {
+               isIdle = false;
+               break;
+            }
+         }
+
+         if (isIdle && this.zIndexVal !== 1) {
+            this.zIndexVal = 1;
+         }
+
+         requestAnimationFrame(() => this.render());
+      }
+
+      showNextImage() {
+         const img = this.images[this.imgPosition];
+         gsap.killTweensOf(img.DOM.el);
+
+         // Tọa độ relative-to-container (GSAP transform tính từ vị trí natural của element)
+         const containerRect = this.DOM.content.getBoundingClientRect();
+         const spawnX = this.mousePos.x - containerRect.left - img.rect.width / 2;
+         const spawnY = this.mousePos.y - containerRect.top - img.rect.height / 2;
+
+         // Bottom của .img-anim-wrap cũng cần convert về container-relative
+         const wrapRect = (this.DOM.content.querySelector('.img-anim-wrap') || this.DOM.content).getBoundingClientRect();
+         const wrapBottom = wrapRect.bottom - containerRect.top + img.rect.height;
+         const fallDistance = wrapBottom - spawnY;
+
+         gsap.timeline()
+            .set(img.DOM.el, {
+               opacity: 0,
+               scale: 1,
+               zIndex: this.zIndexVal,
+               x: spawnX,
+               y: spawnY,
+               rotate: 0
+            })
+            .to(img.DOM.el, {
+               duration: .5,
+               ease: 'expo.out',
+               opacity: 1,
+            }, 0)
+            .to(img.DOM.el, {
+               duration: .7,
+               ease: 'power2.in',
+               y: spawnY + fallDistance,
+            }, 1.2);
+      }
+   }
    class Loader {
       constructor() {
          this.isLoaded = sessionStorage.getItem('isLoaded') === 'true' ? true : false;
@@ -1387,68 +1546,6 @@ const mainScript = () => {
             this.tlTrigger.kill();
             this.tlTrigger = null;
          }
-      }
-   }
-   class FlipText {
-      constructor(wrapEl, { onCycleComplete = () => { }, duration = 3 }) {
-         this.wrapEl = wrapEl;
-         this.tlMaster;
-         this.onCycleComplete = onCycleComplete;
-         this.duration = duration;
-      }
-      setup() {
-         let allSlideItems = $(this.wrapEl).find('.text-rotate');
-         this.tlMaster = gsap.timeline({
-            paused: true,
-            onComplete: () => {
-               this.tlMaster.progress(0);
-            }
-         });
-
-         const DEFAULT = {
-            duration: this.duration,
-            ease: 'expo.inOut',
-            transform: {
-               out: `translate3d(0px, ${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(-91deg)`,
-               in: `translate3d(0px, -${cvUnit(25.5961, 'rem')}px, -${cvUnit(26.0468, 'rem')}px) rotateX(91deg)`,
-            }
-         }
-         gsap.set(this.wrapEl, { perspective: cvUnit(82.5, 'rem') })
-         gsap.set(allSlideItems, {
-            transformOrigin: true
-               ? 'center center -.1em !important'
-               : 'center center -.26em !important',
-         });
-
-         allSlideItems.each((idx, text) => {
-            if (idx == allSlideItems.length - 1) {
-               gsap.set(text, { transform: 'none', autoAlpha: 1 });
-            } else {
-               gsap.set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 });
-            }
-            let tlChild = gsap.timeline({});
-
-            if (idx === allSlideItems.length - 1) {
-               tlChild
-                  .set(text, { transform: 'none', autoAlpha: 1 })
-                  .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } }, '<=0')
-                  .to(text, { duration: DEFAULT.duration * idx - 1 * DEFAULT.duration })
-                  .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
-                  .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease });
-            } else {
-               tlChild
-                  .set(text, { transform: DEFAULT.transform.out, autoAlpha: 0 })
-                  .to(text, { duration: DEFAULT.duration * idx }, '<=0')
-                  .to(text, { transform: 'none', autoAlpha: 1, duration: DEFAULT.duration, ease: DEFAULT.ease })
-                  .to(text, { transform: DEFAULT.transform.in, autoAlpha: 0, duration: DEFAULT.duration, ease: DEFAULT.ease, onStart: () => { this.onCycleComplete(idx) } })
-                  .to(text, { duration: (allSlideItems.length - 2 - idx) * DEFAULT.duration });
-            }
-            this.tlMaster.add(tlChild, 0);
-         });
-         this.tlMaster.progress((1 / allSlideItems.length).toFixed(2));
-      }
-      play() {
-         this.tlMaster.play();
       }
    }
    class Header {
@@ -3883,7 +3980,6 @@ const mainScript = () => {
             tabItems.eq(index).addClass('active');
             const itemActive = tabItems.eq(index);
             const left = itemActive.offset().left - container.offset().left + 1;
-            console.log(itemActive.offset().left, container.offset().left);
             const width = itemActive.outerWidth();
             gsap.to($(this.el).find('.product-key-tab-bg-active'), { left: left, width: width, duration: 0.3, ease: 'none' });
          }
@@ -5815,6 +5911,84 @@ const mainScript = () => {
          }
       },
    };
+   const NotFoundPage = {
+      Hero: class {
+         constructor() {
+            this.el = null;
+            this.tlOnce = null;
+            this.tlEnter = null;
+            this.tlTriggerEnter = null;
+         }
+         setup(data, mode) {
+            this.el = data.next.container.querySelector(".notfound-hero");
+            viewport.w > 991 && new ImageTrail('.notfound-hero');
+            if (mode === "once") {
+               this.setupOnce(data);
+            } else if (mode === "enter") {
+               this.setupEnter(data);
+            } else return;
+            this.interact();
+         }
+         setupOnce(data) {
+            this.tlOnce = gsap.timeline({
+               paused: true,
+               delay: 0.3,
+               onStart: () => {
+
+               },
+            });
+         }
+         setupEnter(data) {
+            this.tlEnter = gsap.timeline({
+               paused: true,
+               delay: 0.3
+            });
+
+            this.tlTriggerEnter = gsap.timeline({
+               scrollTrigger: {
+                  trigger: this.el,
+                  start: "top bottom+=50%",
+                  end: "bottom top-=50%",
+                  once: true,
+                  onEnter: () => this.tlEnter.play(),
+                  onEnterBack: () => this.tlEnter.play()
+               },
+            });
+
+         }
+         playOnce() {
+            this.tlOnce.play();
+         }
+         interact() {
+
+         }
+         destroy() {
+            if (this.tlOnce) {
+               this.tlOnce.kill();
+            }
+            if (this.tlEnter) {
+               this.tlEnter.kill();
+            }
+            if (this.tlTriggerEnter) {
+               this.tlTriggerEnter.kill();
+            }
+            if (viewport.w < 992) {
+               header.unregisterDependent($(this.el).find('.policy-hero-table'));
+            }
+            else {
+               header.unregisterDependent($(this.el).find('.policy-hero-table-inner'));
+            }
+         }
+      },
+
+      Footer: class {
+         constructor() {
+         }
+         setup(data) {
+            footer.init(data);
+         }
+      },
+   };
    class PageManager {
       constructor(page) {
          this.sections = Object.values(page).map(section => new section());
@@ -5916,6 +6090,9 @@ const mainScript = () => {
    class TpResourcePageManager extends PageManager {
       constructor(page) { super(page); }
    }
+   class NotFoundPageManager extends PageManager {
+      constructor(page) { super(page); }
+   }
    const PageManagerRegistry = {
       home: new HomePageManager(HomePage),
       product: new ProductPageManager(ProductPage),
@@ -5926,6 +6103,7 @@ const mainScript = () => {
       policy: new PolicyPageManager(PolicyPage),
       resource: new ResourcePageManager(ResourcePage),
       tpResource: new TpResourcePageManager(TpResourcePage),
+      notfound: new NotFoundPageManager(NotFoundPage),
    };
 
    const SCRIPT = {
@@ -6008,6 +6186,15 @@ const mainScript = () => {
          },
          beforeLeave(data) {
             PageManagerRegistry.tpResource.destroy(data);
+         }
+      },
+      notfound: {
+         namespace: 'notfound',
+         afterEnter(data) {
+            PageManagerRegistry.notfound.initEnter(data);
+         },
+         beforeLeave(data) {
+            PageManagerRegistry.notfound.destroy(data);
          }
       }
    };
