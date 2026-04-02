@@ -3816,6 +3816,7 @@ const mainScript = () => {
             this.tlHead = null;
             this.activeIndex = -1;
             this.scrubTriggers = [];
+            this.swiper = null;
          }
          trigger(data) {
             this.el = data.next.container.querySelector('.product-key-wrap');
@@ -3833,6 +3834,7 @@ const mainScript = () => {
             initNumberIndex($(this.el).find('.product-key-main-title-inner'));
             initNumberIndex($(this.el).find('.product-key-main-left-main'));
             initNumberIndex($(this.el).find('.product-key-tab-item'));
+            $('.product-key-tab-bg-inner').width($('.product-key-tab-list').width());
             let widthTabItem = $(this.el).find('.product-key-tab-item').outerWidth();
             $(this.el).find('.product-key-tab-bg-active').css('width', widthTabItem + 'px');
          }
@@ -3876,11 +3878,12 @@ const mainScript = () => {
             if (this.activeIndex === index) return;
             this.activeIndex = index;
             const tabItems = $(this.el).find('.product-key-tab-item');
-            const container = $(this.el).find('.product-key-tab-cms');
+            const container = $(this.el).find('.product-key-tab-list');
             tabItems.removeClass('active');
             tabItems.eq(index).addClass('active');
             const itemActive = tabItems.eq(index);
             const left = itemActive.offset().left - container.offset().left + 1;
+            console.log(itemActive.offset().left, container.offset().left);
             const width = itemActive.outerWidth();
             gsap.to($(this.el).find('.product-key-tab-bg-active'), { left: left, width: width, duration: 0.4 });
          }
@@ -3915,6 +3918,9 @@ const mainScript = () => {
                            const targetIndex = progress > limitProgress ? index : index - 1;
                            if (targetIndex >= 0) {
                               this.activeTab(targetIndex);
+                           }
+                           if (this.swiper) {
+                              this.swiper.slideTo(targetIndex);
                            }
                         }
                      },
@@ -3981,10 +3987,13 @@ const mainScript = () => {
             $('.product-key-tab-cms').addClass('swiper');
             $('.product-key-tab-list').addClass('swiper-wrapper');
             $('.product-key-tab-item').addClass('swiper-slide');
-            new Swiper('.product-key-tab-cms', {
+            this.swiper = new Swiper('.product-key-tab-cms', {
                slidesPerView: 'auto',
                spaceBetween: 0,
             });
+            $('.product-key-tab-list').append($('.product-key-tab-bg-active').clone());
+            // remove bg active
+            $('.product-key-tab-bg-wrap').remove();
          }
          destroy() {
             header.unregisterDependent($(this.el).find('.product-key-tab-wrap'));
@@ -4993,10 +5002,6 @@ const mainScript = () => {
             }
             new Swiper('.about-job-cms', {
                slidesPerView: 'auto',
-               pagination: {
-                  el: '.about-job-pagination',
-                  clickable: true,
-               },
                breakpoints: {
                   768: {
                      slidesPerView: 3,
@@ -5007,8 +5012,10 @@ const mainScript = () => {
                   prevEl: '.about-job-navi-item.item-prev',
                },
                pagination: {
-                  el: '.about-job-pagi',
-                  type: "fraction",
+                  el: $(this.el).find('.about-job-pagi-line').get(0),
+                  bulletClass: 'about-job-pagi-line-item',
+                  bulletActiveClass: 'active',
+                  clickable: true,
                },
             });
             this.tlHead = gsap.timeline({
