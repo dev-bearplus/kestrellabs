@@ -3991,9 +3991,10 @@ const mainScript = () => {
                slidesPerView: 'auto',
                spaceBetween: 0,
             });
-            $('.product-key-tab-list').append($('.product-key-tab-bg-active').clone());
+            let productBg = $('.product-key-tab-bg-active').clone();
+            $('.product-key-tab-bg-active').remove();
+            $('.product-key-tab-list').append(productBg);
             // remove bg active
-            $('.product-key-tab-bg-wrap').remove();
          }
          destroy() {
             header.unregisterDependent($(this.el).find('.product-key-tab-wrap'));
