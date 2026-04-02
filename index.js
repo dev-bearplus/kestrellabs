@@ -3885,7 +3885,7 @@ const mainScript = () => {
             const left = itemActive.offset().left - container.offset().left + 1;
             console.log(itemActive.offset().left, container.offset().left);
             const width = itemActive.outerWidth();
-            gsap.to($(this.el).find('.product-key-tab-bg-active'), { left: left, width: width, duration: 0.4 });
+            gsap.to($(this.el).find('.product-key-tab-bg-active'), { left: left, width: width, duration: 0.3, ease: 'none' });
          }
          animationScrub() {
             this.scrubTriggers = [];
@@ -3994,7 +3994,6 @@ const mainScript = () => {
             let productBg = $('.product-key-tab-bg-active').clone();
             $('.product-key-tab-bg-active').remove();
             $('.product-key-tab-list').append(productBg);
-            // remove bg active
          }
          destroy() {
             header.unregisterDependent($(this.el).find('.product-key-tab-wrap'));
