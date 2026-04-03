@@ -728,20 +728,14 @@ const mainScript = () => {
       constructor(wrapperSelector = '.home-explore') {
          this.DOM = { content: document.querySelector(wrapperSelector) };
          this.wrapperSelector = wrapperSelector;
-         this.images = [];
-         const TRAIL_COUNT = 14;
-         const imgSource = this.DOM.content.querySelector('.img-anim');
-         if (imgSource) {
-            const existing = [...this.DOM.content.querySelectorAll('.img-anim')];
-            const needed = TRAIL_COUNT - existing.length;
-            for (let i = 0; i < needed; i++) {
-               const clone = imgSource.cloneNode(true);
-               imgSource.parentNode.appendChild(clone);
-            }
+
+         this.imgSource = this.DOM.content.querySelector('.img-anim');
+         if (this.imgSource) {
+            // Ẩn img gốc để làm template
+            this.imgSource.style.display = 'none';
          }
-         [...this.DOM.content.querySelectorAll('.img-anim')].forEach(img => this.images.push(new Image(img)));
-         this.imagesTotal = this.images.length;
-         this.imgPosition = 0;
+
+         this.activeClones = [];
          this.zIndexVal = 1;
          this.threshold = 40;
          this.isInside = false;
@@ -783,7 +777,6 @@ const mainScript = () => {
          if (distance > this.threshold) {
             this.showNextImage();
             this.zIndexVal++;
-            this.imgPosition = this.imgPosition < this.imagesTotal - 1 ? this.imgPosition + 1 : 0;
             this.lastMousePos = { ...this.mousePos };
             if (this.idleInterval) {
                clearInterval(this.idleInterval);
@@ -795,60 +788,76 @@ const mainScript = () => {
                this.idleInterval = setInterval(() => {
                   this.showNextImage();
                   this.zIndexVal++;
-                  this.imgPosition = this.imgPosition < this.imagesTotal - 1 ? this.imgPosition + 1 : 0;
                   this.lastMousePos = { ...this.mousePos };
                }, 600);
             }
          }
 
-
-         let isIdle = true;
-         for (let img of this.images) {
-            if (img.isActive()) {
-               isIdle = false;
-               break;
-            }
-         }
+         let isIdle = this.activeClones.length === 0;
 
          if (isIdle && this.zIndexVal !== 1) {
             this.zIndexVal = 1;
          }
-
          requestAnimationFrame(() => this.render());
       }
 
       showNextImage() {
-         const img = this.images[this.imgPosition];
-         gsap.killTweensOf(img.DOM.el);
+         if (!this.imgSource) return;
 
-         // Tọa độ relative-to-container (GSAP transform tính từ vị trí natural của element)
+         const clone = this.imgSource.cloneNode(true);
+         clone.style.display = '';
+         this.imgSource.parentNode.appendChild(clone);
+         this.activeClones.push(clone);
          const containerRect = this.DOM.content.getBoundingClientRect();
-         const spawnX = this.mousePos.x - containerRect.left - img.rect.width / 2;
-         const spawnY = this.mousePos.y - containerRect.top - img.rect.height / 2;
+         const spawnX = this.mousePos.x - containerRect.left;
+         const spawnY = this.mousePos.y - containerRect.top;
 
-         // Bottom của .img-anim-wrap cũng cần convert về container-relative
+         let deltaX = this.mousePos.x - this.lastMousePos.x;
+         let deltaY = this.mousePos.y - this.lastMousePos.y;
+
+         if (typeof smoothScroll !== 'undefined' && smoothScroll.scroller && smoothScroll.scroller.velocity) {
+            deltaY += smoothScroll.scroller.velocity;
+         }
+
+         const dist = Math.max(1, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
+
+         let slideAmount = 40 + Math.max(0, dist - this.threshold);
+         slideAmount = Math.min(slideAmount, 300);
+
+         const targetX = spawnX + (deltaX / dist) * slideAmount;
+         const targetY = spawnY + (deltaY / dist) * slideAmount;
+
          const wrapRect = (this.DOM.content.querySelector('.img-anim-wrap') || this.DOM.content).getBoundingClientRect();
-         const wrapBottom = wrapRect.bottom - containerRect.top + img.rect.height;
-         const fallDistance = wrapBottom - spawnY;
+         const cloneRect = clone.getBoundingClientRect();
+         const wrapBottom = wrapRect.bottom - containerRect.top + cloneRect.height;
+         const fallDistance = wrapBottom - targetY;
 
-         gsap.timeline()
-            .set(img.DOM.el, {
-               opacity: 0,
-               scale: 1,
+         gsap.timeline({
+            onComplete: () => {
+               clone.remove();
+               this.activeClones = this.activeClones.filter(c => c !== clone);
+            }
+         })
+            .set(clone, {
+               opacity: 1,
+               scale: .8,
                zIndex: this.zIndexVal,
                x: spawnX,
                y: spawnY,
-               rotate: 0
+               rotate: 0,
             })
-            .to(img.DOM.el, {
-               duration: .5,
+            .to(clone, {
+               duration: .6,
+               scale: 1,
+               x: targetX,
+               y: targetY,
                ease: 'expo.out',
                opacity: 1,
             }, 0)
-            .to(img.DOM.el, {
+            .to(clone, {
                duration: .7,
                ease: 'power2.in',
-               y: spawnY + fallDistance,
+               y: targetY + fallDistance,
             }, 1.2);
       }
    }
@@ -1092,8 +1101,6 @@ const mainScript = () => {
       }
 
       init(data) {
-         this.init3d();
-         this.play3d();
          this.tlLoading = gsap.timeline({
             paused: true
          })
@@ -1105,6 +1112,16 @@ const mainScript = () => {
             onComplete: () => {
             }
          })
+         let nameSpaceCurrent = $('.main-inner').attr('data-barba-namespace');
+         if (nameSpaceCurrent == 'notfound') {
+            setTimeout(() => {
+               this.onceSetup(data);
+               this.oncePlay(data);
+            }, 100);
+            return;
+         }
+         this.init3d();
+         this.play3d();
          let title = new SplitText('.loading-content-title', {
             type: 'lines, words',
             linesClass: 'bp-line',
@@ -1116,7 +1133,6 @@ const mainScript = () => {
          let topCenterTitle = (viewport.h - $('.loading-content-title').height()) / 2;
          let bottom3D = viewport.h - cvUnit(8, 'rem') - $('.loading-3d').height();
          let topCenter3D = (viewport.h - $('.loading-3d').height()) / 2;
-         let nameSpaceCurrent = $('.main-inner').attr('data-barba-namespace');
          let bottomLine = $('.home-hero-content .line-horizital.top')
          let distToBottom = 0;
          if (bottomLine.length > 0 && nameSpaceCurrent === 'home') {
