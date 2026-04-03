@@ -17,6 +17,11 @@ const mainScript = () => {
          return window.innerHeight;
       },
    };
+   const isTouchDevice = () => {
+      return (('ontouchstart' in window) ||
+         (navigator.maxTouchPoints > 0) ||
+         (navigator.msMaxTouchPoints > 0));
+   }
    function replaceHyphenWithSpan(el) {
       $(el).html(function (index, oldHtml) {
          return oldHtml.replaceAll("-", "<span>-</span>");
@@ -5983,7 +5988,7 @@ const mainScript = () => {
          }
          setup(data, mode) {
             this.el = data.next.container.querySelector(".notfound-hero");
-            viewport.w > 991 && new ImageTrail('.notfound-hero');
+            !isTouchDevice() && new ImageTrail('.notfound-hero');
             if (mode === "once") {
                this.setupOnce(data);
             } else if (mode === "enter") {
