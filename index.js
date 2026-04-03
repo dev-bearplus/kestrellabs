@@ -5902,7 +5902,53 @@ const mainScript = () => {
             }
          }
       },
+      Other: class extends TriggerSetup {
+         constructor() {
+            super();
+            this.el = null;
+            this.tlHead = null;
+         }
+         trigger(data) {
+            this.el = data.next.container.querySelector('.tp-resource-other');
+            super.setTrigger(this.el, this.onTrigger.bind(this));
+         }
+         onTrigger() {
+            this.interact();
+         }
+         setup() {
+            if (viewport.w < 992) {
+               $(this.el).find('.tp-resource-other-cms').addClass('swiper');
+               $(this.el).find('.tp-resource-other-list').addClass('swiper-wrapper');
+               $(this.el).find('.tp-resource-other-item').addClass('swiper-slide');
 
+               new Swiper('.tp-resource-other-cms', {
+                  slidesPerView: 'auto',
+                  breakpoints: {
+                     768: {
+                        slidesPerView: 3,
+                     },
+                  },
+                  navigation: {
+                     nextEl: '.tp-resource-other-control-item.item-next',
+                     prevEl: '.tp-resource-other-control-item.item-prev',
+                  },
+                  pagination: {
+                     el: $(this.el).find('.tp-resource-other-pagi').get(0),
+                     bulletClass: 'tp-resource-other-pagi-item',
+                     bulletActiveClass: 'active',
+                     clickable: true,
+                  },
+               });
+            }
+
+         }
+         interact() {
+
+         }
+         destroy() {
+
+         }
+      },
       Footer: class {
          constructor() {
          }
