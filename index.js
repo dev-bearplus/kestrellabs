@@ -2383,7 +2383,7 @@ const mainScript = () => {
                   });
                   gsap.set(current.chars, {
                      opacity: 1,
-                     filter: "blur(2px)",
+                     filter: "blur(0px)",
                   });
                }, [], label);
 
