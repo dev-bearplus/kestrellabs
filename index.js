@@ -2371,8 +2371,8 @@ const mainScript = () => {
                tl.addLabel(label);
 
                tl.call(() => {
+                  this.splits.forEach(s => s.el.css({ display: 'none' }));
                   current.el.css({ display: 'block', opacity: 1 });
-                  next.el.css({ display: 'none', opacity: 0 });
 
                   current.chars.forEach(char => {
                      if (char._scrambleInterval) {
@@ -2382,8 +2382,8 @@ const mainScript = () => {
                      char.innerHTML = char.dataset.original;
                   });
                   gsap.set(current.chars, {
-                     opacity: 0,
-                     filter: "blur(6px)",
+                     opacity: 1,
+                     filter: "blur(2px)",
                   });
                }, [], label);
 
@@ -2434,16 +2434,6 @@ const mainScript = () => {
                let holdLabel = "hold" + i;
                tl.addLabel(holdLabel, label + "+" + staggerMax);
                tl.to({}, { duration: HOLD }, holdLabel);
-
-               let fadeOutLabel = "fadeOut" + i;
-               tl.addLabel(fadeOutLabel);
-               tl.to(current.el, {
-                  opacity: 0,
-                  duration: 0.5,
-                  onComplete: () => {
-                     current.el.css('display', 'none');
-                  }
-               }, fadeOutLabel);
             }
 
             this.tlRotate = tl;
