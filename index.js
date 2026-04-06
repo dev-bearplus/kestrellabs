@@ -2262,19 +2262,24 @@ const mainScript = () => {
             if (headings.length === 0) return;
             headings.each((ind, item) => {
                let el = $(item);
-               let st = new SplitText($(el).find('.heading'), { type: 'lines', linesClass: 'bp-mask-line-mask' });
-               let blocks = st.lines.map(line => {
-                  let block = document.createElement('div');
-                  block.className = 'hero-wipe-block';
-                  line.appendChild(block);
-                  return block;
+               el.css('display', 'block');
+               let st = new SplitText($(el).find('.heading'), { type: 'words, chars' });
+               let chars = st.chars;
+               $(el).find('.heading').each(function () {
+                  const rect = this.getBoundingClientRect();
+                  this.style.minHeight = Math.ceil(rect.height) + "px";
+                  this.style.height = Math.ceil(rect.height) + "px";
+                  this.style.textAlign = "left";
+               });
+               chars.forEach(char => {
+                  char.dataset.original = char.innerHTML;
                });
                if (ind === 0) {
                   el.css('display', 'block');
                } else {
                   el.css('display', 'none');
                }
-               this.splits.push({ el: el, lines: st.lines, blocks: blocks, st: st });
+               this.splits.push({ el: el, chars: chars, st: st });
             });
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
                this.initRuler();
@@ -2343,48 +2348,102 @@ const mainScript = () => {
          rotateText() {
             if (this.splits.length === 0) return;
 
-            // Explicitly reset initial state for clean restarts
             this.splits.forEach((split, index) => {
                if (index === 0) {
-                  split.el.css('display', 'block');
+                  split.el.css({ display: 'block', opacity: 1 });
                } else {
-                  split.el.css('display', 'none');
+                  split.el.css({ display: 'none', opacity: 0 });
                }
             });
 
             if (this.splits.length === 1) return;
 
+            const symbols = "abcdefghijklmnopqrstuvwxyz";
             const HOLD = 2.5;
-            const WIPE_IN = 0.8;
-            const WIPE_OUT = 0.8;
-            const STAGGER = 0.1;
 
-            let tl = gsap.timeline({ repeat: -1, delay: HOLD });
+            let tl = gsap.timeline({ repeat: -1 });
 
             for (let i = 0; i < this.splits.length; i++) {
                let current = this.splits[i];
                let next = this.splits[(i + 1) % this.splits.length];
 
-               tl.set(current.blocks, { transformOrigin: 'left center', scaleX: 0 });
-               tl.to(current.blocks, {
-                  scaleX: 1,
-                  duration: WIPE_IN,
-                  ease: 'power3.inOut',
-                  stagger: STAGGER
+               let label = "heading" + i;
+               tl.addLabel(label);
+
+               tl.call(() => {
+                  current.el.css({ display: 'block', opacity: 1 });
+                  next.el.css({ display: 'none', opacity: 0 });
+
+                  current.chars.forEach(char => {
+                     if (char._scrambleInterval) {
+                        clearInterval(char._scrambleInterval);
+                        char._scrambleInterval = null;
+                     }
+                     char.innerHTML = char.dataset.original;
+                  });
+                  gsap.set(current.chars, {
+                     opacity: 0,
+                     filter: "blur(6px)",
+                  });
+               }, [], label);
+
+               let staggerMax = 0;
+               current.chars.forEach((char, idx) => {
+                  let delay = idx * 0.02;
+                  let duration = 0.6 + (idx * 0.04) + gsap.utils.random(0, 0.05);
+                  if (delay + duration > staggerMax) staggerMax = delay + duration;
+
+                  tl.to(char, {
+                     duration: duration,
+                     opacity: 1,
+                     filter: "blur(0px)",
+                     ease: "none",
+                     onStart: () => {
+                        const origText = char.textContent || "";
+                        const maxLen = origText.length;
+                        const isSpace = origText.trim() === "";
+                        if (!isSpace && maxLen > 0) {
+                           if (!char.dataset.origWidth) {
+                              char.dataset.origWidth = char.offsetWidth;
+                           }
+                           const origWidth = parseFloat(char.dataset.origWidth);
+
+                           char._scrambleInterval = setInterval(() => {
+                              let randStr = "";
+                              for (let k = 0; k < maxLen; k++) {
+                                 randStr += symbols[Math.floor(Math.random() * symbols.length)];
+                              }
+                              char.innerText = randStr;
+
+                              if (char.offsetWidth > origWidth + 1) {
+                                 char.innerText = char.dataset.original;
+                              }
+                           }, 60);
+                        }
+                     },
+                     onComplete: () => {
+                        if (char._scrambleInterval) {
+                           clearInterval(char._scrambleInterval);
+                           char._scrambleInterval = null;
+                        }
+                        char.innerHTML = char.dataset.original;
+                     }
+                  }, label);
                });
 
-               tl.set(current.el, { display: 'none' });
-               tl.set(next.el, { display: 'block' });
+               let holdLabel = "hold" + i;
+               tl.addLabel(holdLabel, label + "+" + staggerMax);
+               tl.to({}, { duration: HOLD }, holdLabel);
 
-               tl.set(next.blocks, { scaleX: 1, transformOrigin: 'right center' });
-               tl.to(next.blocks, {
-                  scaleX: 0,
-                  duration: WIPE_OUT,
-                  ease: 'power3.inOut',
-                  stagger: STAGGER
-               });
-
-               tl.to({}, { duration: HOLD });
+               let fadeOutLabel = "fadeOut" + i;
+               tl.addLabel(fadeOutLabel);
+               tl.to(current.el, {
+                  opacity: 0,
+                  duration: 0.5,
+                  onComplete: () => {
+                     current.el.css('display', 'none');
+                  }
+               }, fadeOutLabel);
             }
 
             this.tlRotate = tl;
