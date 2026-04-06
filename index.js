@@ -5632,6 +5632,16 @@ const mainScript = () => {
             this.tlOnce.play();
          }
          interact() {
+            $('.policy-hero-table-item-txt-inner').each((index, item) => {
+               let thisWidth = $(item).width();
+               let txtWidth = $(item).find('.txt').get(0).scrollWidth;
+               console.log(thisWidth, txtWidth);
+               if (thisWidth + 3 < txtWidth) {
+                  $(item).closest('.policy-hero-table-item').addClass('has-tooltip');
+               }
+               $(item).find('.txt').css('white-space', 'wrap')
+               $(item).closest('.tp-resource-hero-table-item-txt').css('overflow', 'visible');
+            });
             const $el = $(this.el);
             const $tableList = $el.find('.policy-hero-table-list');
             const $tableHead = $el.find('.policy-hero-table-head');
@@ -5707,10 +5717,10 @@ const mainScript = () => {
                if (i == 0) {
                   titleLeftClone.addClass('active');
                }
-               let index = `${i + 1}.`
+               let index = i < 10 ? `[0${i + 1}]` : `[${i + 1}]`
                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
-               titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(0).text(index);
-               titleLeftClone.find('.policy-hero-table-item-txt .txt').eq(1).text(cleanText);
+               titleLeftClone.find('.policy-hero-table-item-txt .policy-hero-table-item-number').text(index);
+               titleLeftClone.find('.policy-hero-table-item-inner .txt').text(cleanText);
                titleLeftClone.attr('data-title', `toch-${i}`);
                $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
             })
@@ -5843,6 +5853,16 @@ const mainScript = () => {
             });
          }
          interact() {
+            $('.tp-resource-hero-table-item-txt-inner').each((index, item) => {
+               let thisWidth = $(item).width();
+               let txtWidth = $(item).find('.txt').get(0).scrollWidth;
+               console.log(thisWidth, txtWidth);
+               if (thisWidth + 3 < txtWidth) {
+                  $(item).closest('.tp-resource-hero-table-item').addClass('has-tooltip');
+               }
+               $(item).find('.txt').css('white-space', 'wrap')
+               $(item).closest('.tp-resource-hero-table-item-txt').css('overflow', 'visible');
+            });
             this.validForm();
             this.actionShare();
             $(this.el).find('.tp-resource-hero-table-item').on('click', (e) => {
@@ -5896,8 +5916,8 @@ const mainScript = () => {
                }
                let index = i <= 9 ? `0${i + 1}` : i + 1;
                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
-               titleLeftClone.find('.tp-resource-hero-table-item-txt .number-text').eq(0).text(index);
-               titleLeftClone.find('.tp-resource-hero-table-item-txt .txt').eq(1).text(cleanText);
+               titleLeftClone.find('.tp-resource-hero-table-item-txt .tp-resource-hero-table-item-txt-number').text(`[${index}]`);
+               titleLeftClone.find('.tp-resource-hero-table-item-txt-inner .txt').text(cleanText);
                titleLeftClone.attr('data-title', `toch-${i}`);
                $(this.el).find('.tp-resource-hero-table-list').append(titleLeftClone);
             })

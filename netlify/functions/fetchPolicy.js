@@ -8,7 +8,7 @@ export async function handler(event, context) {
         const response = await fetch(url);
         const html = await response.text();
 
-        const allowedOrigins = ['https://kestrel-labs.webflow.io', 'https://kestrellabs.webflow.io'];
+        const allowedOrigins = ['https://kestrel-labs.webflow.io', 'https://kestrellabs.webflow.io', 'https://kestrellabs-bp.webflow.io'];
         const origin = event.headers.origin || event.headers.Origin;
         const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
