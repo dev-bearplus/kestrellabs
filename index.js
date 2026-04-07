@@ -5720,7 +5720,7 @@ const mainScript = () => {
                let index = i < 10 ? `[0${i + 1}]` : `[${i + 1}]`
                let cleanText = $(el).text().replace(/^\d+\.\s*/, '');
                titleLeftClone.find('.policy-hero-table-item-txt .policy-hero-table-item-number').text(index);
-               titleLeftClone.find('.policy-hero-table-item-inner .txt').text(cleanText);
+               titleLeftClone.find('.policy-hero-table-item-txt-inner .txt').text(cleanText);
                titleLeftClone.attr('data-title', `toch-${i}`);
                $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
             })
