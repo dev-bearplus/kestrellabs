@@ -5599,7 +5599,7 @@ const mainScript = () => {
                this.setupEnter(data);
             } else return;
             this.loadTermlyPolicy();
-            this.interact();
+
          }
          setupOnce(data) {
             this.tlOnce = gsap.timeline({
@@ -5640,7 +5640,7 @@ const mainScript = () => {
                   $(item).closest('.policy-hero-table-item').addClass('has-tooltip');
                }
                $(item).find('.txt').css('white-space', 'wrap')
-               $(item).closest('.tp-resource-hero-table-item-txt').css('overflow', 'visible');
+               $(item).closest('.policy-hero-table-item-txt').css('overflow', 'visible');
             });
             const $el = $(this.el);
             const $tableList = $el.find('.policy-hero-table-list');
@@ -5724,6 +5724,7 @@ const mainScript = () => {
                titleLeftClone.attr('data-title', `toch-${i}`);
                $(this.el).find('.policy-hero-table-list').append(titleLeftClone);
             })
+            this.interact();
          }
          async loadTermlyPolicy() {
             const id = $(this.el).find('[policyUUID]').attr('policyUUID');
