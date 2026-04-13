@@ -2259,28 +2259,30 @@ const mainScript = () => {
             this.el = data.next.container.querySelector('.home-hero-wrap');
             this.taglineMarquee = new Marquee($(this.el).find('.home-hero-work'), $(this.el).find('.home-hero-work-inner'), 40);
             const headings = $(this.el).find('.home-hero-title ');
-            if (headings.length === 0) return;
-            headings.each((ind, item) => {
-               let el = $(item);
-               el.css('display', 'block');
-               let st = new SplitText($(el).find('.heading'), { type: 'words, chars' });
-               let chars = st.chars;
-               $(el).find('.heading').each(function () {
-                  const rect = this.getBoundingClientRect();
-                  this.style.minHeight = Math.ceil(rect.height) + "px";
-                  this.style.height = Math.ceil(rect.height) + "px";
-                  this.style.textAlign = "left";
-               });
-               chars.forEach(char => {
-                  char.dataset.original = char.innerHTML;
-               });
-               if (ind === 0) {
+            if (headings.length > 1) {
+               headings.each((ind, item) => {
+                  let el = $(item);
                   el.css('display', 'block');
-               } else {
-                  el.css('display', 'none');
-               }
-               this.splits.push({ el: el, chars: chars, st: st });
-            });
+                  let st = new SplitText($(el).find('.heading'), { type: 'words, chars' });
+                  let chars = st.chars;
+                  $(el).find('.heading').each(function () {
+                     const rect = this.getBoundingClientRect();
+                     this.style.minHeight = Math.ceil(rect.height) + "px";
+                     this.style.height = Math.ceil(rect.height) + "px";
+                     this.style.textAlign = "left";
+                  });
+                  chars.forEach(char => {
+                     char.dataset.original = char.innerHTML;
+                  });
+                  if (ind === 0) {
+                     el.css('display', 'block');
+                  } else {
+                     el.css('display', 'none');
+                  }
+                  this.splits.push({ el: el, chars: chars, st: st });
+               });
+            }
+
             if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && $(window).width() > 767) {
                this.initRuler();
                this.drawBox();
